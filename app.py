@@ -11,7 +11,6 @@ from typing import Any
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
-from fastapi.staticfiles import StaticFiles
 
 BASE_DIR = Path(__file__).resolve().parent
 UPLOAD_DIR = BASE_DIR / 'uploads'
@@ -31,8 +30,7 @@ app.add_middleware(
     allow_headers=['*'],
 )
 
-if (BASE_DIR / 'index.html').exists():
-    app.mount('/static', StaticFiles(directory=BASE_DIR), name='static')
+# Static files handled via root endpoint for serverless compatibility
 
 JOBS: dict[str, dict[str, Any]] = {}
 ALLOWED_AUDIO_EXTENSIONS = {'.webm', '.wav', '.mp3', '.m4a', '.ogg'}
