@@ -6,18 +6,74 @@
       "use": "@vercel/python"
     },
     {
-      "src": "*.html",
-      "use": "@vercel/static"
+      "src": "api/*.py",
+      "use": "@vercel/python"
     }
   ],
   "routes": [
     {
-      "src": "/api/(.*)",
-      "dest": "/app.py"
+      "src": "/api/auth/register",
+      "dest": "/api/auth.py"
+    },
+    {
+      "src": "/api/auth/login",
+      "dest": "/api/auth.py"
+    },
+    {
+      "src": "/api/auth/logout",
+      "dest": "/api/auth.py"
+    },
+    {
+      "src": "/api/auth/me",
+      "dest": "/api/auth.py"
+    },
+    {
+      "src": "/api/user/api-key",
+      "dest": "/api/user.py"
+    },
+    {
+      "src": "/api/user/profile",
+      "dest": "/api/user.py"
+    },
+    {
+      "src": "/api/user/usage",
+      "dest": "/api/user.py"
+    },
+    {
+      "src": "/api/transcribe",
+      "dest": "/api/transcribe.py"
+    },
+    {
+      "src": "/api/jobs",
+      "dest": "/api/transcribe.py"
+    },
+    {
+      "src": "/api/jobs/(.*)",
+      "dest": "/api/transcribe.py"
     },
     {
       "src": "/app",
-      "dest": "/index.html"
+      "dest": "/app-page.html"
+    },
+    {
+      "src": "/pricing",
+      "dest": "/pricing.html"
+    },
+    {
+      "src": "/auth",
+      "dest": "/auth.html"
+    },
+    {
+      "src": "/dashboard",
+      "dest": "/dashboard.html"
+    },
+    {
+      "src": "/app/api-keys",
+      "dest": "/api-keys.html"
+    },
+    {
+      "src": "/landing.html",
+      "dest": "/landing.html"
     },
     {
       "src": "/(.*)",
@@ -37,9 +93,14 @@
       "source": "/api/(.*)",
       "headers": [
         { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Access-Control-Allow-Methods", "value": "POST, GET, OPTIONS" },
-        { "key": "Access-Control-Allow-Headers", "value": "Content-Type" }
+        { "key": "Access-Control-Allow-Methods", "value": "POST, GET, DELETE, PATCH, OPTIONS" },
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Cookie" }
       ]
     }
-  ]
+  ],
+  "env": {
+    "SUPABASE_URL": "@supabase_url",
+    "SUPABASE_SERVICE_KEY": "@supabase_service_key",
+    "SUPABASE_ANON_KEY": "@supabase_anon_key"
+  }
 }

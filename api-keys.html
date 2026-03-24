@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Key 設定｜Meeting Recorder</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --primary: #326bff; --primary2: #6e45ff; --accent: #16a34a; --danger: #dc2626; --bg: #f7f9fc; --ink: #121826; --muted: #6b7280; --warn: #f59e0b; }
+    body { font-family: 'Noto Sans TC', sans-serif; color: var(--ink); background: var(--bg); min-height: 100vh; }
+    a { text-decoration: none; color: inherit; }
+
+    .topbar { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 60px; position: sticky; top: 0; z-index: 100; }
+    .logo { font-size: 18px; font-weight: 800; color: var(--primary); }
+    .logo span { color: var(--primary2); }
+    .topbar-links { display: flex; gap: 24px; }
+    .topbar-links a { font-size: 14px; color: var(--muted); font-weight: 500; transition: color 0.2s; }
+    .topbar-links a:hover { color: var(--ink); }
+    .topbar-links a.active { color: var(--primary); font-weight: 600; }
+    .user-name { font-size: 14px; font-weight: 600; }
+    .btn-outline { padding: 7px 16px; border: 1.5px solid #e2e8f0; border-radius: 8px; font-size: 13px; font-weight: 600; color: var(--muted); cursor: pointer; background: none; font-family: inherit; }
+    .btn-outline:hover { border-color: var(--danger); color: var(--danger); }
+    .topbar-right { display: flex; align-items: center; gap: 12px; }
+
+    .page { max-width: 720px; margin: 0 auto; padding: 36px 24px; }
+
+    .page-title { font-size: 24px; font-weight: 800; margin-bottom: 4px; }
+    .page-subtitle { color: var(--muted); font-size: 14px; margin-bottom: 28px; line-height: 1.6; }
+
+    .card { background: #fff; border-radius: 20px; padding: 28px; border: 1px solid #e2e8f0; margin-bottom: 20px; }
+    .card-title { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+    .card-desc { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 20px; }
+
+    .key-display { background: var(--bg); border-radius: 10px; padding: 12px 16px; font-family: monospace; font-size: 14px; color: var(--muted); margin-bottom: 16px; min-height: 44px; display: flex; align-items: center; }
+    .key-display.has-key { color: var(--ink); font-size: 13px; }
+    .key-display-placeholder { font-style: italic; color: var(--muted); font-family: inherit; font-size: 13px; }
+
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: #374151; }
+    .form-group input { width: 100%; padding: 11px 14px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 14px; font-family: inherit; color: var(--ink); outline: none; transition: border-color 0.2s; }
+    .form-group input:focus { border-color: var(--primary); }
+    .form-group input.error { border-color: var(--danger); }
+    .form-hint { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+    .btn-primary { display: inline-block; padding: 11px 24px; background: linear-gradient(135deg, var(--primary), var(--primary2)); color: #fff; border: none; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; transition: opacity 0.2s; box-shadow: 0 4px 12px rgba(50,107,255,0.25); }
+    .btn-primary:hover { opacity: 0.88; }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn-danger { display: inline-block; padding: 11px 24px; background: #fff; color: var(--danger); border: 1.5px solid #fecaca; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; }
+    .btn-danger:hover { background: #fef2f2; }
+
+    .btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
+
+    .alert { padding: 12px 16px; border-radius: 10px; font-size: 13px; margin-bottom: 16px; display: none; }
+    .alert.show { display: block; }
+    .alert.error { background: #fef2f2; border: 1px solid #fecaca; color: var(--danger); }
+    .alert.success { background: #f0fdf4; border: 1px solid #bbf7d0; color: #15803d; }
+    .alert.info { background: #eff6ff; border: 1px solid #bfdbfe; color: #1d4ed8; }
+
+    .info-box { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; padding: 14px 16px; margin-bottom: 20px; }
+    .info-box h4 { font-size: 13px; font-weight: 700; color: #1d4ed8; margin-bottom: 6px; }
+    .info-box p { font-size: 12px; color: #3b82f6; line-height: 1.6; }
+    .info-box a { color: var(--primary); font-weight: 600; }
+
+    .status-row { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; font-size: 13px; }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .status-dot.active { background: var(--accent); box-shadow: 0 0 6px rgba(22,163,74,0.5); }
+    .status-dot.inactive { background: #d1d5db; }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="/" class="logo">Meeting<span>Recorder</span></a>
+  <div class="topbar-links">
+    <a href="/app">錄音工作台</a>
+    <a href="/dashboard">使用量</a>
+    <a href="/app/api-keys" class="active">API Key</a>
+  </div>
+  <div class="topbar-right">
+    <span class="user-name" id="user-name">載入中...</span>
+    <button class="btn-outline" id="logout-btn">登出</button>
+  </div>
+</div>
+
+<div class="page">
+  <h1 class="page-title">API Key 設定</h1>
+  <p class="page-subtitle">填入你的 OpenAI API Key，語音轉文字功能才會正常運作。Key 只儲存在你的帳戶，不會分享給任何人。</p>
+
+  <div class="info-box">
+    <h4>💡 沒有 API Key？</h4>
+    <p>前往 <a href="https://platform.openai.com/api-keys" target="_blank">OpenAI Platform</a> 申請，通常幾分鐘即可完成。Whisper API 約 NT$1.5/分鐘，費用由 OpenAI 直接向你收取。</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">OpenAI API Key</div>
+    <div class="card-desc">你的 API Key 經加密儲存在雲端資料庫，僅用於 Whisper 語音轉文字。</div>
+
+    <div class="alert error" id="error-msg"></div>
+    <div class="alert success" id="success-msg"></div>
+
+    <div class="status-row">
+      <span class="status-dot inactive" id="key-status-dot"></span>
+      <span id="key-status-text">尚未設定 API Key</span>
+    </div>
+
+    <div class="key-display" id="key-display">
+      <span class="key-display-placeholder">尚無 API Key</span>
+    </div>
+
+    <form id="key-form">
+      <div class="form-group">
+        <label>API Key（sk-...）</label>
+        <input type="password" id="api-key-input" placeholder="sk-..." autocomplete="off">
+        <div class="form-hint">Key 必须以 <code>sk-</code> 開頭，我們不會驗證格式以外的內容。</div>
+      </div>
+      <div class="btn-row">
+        <button type="submit" class="btn-primary" id="save-btn">儲存 Key</button>
+        <button type="button" class="btn-danger" id="delete-btn" style="display:none;">刪除 Key</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="card">
+    <div class="card-title">隱私說明</div>
+    <div class="card-desc">上傳的錄音檔在處理完成後會從伺服器刪除。語音辨識由 OpenAI Whisper API 完成，相關資料遵循 OpenAI 的資料處理政策。我們不會將你的錄音或轉寫結果用於模型訓練。</div>
+  </div>
+</div>
+
+<script>
+  async function loadProfile() {
+    try {
+      const res = await fetch('/api/auth/me', { credentials: 'include' });
+      if (!res.ok) { window.location.href = '/auth'; return; }
+      const { user } = await res.json();
+      document.getElementById('user-name').textContent = user.name || user.email;
+    } catch { window.location.href = '/auth'; }
+  }
+
+  async function loadApiKeyStatus() {
+    try {
+      const res = await fetch('/api/user/api-key', { credentials: 'include' });
+      if (!res.ok) return;
+      const data = await res.json();
+      const dot = document.getElementById('key-status-dot');
+      const text = document.getElementById('key-status-text');
+      const display = document.getElementById('key-display');
+      const deleteBtn = document.getElementById('delete-btn');
+
+      if (data.has_api_key) {
+        dot.className = 'status-dot active';
+        text.textContent = 'API Key 已設定';
+        display.innerHTML = `<span style="font-family:monospace;font-size:13px;">${data.masked}</span>`;
+        display.classList.add('has-key');
+        deleteBtn.style.display = 'inline-block';
+      } else {
+        dot.className = 'status-dot inactive';
+        text.textContent = '尚未設定 API Key';
+        display.innerHTML = '<span class="key-display-placeholder">尚無 API Key</span>';
+      }
+    } catch(err) { console.error(err); }
+  }
+
+  function showError(msg) {
+    const el = document.getElementById('error-msg');
+    el.textContent = msg;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 5000);
+  }
+  function showSuccess(msg) {
+    const el = document.getElementById('success-msg');
+    el.textContent = msg;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 4000);
+  }
+
+  document.getElementById('key-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const input = document.getElementById('api-key-input');
+    const key = input.value.trim();
+    const btn = document.getElementById('save-btn');
+
+    if (!key) { showError('請輸入 API Key'); return; }
+    if (!key.startsWith('sk-')) { showError('API Key 必須以 sk- 開頭'); return; }
+
+    btn.disabled = true;
+    btn.textContent = '儲存中...';
+    try {
+      const res = await fetch('/api/user/api-key', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ api_key: key }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || '儲存失敗');
+      showSuccess('API Key 已安全儲存！');
+      input.value = '';
+      loadApiKeyStatus();
+    } catch(err) {
+      showError(err.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '儲存 Key';
+    }
+  });
+
+  document.getElementById('delete-btn').addEventListener('click', async () => {
+    if (!confirm('確定要刪除 API Key 嗎？刪除後需要重新填寫才能使用轉寫功能。')) return;
+    try {
+      const res = await fetch('/api/user/api-key', { method: 'DELETE', credentials: 'include' });
+      if (!res.ok) throw new Error('刪除失敗');
+      showSuccess('API Key 已刪除');
+      loadApiKeyStatus();
+    } catch(err) {
+      showError(err.message);
+    }
+  });
+
+  document.getElementById('logout-btn').addEventListener('click', async () => {
+    await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+    window.location.href = '/';
+  });
+
+  loadProfile();
+  loadApiKeyStatus();
+</script>
+
+</body>
+</html>

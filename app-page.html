@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>會議工作台｜Meeting Recorder</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #f3f5f8; --ink: #121826; --muted: #6b7280;
+      --card: rgba(255,255,255,0.92); --line: rgba(15,23,42,0.08);
+      --primary: #326bff; --primary2: #6e45ff; --accent: #16a34a;
+      --warn: #ea580c; --danger: #dc2626; --shadow: 0 24px 70px rgba(15,23,42,0.12);
+    }
+    body { font-family: 'Noto Sans TC', sans-serif; min-height: 100vh; color: var(--ink); background: radial-gradient(circle at top left, rgba(50,107,255,0.10), transparent 28%), radial-gradient(circle at 82% 18%, rgba(110,69,255,0.10), transparent 26%), linear-gradient(180deg, #f7f9fc 0%, var(--bg) 100%); }
+    a { text-decoration: none; color: inherit; }
+    button { font-family: inherit; cursor: pointer; }
+
+    /* Topbar */
+    .topbar { background: var(--card); backdrop-filter: blur(16px); border-bottom: 1px solid var(--line); padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 60px; position: sticky; top: 0; z-index: 200; }
+    .logo { font-size: 18px; font-weight: 800; color: var(--primary); }
+    .logo span { color: var(--primary2); }
+    .topbar-links { display: flex; gap: 24px; }
+    .topbar-links a { font-size: 14px; color: var(--muted); font-weight: 500; transition: color 0.2s; }
+    .topbar-links a:hover { color: var(--ink); }
+    .topbar-links a.active { color: var(--primary); font-weight: 600; }
+    .topbar-right { display: flex; align-items: center; gap: 10px; }
+    .user-pill { background: linear-gradient(135deg, var(--primary), var(--primary2)); color: #fff; padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+    .btn-outline-sm { padding: 6px 14px; border: 1.5px solid #e2e8f0; border-radius: 8px; font-size: 12px; font-weight: 600; color: var(--muted); background: none; cursor: pointer; font-family: inherit; }
+    .btn-outline-sm:hover { border-color: var(--danger); color: var(--danger); }
+
+    /* Shell */
+    .shell { max-width: 1180px; margin: 0 auto; padding: 24px 20px 60px; }
+
+    /* Alert banners */
+    .alert-banner { background: #fef3c7; border: 1px solid #fde68a; border-radius: 12px; padding: 12px 16px; font-size: 13px; color: #92400e; margin-bottom: 16px; display: none; align-items: center; gap: 8px; }
+    .alert-banner a { color: var(--primary); font-weight: 700; }
+    .alert-banner.show { display: flex; }
+    .alert-banner.warn { background: #eff6ff; border-color: #bfdbfe; color: #1e40af; }
+
+    /* Grid layout */
+    .hero { display: grid; grid-template-columns: 1.35fr .9fr; gap: 18px; margin-bottom: 20px; }
+    .card { background: var(--card); backdrop-filter: blur(18px); border: 1px solid var(--line); border-radius: 28px; box-shadow: var(--shadow); padding: 28px 30px; }
+
+    /* Meeting info */
+    .section-label { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .12em; color: var(--primary); margin-bottom: 10px; display: block; }
+    .info-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+    .info-field label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 5px; }
+    .info-field input { width: 100%; padding: 9px 12px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 13px; font-family: inherit; outline: none; transition: border-color 0.2s; }
+    .info-field input:focus { border-color: var(--primary); }
+
+    /* Recorder card */
+    .recorder-title { font-size: 17px; font-weight: 700; margin-bottom: 16px; }
+    .recorder-body { display: flex; flex-direction: column; align-items: center; padding: 20px 0; }
+    .waveform { width: 100%; height: 60px; margin-bottom: 18px; display: flex; align-items: center; justify-content: center; gap: 3px; }
+    .wave-bar { width: 4px; height: 20px; background: #e2e8f0; border-radius: 2px; transition: height 0.1s; }
+    .wave-bar.active { background: linear-gradient(to top, var(--primary), var(--primary2)); }
+    .timer { font-size: 36px; font-weight: 800; color: var(--ink); font-variant-numeric: tabular-nums; margin-bottom: 20px; font-family: monospace; }
+    .timer.recording { color: var(--danger); }
+    .recorder-controls { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+    .btn-rec { padding: 12px 28px; border-radius: 14px; font-size: 14px; font-weight: 700; border: none; transition: all 0.2s; }
+    .btn-rec.start { background: linear-gradient(135deg, var(--primary), var(--primary2)); color: #fff; box-shadow: 0 4px 16px rgba(50,107,255,0.35); }
+    .btn-rec.start:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(50,107,255,0.4); }
+    .btn-rec.stop { background: var(--danger); color: #fff; box-shadow: 0 4px 16px rgba(220,38,38,0.35); }
+    .btn-rec.upload { background: #fff; color: var(--ink); border: 1.5px solid #e2e8f0; }
+    .btn-rec.upload:hover { border-color: var(--primary); color: var(--primary); }
+    .btn-rec:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+
+    .upload-area { width: 100%; margin-top: 14px; display: none; }
+    .upload-area.show { display: block; }
+    .upload-area label { display: block; cursor: pointer; padding: 20px; border: 2px dashed #e2e8f0; border-radius: 14px; text-align: center; font-size: 13px; color: var(--muted); transition: border-color 0.2s; }
+    .upload-area label:hover { border-color: var(--primary); color: var(--primary); }
+    .upload-area input { display: none; }
+    .upload-filename { margin-top: 8px; font-size: 12px; color: var(--accent); font-weight: 600; }
+    #upload-file-input { display: none; }
+
+    /* Status bar */
+    .status-bar { background: var(--card); backdrop-filter: blur(18px); border: 1px solid var(--line); border-radius: 16px; padding: 14px 20px; margin-bottom: 20px; display: none; align-items: center; gap: 12px; }
+    .status-bar.show { display: flex; }
+    .status-spinner { width: 18px; height: 18px; border: 2.5px solid #e2e8f0; border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; flex-shrink: 0; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .status-text { font-size: 13px; color: var(--muted); flex: 1; }
+    .status-progress { font-size: 13px; font-weight: 700; color: var(--primary); }
+    .progress-bar-wrap { flex: 1; height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--primary2)); border-radius: 3px; transition: width 0.4s; }
+
+    /* Transcript & Summary */
+    .bottom-grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: 18px; margin-bottom: 20px; }
+    .transcript-area { background: var(--card); backdrop-filter: blur(18px); border: 1px solid var(--line); border-radius: 28px; padding: 28px 30px; box-shadow: var(--shadow); }
+    .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .section-header h2 { font-size: 17px; font-weight: 700; }
+    .section-header-actions { display: flex; gap: 8px; }
+    .btn-sm { padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; border: 1.5px solid #e2e8f0; background: #fff; color: var(--muted); cursor: pointer; font-family: inherit; transition: all 0.2s; }
+    .btn-sm:hover { border-color: var(--primary); color: var(--primary); }
+    .btn-sm.primary { background: linear-gradient(135deg, var(--primary), var(--primary2)); color: #fff; border: none; box-shadow: 0 2px 8px rgba(50,107,255,0.25); }
+    .btn-sm.primary:hover { opacity: 0.88; }
+
+    textarea { width: 100%; min-height: 280px; padding: 14px; border: 1.5px solid #e2e8f0; border-radius: 14px; font-size: 13px; font-family: inherit; color: var(--ink); resize: vertical; outline: none; line-height: 1.7; background: var(--bg); }
+    textarea:focus { border-color: var(--primary); }
+    textarea::placeholder { color: var(--muted); }
+    .summary-area textarea { min-height: 280px; }
+
+    /* History */
+    .history-card { background: var(--card); backdrop-filter: blur(18px); border: 1px solid var(--line); border-radius: 28px; padding: 28px 30px; box-shadow: var(--shadow); }
+    .search-row { display: flex; gap: 10px; margin-bottom: 14px; }
+    .search-row input { flex: 1; padding: 9px 12px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 13px; outline: none; font-family: inherit; }
+    .search-row input:focus { border-color: var(--primary); }
+    .history-list { list-style: none; max-height: 360px; overflow-y: auto; }
+    .history-item { padding: 10px 0; border-bottom: 1px solid #f1f5f9; display: flex; flex-direction: column; gap: 3px; cursor: pointer; transition: background 0.15s; border-radius: 8px; padding: 8px; }
+    .history-item:hover { background: var(--bg); }
+    .history-item-title { font-size: 13px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .history-item-meta { font-size: 11px; color: var(--muted); }
+    .history-empty { text-align: center; padding: 30px 0; color: var(--muted); font-size: 13px; }
+
+    @media (max-width: 900px) {
+      .hero { grid-template-columns: 1fr; }
+      .bottom-grid { grid-template-columns: 1fr; }
+      .info-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Topbar -->
+<div class="topbar">
+  <a href="/" class="logo">Meeting<span>Recorder</span></a>
+  <div class="topbar-links">
+    <a href="/app" class="active">錄音工作台</a>
+    <a href="/dashboard">使用量</a>
+    <a href="/app/api-keys">API Key</a>
+  </div>
+  <div class="topbar-right">
+    <span class="user-pill" id="user-name">載入中</span>
+    <button class="btn-outline-sm" id="logout-btn">登出</button>
+  </div>
+</div>
+
+<div class="shell">
+
+  <!-- Alert: no API key -->
+  <div class="alert-banner" id="alert-no-key">
+    ⚠️ 尚未設定 OpenAI API Key，無法使用轉寫功能。 <a href="/app/api-keys">立即設定 →</a>
+  </div>
+
+  <!-- Status bar (processing) -->
+  <div class="status-bar" id="status-bar">
+    <div class="status-spinner"></div>
+    <span class="status-text" id="status-text">處理中...</span>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progress-bar" style="width:5%"></div></div>
+    <span class="status-progress" id="status-progress">5%</span>
+  </div>
+
+  <!-- Hero: Info + Recorder -->
+  <div class="hero">
+
+    <!-- Info card -->
+    <div class="card">
+      <span class="section-label">會議資訊</span>
+      <div class="info-row">
+        <div class="info-field">
+          <label>會議主題</label>
+          <input type="text" id="meeting-title" placeholder="例如：Q3 產品策略會議" value="">
+        </div>
+        <div class="info-field">
+          <label>與會人員</label>
+          <input type="text" id="participants" placeholder="例如：CEO, CTO, PM" value="">
+        </div>
+      </div>
+
+      <!-- Recorder -->
+      <div style="margin-top: 8px;">
+        <span class="section-label" style="margin-bottom:14px;">錄音控制</span>
+        <div class="recorder-body">
+          <div class="waveform" id="waveform">
+            <script>for(let i=0;i<28;i++){document.write('<div class=wave-bar id=wb'+i+'></div>')}</script>
+          </div>
+          <div class="timer" id="timer">00:00</div>
+          <div class="recorder-controls">
+            <button class="btn-rec start" id="btn-start">🎙️ 開始錄音</button>
+            <button class="btn-rec stop" id="btn-stop" style="display:none;">⏹ 停止錄音</button>
+            <label class="btn-rec upload" for="upload-file-input">📁 上傳音訊</label>
+          </div>
+          <input type="file" id="upload-file-input" accept=".webm,.wav,.mp3,.m4a,.ogg">
+          <div class="upload-area" id="upload-area">
+            <label for="upload-file-input">點擊選擇音訊檔，或拖放到這裡<br><small style="color:var(--muted)">支援 WebM, WAV, MP3, M4A, OGG</small></label>
+            <div class="upload-filename" id="upload-filename"></div>
+            <button class="btn-rec start" id="btn-upload" style="display:none;margin-top:10px;width:100%;">🚀 送出轉寫</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Summary card (preview) -->
+    <div class="card" style="display:flex;flex-direction:column;">
+      <span class="section-label">摘要預覽</span>
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:20px 0;color:var(--muted);" id="summary-placeholder">
+        <div style="font-size:40px;margin-bottom:12px;">📋</div>
+        <p style="font-size:13px;line-height:1.7;">開始錄音並上傳，<br>AI 會在這裡自動產生<br>結構化 Meeting Minutes</p>
+      </div>
+      <div id="summary-result" style="display:none;"></div>
+    </div>
+
+  </div>
+
+  <!-- Transcript + History -->
+  <div class="bottom-grid">
+
+    <div class="transcript-area">
+      <div class="section-header">
+        <h2>✍️ 逐字稿</h2>
+        <div class="section-header-actions">
+          <button class="btn-sm" id="btn-copy-transcript">複製</button>
+        </div>
+      </div>
+      <textarea id="transcript-area" placeholder="逐字稿會在這裡顯示。開始錄音或上傳音訊檔即可產生..."></textarea>
+    </div>
+
+    <div class="history-card">
+      <div class="section-header">
+        <h2>📜 歷史記錄</h2>
+        <button class="btn-sm" id="btn-clear-history">清除</button>
+      </div>
+      <div class="search-row">
+        <input type="text" id="search-history" placeholder="搜尋會議...">
+      </div>
+      <ul class="history-list" id="history-list">
+        <li class="history-empty">尚無記錄</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <!-- Summary full view -->
+  <div class="transcript-area" id="summary-card" style="display:none;">
+    <div class="section-header">
+      <h2>📋 會議紀要（Meeting Minutes）</h2>
+      <div class="section-header-actions">
+        <button class="btn-sm primary" id="btn-copy-summary">複製全文</button>
+      </div>
+    </div>
+    <textarea id="summary-area" readonly style="min-height:200px;"></textarea>
+  </div>
+
+</div>
+
+<script>
+  // ─── Auth check ──────────────────────────────────────────────────────────
+  async function checkAuth() {
+    try {
+      const res = await fetch('/api/auth/me', { credentials: 'include' });
+      if (!res.ok) { window.location.href = '/auth?redirect=/app'; return; }
+      const { user } = await res.json();
+      document.getElementById('user-name').textContent = user.name || user.email.split('@')[0];
+    } catch { window.location.href = '/auth?redirect=/app'; }
+  }
+
+  async function checkApiKey() {
+    try {
+      const res = await fetch('/api/user/api-key', { credentials: 'include' });
+      if (res.ok) {
+        const data = await res.json();
+        if (!data.has_api_key) {
+          document.getElementById('alert-no-key').classList.add('show');
+        }
+      }
+    } catch {}
+  }
+
+  checkAuth();
+  checkApiKey();
+
+  // ─── Logout ──────────────────────────────────────────────────────────────
+  document.getElementById('logout-btn').addEventListener('click', async () => {
+    await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+    window.location.href = '/';
+  });
+
+  // ─── Waveform animation ──────────────────────────────────────────────────
+  let waveInterval;
+  function startWave() {
+    clearInterval(waveInterval);
+    waveInterval = setInterval(() => {
+      for (let i = 0; i < 28; i++) {
+        const bar = document.getElementById('wb' + i);
+        if (bar) bar.style.height = (15 + Math.random() * 40) + 'px';
+      }
+    }, 120);
+  }
+  function stopWave() {
+    clearInterval(waveInterval);
+    for (let i = 0; i < 28; i++) {
+      const bar = document.getElementById('wb' + i);
+      if (bar) bar.style.height = '20px';
+    }
+  }
+
+  // ─── Timer ────────────────────────────────────────────────────────────────
+  let timerStart = null, timerInterval = null;
+  function startTimer() {
+    timerStart = Date.now();
+    timerInterval = setInterval(() => {
+      const secs = Math.floor((Date.now() - timerStart) / 1000);
+      const m = String(Math.floor(secs / 60)).padStart(2, '0');
+      const s = String(secs % 60).padStart(2, '0');
+      document.getElementById('timer').textContent = m + ':' + s;
+    }, 1000);
+  }
+  function stopTimer() {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+  function resetTimer() {
+    stopTimer();
+    document.getElementById('timer').textContent = '00:00';
+    document.getElementById('timer').classList.remove('recording');
+  }
+
+  // ─── Browser recording ────────────────────────────────────────────────────
+  let mediaRecorder = null, audioChunks = [];
+
+  document.getElementById('btn-start').addEventListener('click', async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+      audioChunks = [];
+      mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(audioChunks, { type: 'audio/webm' });
+        document.getElementById('upload-filename').textContent = '錄音_' + new Date().toLocaleTimeString('zh-TW') + '.webm';
+        document.getElementById('upload-area').classList.add('show');
+        document.getElementById('btn-upload').style.display = 'inline-block';
+        document.getElementById('btn-upload').dataset.blob = blob;
+        stream.getTracks().forEach(t => t.stop());
+      };
+      mediaRecorder.start(100);
+      document.getElementById('btn-start').style.display = 'none';
+      document.getElementById('btn-stop').style.display = 'inline-block';
+      document.getElementById('timer').classList.add('recording');
+      startTimer();
+      startWave();
+    } catch (err) {
+      alert('無法存取麥克風，請確認瀏覽器權限已開啟。');
+      console.error(err);
+    }
+  });
+
+  document.getElementById('btn-stop').addEventListener('click', () => {
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+      mediaRecorder.stop();
+    }
+    document.getElementById('btn-start').style.display = 'inline-block';
+    document.getElementById('btn-stop').style.display = 'none';
+    stopTimer();
+    stopWave();
+  });
+
+  // ─── File upload ─────────────────────────────────────────────────────────
+  const fileInput = document.getElementById('upload-file-input');
+  const uploadArea = document.getElementById('upload-area');
+  const filenameDisplay = document.getElementById('upload-filename');
+  const btnUpload = document.getElementById('btn-upload');
+
+  fileInput.addEventListener('change', () => {
+    const file = fileInput.files[0];
+    if (!file) return;
+    filenameDisplay.textContent = file.name;
+    uploadArea.classList.add('show');
+    btnUpload.style.display = 'inline-block';
+    btnUpload.dataset.file = null;
+    const reader = new FileReader();
+    reader.onload = e => { btnUpload.dataset.file = e.target.result; };
+    reader.readAsDataURL(file);
+  });
+
+  // Drag and drop
+  const uploadLabel = uploadArea.querySelector('label');
+  uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadLabel.style.borderColor = 'var(--primary)'; });
+  uploadArea.addEventListener('dragleave', () => { uploadLabel.style.borderColor = '#e2e8f0'; });
+  uploadArea.addEventListener('drop', e => {
+    e.preventDefault();
+    uploadLabel.style.borderColor = '#e2e8f0';
+    const file = e.dataTransfer.files[0];
+    if (file) {
+      fileInput.files = e.dataTransfer.files;
+      filenameDisplay.textContent = file.name;
+      uploadArea.classList.add('show');
+      btnUpload.style.display = 'inline-block';
+      const reader = new FileReader();
+      reader.onload = ev => { btnUpload.dataset.file = ev.target.result; };
+      reader.readAsDataURL(file);
+    }
+  });
+
+  btnUpload.addEventListener('click', async () => {
+    const blob = btnUpload.dataset.blob ? new Blob([Uint8Array.from(atob(btnUpload.dataset.blob.split(',')[1]), c => c.charCodeAt(0))], { type: 'audio/webm' }) : fileInput.files[0];
+    if (!blob) { alert('請先選擇檔案或錄製音訊'); return; }
+    await submitTranscription(blob, blob.name || 'recording.webm');
+  });
+
+  // ─── Transcription ───────────────────────────────────────────────────────
+  async function submitTranscription(audioBlob, filename) {
+    const title = document.getElementById('meeting-title').value.trim() || '未命名會議';
+    const participants = document.getElementById('participants').value.trim() || '未填寫';
+
+    showStatus('正在上傳並排程轉寫任務...', 5);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', audioBlob, filename);
+      formData.append('meeting_title', title);
+      formData.append('participants', participants);
+
+      const res = await fetch('/api/transcribe', {
+        method: 'POST',
+        credentials: 'include',
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        if (res.status === 403) {
+          hideStatus();
+          document.getElementById('alert-no-key').classList.add('show');
+          alert('請先設定 OpenAI API Key：' + (data.detail || ''));
+          return;
+        }
+        if (res.status === 429) {
+          hideStatus();
+          alert('已超過本月用量上限，請等到下個月或升級方案。');
+          return;
+        }
+        throw new Error(data.detail || '轉寫請求失敗');
+      }
+
+      pollJob(data.job_id);
+
+    } catch (err) {
+      hideStatus();
+      alert('錯誤：' + err.message);
+    }
+  }
+
+  function pollJob(jobId) {
+    showStatus('排程成功，等待處理...', 10);
+    let attempts = 0;
+    const poll = setInterval(async () => {
+      attempts++;
+      try {
+        const res = await fetch(`/api/jobs/${jobId}`, { credentials: 'include' });
+        if (!res.ok) return;
+        const job = await res.json();
+        updateStatus(job.message || '處理中...', job.progress || 10);
+        if (job.status === 'completed') {
+          clearInterval(poll);
+          hideStatus();
+          displayResult(job);
+        } else if (job.status === 'failed') {
+          clearInterval(poll);
+          hideStatus();
+          alert('轉寫失敗：' + (job.error || '未知錯誤'));
+        }
+      } catch {}
+      if (attempts > 120) clearInterval(poll); // 2 min timeout
+    }, 2000);
+  }
+
+  function showStatus(text, progress) {
+    const bar = document.getElementById('status-bar');
+    bar.classList.add('show');
+    document.getElementById('status-text').textContent = text;
+    document.getElementById('progress-bar').style.width = progress + '%';
+    document.getElementById('status-progress').textContent = progress + '%';
+  }
+  function updateStatus(text, progress) {
+    document.getElementById('status-text').textContent = text;
+    document.getElementById('progress-bar').style.width = progress + '%';
+    document.getElementById('status-progress').textContent = progress + '%';
+  }
+  function hideStatus() { document.getElementById('status-bar').classList.remove('show'); }
+
+  function displayResult(job) {
+    document.getElementById('transcript-area').value = job.transcript || '';
+    document.getElementById('summary-area').value = job.summary || '';
+    document.getElementById('summary-card').style.display = 'block';
+    document.getElementById('summary-placeholder').style.display = 'none';
+    document.getElementById('summary-result').style.display = 'none';
+
+    // Save to local history
+    const history = JSON.parse(localStorage.getItem('mr_history') || '[]');
+    history.unshift({
+      id: job.job_id,
+      title: job.meeting_title,
+      participants: job.participants,
+      transcript: job.transcript,
+      summary: job.summary,
+      date: new Date().toISOString(),
+    });
+    localStorage.setItem('mr_history', JSON.stringify(history.slice(0, 50)));
+    renderHistory();
+  }
+
+  // ─── History ──────────────────────────────────────────────────────────────
+  function renderHistory(filter = '') {
+    const history = JSON.parse(localStorage.getItem('mr_history') || '[]');
+    const list = document.getElementById('history-list');
+    const q = filter.toLowerCase();
+    const filtered = history.filter(h =>
+      !q || h.title?.toLowerCase().includes(q) || h.participants?.toLowerCase().includes(q)
+    );
+    if (!filtered.length) {
+      list.innerHTML = '<li class="history-empty">尚無記錄</li>';
+      return;
+    }
+    list.innerHTML = filtered.map(h => `
+      <li class="history-item" onclick="loadHistory('${h.id}')">
+        <span class="history-item-title">${h.title || '未命名'}</span>
+        <span class="history-item-meta">${h.participants || ''} · ${new Date(h.date).toLocaleDateString('zh-TW')}</span>
+      </li>
+    `).join('');
+  }
+
+  window.loadHistory = function(id) {
+    const history = JSON.parse(localStorage.getItem('mr_history') || '[]');
+    const h = history.find(x => x.id == id);
+    if (!h) return;
+    document.getElementById('meeting-title').value = h.title || '';
+    document.getElementById('participants').value = h.participants || '';
+    document.getElementById('transcript-area').value = h.transcript || '';
+    document.getElementById('summary-area').value = h.summary || '';
+    document.getElementById('summary-card').style.display = h.summary ? 'block' : 'none';
+    document.getElementById('summary-placeholder').style.display = h.summary ? 'none' : 'flex';
+  };
+
+  document.getElementById('search-history').addEventListener('input', e => renderHistory(e.target.value));
+  document.getElementById('btn-clear-history').addEventListener('click', () => {
+    if (confirm('確定清除所有本地記錄？')) {
+      localStorage.removeItem('mr_history');
+      renderHistory();
+    }
+  });
+
+  // ─── Copy buttons ─────────────────────────────────────────────────────────
+  document.getElementById('btn-copy-transcript').addEventListener('click', () => {
+    navigator.clipboard.writeText(document.getElementById('transcript-area').value);
+    alert('已複製到剪貼簿！');
+  });
+  document.getElementById('btn-copy-summary').addEventListener('click', () => {
+    navigator.clipboard.writeText(document.getElementById('summary-area').value);
+    alert('已複製到剪貼簿！');
+  });
+
+  // ─── Init ─────────────────────────────────────────────────────────────────
+  renderHistory();
+</script>
+
+</body>
+</html>
