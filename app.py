@@ -13,13 +13,25 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 
 BASE_DIR = Path(__file__).resolve().parent
+
+# Serverless-compatible: defer directory creation
+def get_data_dir():
+    d = BASE_DIR / '.data'
+    d.mkdir(exist_ok=True)
+    return d
+
 UPLOAD_DIR = BASE_DIR / 'uploads'
 OUTPUT_DIR = BASE_DIR / 'outputs'
 DATA_DIR = BASE_DIR / '.data'
 JOBS_FILE = DATA_DIR / 'jobs.json'
-UPLOAD_DIR.mkdir(exist_ok=True)
-OUTPUT_DIR.mkdir(exist_ok=True)
-DATA_DIR.mkdir(exist_ok=True)
+
+# Defer directory creation to avoid serverless initialization errors
+try:
+    UPLOAD_DIR.mkdir(exist_ok=True)
+    OUTPUT_DIR.mkdir(exist_ok=True)
+    DATA_DIR.mkdir(exist_ok=True)
+except Exception:
+    pass  # Will be created on-demand
 
 app = FastAPI(title='meeting-recorder')
 app.add_middleware(
