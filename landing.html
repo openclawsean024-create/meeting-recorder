@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meeting Recorder｜會議錄音、逐字稿、Meeting Minutes 一站式整理</title>
+  <meta name="description" content="免費會議錄音工具。支援錄音、即時語音辨識、Whisper AI 逐字稿、結構化 Meeting Minutes。本地儲存，隱私安全。">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root { --primary: #326bff; --primary2: #6e45ff; --accent: #16a34a; --bg: #f3f5f8; --ink: #121826; --muted: #6b7280; }
+    body { font-family: 'Noto Sans TC', sans-serif; color: var(--ink); background: var(--bg); }
+    
+    .hero {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%);
+      color: #fff; padding: 80px 20px; text-align: center;
+    }
+    .hero h1 { font-size: clamp(32px, 6vw, 56px); font-weight: 800; margin-bottom: 16px; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .hero p { font-size: 18px; color: #aaa; max-width: 620px; margin: 0 auto 32px; line-height: 1.7; }
+    .hero .cta { display: inline-block; padding: 16px 40px; background: linear-gradient(135deg, var(--primary), var(--primary2)); color: #fff; text-decoration: none; border-radius: 12px; font-size: 18px; font-weight: 700; transition: transform 0.2s, box-shadow 0.2s; }
+    .hero .cta:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(50,107,255,0.35); }
+    .hero .badge { display: inline-block; background: rgba(52,199,89,0.2); color: #34c759; padding: 6px 14px; border-radius: 20px; font-size: 13px; margin-top: 16px; }
+    
+    .features { padding: 60px 20px; max-width: 1000px; margin: 0 auto; }
+    .features h2 { font-size: 32px; text-align: center; margin-bottom: 40px; }
+    .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+    .feature { background: #fff; border-radius: 20px; padding: 28px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
+    .feature-icon { font-size: 36px; margin-bottom: 14px; }
+    .feature h3 { font-size: 17px; margin-bottom: 8px; color: var(--primary); }
+    .feature p { color: var(--muted); font-size: 14px; line-height: 1.7; }
+    
+    .workflow { background: #fff; padding: 60px 20px; }
+    .workflow-inner { max-width: 900px; margin: 0 auto; }
+    .workflow h2 { font-size: 32px; text-align: center; margin-bottom: 40px; }
+    .steps { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+    .step { flex: 1; min-width: 200px; text-align: center; padding: 24px 16px; background: var(--bg); border-radius: 16px; }
+    .step-num { width: 40px; height: 40px; background: linear-gradient(135deg, var(--primary), var(--primary2)); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; margin: 0 auto 14px; }
+    .step h3 { font-size: 16px; margin-bottom: 8px; }
+    .step p { font-size: 13px; color: var(--muted); }
+    
+    .output { padding: 60px 20px; max-width: 800px; margin: 0 auto; }
+    .output h2 { font-size: 28px; text-align: center; margin-bottom: 24px; }
+    .output pre { background: #1a1a2e; color: #a8b3cf; padding: 24px; border-radius: 16px; font-size: 13px; line-height: 1.8; overflow-x: auto; }
+    
+    .cta-section { background: linear-gradient(135deg, var(--primary), var(--primary2)); padding: 60px 20px; text-align: center; color: #fff; }
+    .cta-section h2 { font-size: 28px; margin-bottom: 12px; }
+    .cta-section p { opacity: 0.9; margin-bottom: 24px; }
+    .cta-section .btn { display: inline-block; padding: 14px 32px; background: #fff; color: var(--primary); text-decoration: none; border-radius: 10px; font-weight: 700; }
+    
+    .footer { background: #1a1a2e; color: #555; padding: 40px 20px; text-align: center; font-size: 13px; }
+    .footer a { color: #888; text-decoration: none; }
+    
+    .demo { padding: 40px 20px; text-align: center; background: var(--bg); }
+    .demo iframe { width: 100%; max-width: 1100px; height: 700px; border: none; border-radius: 16px; box-shadow: 0 8px 40px rgba(0,0,0,0.12); }
+  </style>
+</head>
+<body>
+  <div class="hero">
+    <h1>🎙️ Meeting Recorder</h1>
+    <p>會議錄音、即時逐字稿、正式 Meeting Minutes — 全部在一個工具裡完成。<br>支援 Whisper AI 轉錄，本地儲存，隱私安全。</p>
+    <a href="/app" class="cta">🚀 開始使用</a>
+    <div class="badge">✓ 免費 ✓ 瀏覽器直接用 ✓ 無需安裝</div>
+  </div>
+
+  <div class="features">
+    <h2>功能特色</h2>
+    <div class="features-grid">
+      <div class="feature">
+        <div class="feature-icon">🎙️</div>
+        <h3>瀏覽器錄音</h3>
+        <p>直接用瀏覽器錄音，支援即時麥克風偵測。錄音同時可顯示波形視覺化。</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">📝</div>
+        <h3>即時語音辨識</h3>
+        <p>若瀏覽器支援 Web Speech API，錄音同時即時產出逐字稿。也可手動編輯修正。</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🤖</div>
+        <h3>Whisper AI 轉錄</h3>
+        <p>後端串接 OpenAI Whisper API，支援後端非同步轉錄，輸出高品質逐字稿。</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">📋</div>
+        <h3>結構化 Meeting Minutes</h3>
+        <p>自動整理：目標、執行摘要、討論重點、決策、行動項、風險、下一步。</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">💾</div>
+        <h3>本地歷史管理</h3>
+        <p>會議記錄與音檔綁定保存在瀏覽器 localStorage，可搜尋、載入、刪除。</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">📤</div>
+        <h3>多格式匯出</h3>
+        <p>支援匯出 Markdown、JSON、TXT，逐字稿與音檔皆可下載。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="workflow">
+    <div class="workflow-inner">
+      <h2>工作流程</h2>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <h3>錄音</h3>
+          <p>輸入會議主題與與會人員，點擊錄音按鈕開始</p>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <h3>逐字稿</h3>
+          <p>瀏覽器即時辨識，或後送 Whisper API 處理</p>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <h3>整理紀要</h3>
+          <p>一鍵產生結構化 Meeting Minutes</p>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <h3>匯出保存</h3>
+          <p>下載 Markdown / JSON / TXT，含綁定音檔</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="output">
+    <h2>Meeting Minutes 輸出範例</h2>
+    <pre># Meeting Minutes
+
+## Document Control
+- Meeting Topic: Q2 產品策略會議
+- Participants: Sean、PM、Engineer
+- Duration: 00:32:15
+
+## 1. Meeting Objective
+1. 確認 Q2 產品 Roadmap 優先順序
+2. 討論技術可行性與風險
+
+## 2. Executive Summary
+1. 確認本季 Top 3 功能優先順序
+2. 工程師提出兩個技術風險需追蹤
+
+## 3. Discussion Highlights
+1. Text-to-Speech MVP 需要在 4 月前完成
+2. Meeting Recorder 需要加強摘要品質
+
+## 4. Decisions Made
+1. Q2 優先做 TTS、Meeting Recorder、ebook-to-audiobook
+2. 使用 OpenAI Whisper 做轉錄引擎
+
+## 5. Action Items
+| # | Owner | Action | Due | Status |
+|---|---|---|---|---|
+| 1 | Sean | 安排 TTS UI review | 3/31 | Open |
+| 2 | PM | 整理 Q2 Roadmap | 4/1 | Open |
+
+## 6. Next Checkpoints
+1. 下週三產品會議追蹤進度</pre>
+  </div>
+
+  <div class="demo">
+    <h2 style="font-size:28px;margin-bottom:20px;">線上預覽</h2>
+    <iframe src="/app" title="Meeting Recorder App"></iframe>
+  </div>
+
+  <div class="cta-section">
+    <h2>準備好了嗎？</h2>
+    <p>免費使用，無需註冊，直接在瀏覽器中完成會議記錄所有流程。</p>
+    <a href="/app" class="btn">🚀 開始錄音</a>
+  </div>
+
+  <div class="footer">
+    <p>Meeting Recorder | OpenClaw 生態系</p>
+    <p style="margin-top:8px;"><a href="https://github.com/openclawsean024-create/meeting-recorder" target="_blank">GitHub</a></p>
+  </div>
+</body>
+</html>
