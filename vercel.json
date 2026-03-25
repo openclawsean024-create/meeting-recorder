@@ -12,6 +12,7 @@
   ],
   "routes": [
     { "src": "/api/(.*)", "dest": "/app.py" },
+    { "src": "/health", "dest": "/app.py" },
     { "src": "/app", "dest": "/app-page.html" },
     { "src": "/pricing", "dest": "/pricing.html" },
     { "src": "/auth", "dest": "/auth.html" },
