@@ -6,25 +6,12 @@
       "use": "@vercel/python"
     },
     {
-      "src": "api/*.py",
-      "use": "@vercel/python"
-    },
-    {
       "src": "*.html",
       "use": "@vercel/static"
     }
   ],
   "routes": [
-    { "src": "/api/auth/register", "dest": "/api/auth.py" },
-    { "src": "/api/auth/login", "dest": "/api/auth.py" },
-    { "src": "/api/auth/logout", "dest": "/api/auth.py" },
-    { "src": "/api/auth/me", "dest": "/api/auth.py" },
-    { "src": "/api/user/api-key", "dest": "/api/user.py" },
-    { "src": "/api/user/profile", "dest": "/api/user.py" },
-    { "src": "/api/user/usage", "dest": "/api/user.py" },
-    { "src": "/api/transcribe", "dest": "/api/transcribe.py" },
-    { "src": "/api/jobs", "dest": "/api/transcribe.py" },
-    { "src": "/api/jobs/(.*)", "dest": "/api/transcribe.py" },
+    { "src": "/api/(.*)", "dest": "/app.py" },
     { "src": "/app", "dest": "/app-page.html" },
     { "src": "/pricing", "dest": "/pricing.html" },
     { "src": "/auth", "dest": "/auth.html" },

@@ -2,9 +2,9 @@
 
 上傳會議錄音，AI 自動產生逐字稿與結構化 Meeting Minutes。支援 Whisper AI，無需訂閱昂貴的會議錄音服務。
 
-**👉 立即使用**：https://meeting-recorder.vercel.app（需取消密碼保護，見下方說明）
+**👉 立即使用**：https://meeting-recorder-ten.vercel.app
 
-**⚠️ 目前 Vercel 部署受密碼保護**：請在 [Vercel Dashboard](https://vercel.com/dashboard) → `meeting-recorder` 專案 → Settings → Deployment Protection 移除密碼保護。
+**⚠️ 首次使用需設定**：請在 [Vercel Dashboard](https://vercel.com/dashboard) → `meeting-recorder` 專案 → Settings → Environment Variables 設定 Supabase 環境變數（`SUPABASE_URL`、`SUPABASE_SERVICE_KEY`、`SUPABASE_ANON_KEY`），並在 Supabase 建立資料庫（執行 `supabase-schema.sql`）。
 
 **📄 GitHub Pages 備用部署**：https://openclawsean024-create.github.io/meeting-recorder/
 
