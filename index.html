@@ -6,286 +6,488 @@
   <title>Meeting Recorder｜會議錄音工作台</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700;800&display=swap" rel="stylesheet">
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
     :root {
-      --bg: #f3f5f8;
-      --ink: #121826;
-      --muted: #6b7280;
-      --card: rgba(255,255,255,0.88);
-      --line: rgba(15, 23, 42, 0.08);
-      --primary: #326bff;
-      --primary-2: #6e45ff;
-      --accent: #16a34a;
-      --warn: #ea580c;
-      --danger: #dc2626;
-      --shadow: 0 24px 70px rgba(15, 23, 42, 0.12);
+      --bg: #0a0a14;
+      --surface: #10101e;
+      --surface-2: #16162a;
+      --card: rgba(255,255,255,0.04);
+      --card-hover: rgba(255,255,255,0.07);
+      --border: rgba(255,255,255,0.07);
+      --border-bright: rgba(255,255,255,0.12);
+      --text: #ffffff;
+      --text-2: rgba(255,255,255,0.72);
+      --text-muted: rgba(255,255,255,0.42);
+      --primary: #8b5cf6;
+      --primary-2: #7c3aed;
+      --primary-dim: rgba(139,92,246,0.13);
+      --accent: #34d399;
+      --accent-2: #10b981;
+      --accent-dim: rgba(52,211,153,0.12);
+      --warn: #fb923c;
+      --danger: #f87171;
+      --danger-dim: rgba(248,113,113,0.12);
+      --shadow: 0 24px 80px rgba(0,0,0,0.55);
+      --glow: 0 0 60px rgba(139,92,246,0.14);
+      --radius: 22px;
+      --radius-sm: 14px;
+      --radius-xs: 8px;
+      --font: 'Inter', 'Noto Sans TC', sans-serif;
     }
-    body {
-      font-family: 'Noto Sans TC', sans-serif;
-      min-height: 100vh;
-      color: var(--ink);
-      background:
-        radial-gradient(circle at top left, rgba(50,107,255,0.12), transparent 28%),
-        radial-gradient(circle at 82% 18%, rgba(110,69,255,0.12), transparent 26%),
-        linear-gradient(180deg, #f7f9fc 0%, var(--bg) 100%);
+
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--font); min-height: 100vh; color: var(--text); background: var(--bg); -webkit-font-smoothing: antialiased; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 999px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.18); }
+
+    /* ═══ NAV ═══ */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 32px; height: 64px;
+      background: rgba(10,10,20,0.88); backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
     }
-    .shell { max-width: 1180px; margin: 0 auto; padding: 24px 20px 60px; }
-    .hero { display: grid; grid-template-columns: 1.35fr .9fr; gap: 18px; margin-bottom: 20px; }
+    .nav-logo {
+      font-size: 17px; font-weight: 900; letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #a78bfa, #818cf8);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .nav-links { display: flex; gap: 4px; }
+    .nav-links a {
+      font-size: 13px; font-weight: 500; color: var(--text-2);
+      padding: 6px 14px; border-radius: var(--radius-xs);
+      transition: color 0.15s, background 0.15s;
+    }
+    .nav-links a:hover { color: var(--text); background: var(--card); }
+    .nav-links a.active { color: var(--primary); font-weight: 600; }
+    .nav-right { display: flex; align-items: center; gap: 10px; }
+    .nav-badge {
+      font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 999px;
+      background: var(--primary-dim); color: #a78bfa; border: 1px solid rgba(139,92,246,0.2);
+    }
+
+    /* ═══ SHELL ═══ */
+    .shell { max-width: 1200px; margin: 0 auto; padding: 84px 24px 60px; }
+
+    /* ═══ PAGE HEADER ═══ */
+    .page-header {
+      display: flex; align-items: flex-end; justify-content: space-between;
+      margin-bottom: 28px; gap: 16px; flex-wrap: wrap;
+    }
+    .page-title { font-size: 28px; font-weight: 900; letter-spacing: -0.03em; }
+    .page-title span { color: var(--primary); }
+    .page-sub { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
+
+    /* ═══ STAT STRIP ═══ */
+    .stat-strip {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px;
+    }
+    .stat-tile {
+      background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm);
+      padding: 16px 20px; display: flex; align-items: center; gap: 14px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .stat-tile:hover { border-color: rgba(139,92,246,0.2); }
+    .stat-tile-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      background: var(--primary-dim); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0;
+    }
+    .stat-tile-icon.accent { background: var(--accent-dim); }
+    .stat-tile-val { font-size: 20px; font-weight: 800; line-height: 1.1; }
+    .stat-tile-lbl { font-size: 11px; color: var(--text-muted); margin-top: 2px; font-weight: 600; }
+
+    /* ═══ GRID ═══ */
+    .app-grid { display: grid; grid-template-columns: 1fr 1.1fr; gap: 20px; align-items: start; }
+    .app-stack { display: grid; gap: 16px; }
+
+    /* ═══ CARD ═══ */
     .card {
-      background: var(--card);
-      backdrop-filter: blur(18px);
-      border: 1px solid var(--line);
-      border-radius: 28px;
-      box-shadow: var(--shadow);
+      background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+      backdrop-filter: blur(16px);
     }
-    .hero-main { padding: 34px; }
-    .eyebrow {
-      display: inline-flex; align-items: center; gap: 8px;
-      text-transform: uppercase; letter-spacing: .12em; font-size: 11px; font-weight: 800;
-      color: var(--primary); margin-bottom: 14px;
+    .card-pad { padding: 24px; }
+    .card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; flex-wrap: wrap; gap: 10px; }
+    .card-title { font-size: 16px; font-weight: 800; }
+    .card-sub { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+
+    /* ═══ TABS ═══ */
+    .tabs { display: flex; gap: 6px; background: rgba(255,255,255,0.03); border-radius: 999px; padding: 4px; margin-bottom: 20px; }
+    .tab {
+      flex: 1; text-align: center; padding: 9px 16px; border-radius: 999px;
+      font-size: 13px; font-weight: 700; cursor: pointer; color: var(--text-muted);
+      border: none; background: none; transition: all 0.18s;
     }
-    h1 { font-size: clamp(34px, 5vw, 58px); line-height: 1.02; max-width: 10ch; }
-    .hero-main p { color: var(--muted); margin-top: 16px; max-width: 60ch; line-height: 1.75; }
-    .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 22px; }
-    .btn {
-      border: none; border-radius: 999px; padding: 13px 18px; cursor: pointer;
-      font-size: 14px; font-weight: 800; transition: .18s ease; position: relative; overflow: hidden;
-    }
-    .btn::after {
-      content: ''; position: absolute; inset: 0; background: rgba(255,255,255,0);
-      transition: background .15s ease; pointer-events: none;
-    }
-    .btn:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(50,107,255,.18); }
-    .btn:hover::after { background: rgba(255,255,255,.08); }
-    .btn:active { transform: translateY(0); }
-    .btn:focus-visible { outline: 3px solid var(--primary); outline-offset: 3px; }
-    .btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
-    .btn-primary { background: linear-gradient(135deg, var(--primary), var(--primary-2)); color: white; }
-    .btn-secondary { background: white; color: var(--ink); border: 1px solid var(--line); }
-    .btn-danger { background: white; color: var(--danger); border: 1px solid rgba(220,38,38,.16); }
-    .btn-ghost-danger { background: rgba(220,38,38,.06); color: var(--danger); border: 1px solid rgba(220,38,38,.14); }
-    .hero-side { padding: 24px; display: grid; gap: 14px; }
-    .metric { background: rgba(255,255,255,0.7); border-radius: 20px; padding: 18px; border: 1px solid var(--line); }
-    .metric span { display: block; color: var(--muted); font-size: 12px; margin-bottom: 8px; }
-    .metric strong { font-size: 18px; line-height: 1.35; }
-    .grid { display: grid; grid-template-columns: .95fr 1.05fr; gap: 18px; }
-    .stack { display: grid; gap: 18px; }
-    .panel { padding: 24px; }
-    .panel-title { font-size: 20px; font-weight: 800; margin-bottom: 14px; }
-    .panel-sub { color: var(--muted); font-size: 14px; line-height: 1.7; margin-bottom: 14px; }
-    .field { margin-bottom: 14px; }
-    .field label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 8px; color: #334155; }
-    .input, .textarea, .select {
-      width: 100%; border: 1px solid var(--line); border-radius: 16px; background: rgba(255,255,255,.84);
-      padding: 14px 16px; font-size: 15px; color: var(--ink);
-    }
-    .textarea { min-height: 220px; resize: vertical; }
-    .textarea.compact { min-height: 360px; }
-    .record-card { text-align: center; padding: 30px 24px; }
-    .record-btn {
-      width: 128px; height: 128px; border-radius: 999px; border: none; cursor: pointer;
-      font-size: 48px; color: white; background: linear-gradient(135deg, var(--primary), var(--primary-2));
-      box-shadow: 0 20px 40px rgba(50,107,255,.22); transition: .2s ease;
-    }
-    .record-btn.recording { background: linear-gradient(135deg, #ff4d5f, #d81b60); animation: pulse 1.7s infinite; }
-    @keyframes pulse { 0%,100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(220,38,38,.28); } 50% { transform: scale(1.04); box-shadow: 0 0 0 20px rgba(220,38,38,0); } }
-    .status { margin-top: 16px; font-weight: 800; font-size: 16px; }
-    .status.recording { color: var(--danger); }
-    .timer { font-size: 34px; font-weight: 800; margin-top: 12px; font-variant-numeric: tabular-nums; }
-    .wave { display: flex; justify-content: center; align-items: end; gap: 5px; height: 64px; margin-top: 18px; }
-    .bar { width: 8px; height: 18px; border-radius: 999px; background: #bcd0ff; transition: .25s ease; }
-    .wave.recording .bar { background: #ff7584; animation: wave .9s ease-in-out infinite; }
-    .wave.recording .bar:nth-child(2) { animation-delay: .1s; }
-    .wave.recording .bar:nth-child(3) { animation-delay: .2s; }
-    .wave.recording .bar:nth-child(4) { animation-delay: .3s; }
-    .wave.recording .bar:nth-child(5) { animation-delay: .4s; }
-    @keyframes wave { 0%,100% { height: 18px; } 50% { height: 56px; } }
-    .chips { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; justify-content:center; }
-    .chip { font-size: 12px; font-weight: 700; color: #334155; background: rgba(50,107,255,.08); padding: 8px 12px; border-radius: 999px; }
-    .toolbar { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
-    .toolbar .btn { flex: 1; min-width: 140px; }
-    .toolbar.tight .btn { min-width: 120px; }
-    .output {
-      background: rgba(250,251,255,0.92); border: 1px solid var(--line); border-radius: 20px;
-      padding: 16px; min-height: 220px; max-height: 340px; overflow: auto; white-space: pre-wrap; line-height: 1.8;
-    }
-    .empty::before { content: attr(data-placeholder); color: var(--muted); }
-    .tabs { display: flex; gap: 10px; margin-bottom: 16px; }
-    .tab { flex: 1; padding: 12px 16px; border-radius: 999px; border: 1px solid var(--line); background: white; font-weight: 800; cursor: pointer; }
-    .tab.active { background: linear-gradient(135deg, var(--primary), var(--primary-2)); color: white; border-color: transparent; }
+    .tab.active { background: linear-gradient(135deg, var(--primary), var(--primary-2)); color: #fff; box-shadow: 0 4px 14px rgba(139,92,246,0.3); }
+    .tab:not(.active):hover { color: var(--text); background: var(--card-hover); }
     .tab-pane { display: none; }
     .tab-pane.active { display: block; }
-    .history-list { display: grid; gap: 12px; }
-    .history-item { padding: 16px; border: 1px solid var(--line); border-radius: 20px; background: rgba(255,255,255,.78); }
-    .history-header { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
-    .history-item h4 { font-size: 16px; }
-    .history-meta { color: var(--muted); font-size: 12px; margin-top: 6px; }
-    .history-preview { color: #475569; font-size: 13px; margin-top: 10px; }
-    .history-actions { display:flex; gap:8px; flex-wrap:wrap; margin-top: 12px; }
-    .mini-btn {
-      border:none; cursor:pointer; border-radius:999px; padding:8px 12px; font-size:12px; font-weight:800;
-      background:white; border:1px solid var(--line); color:var(--ink);
+
+    /* ═══ FORM ELEMENTS ═══ */
+    .field { margin-bottom: 14px; }
+    .field label { display: block; font-size: 12px; font-weight: 700; margin-bottom: 7px; color: var(--text-muted); letter-spacing: 0.04em; }
+    .input, .textarea, .select {
+      width: 100%; border: 1px solid var(--border-bright); border-radius: var(--radius-sm);
+      background: rgba(255,255,255,0.04); padding: 11px 14px; font-size: 14px; color: var(--text);
+      font-family: var(--font); transition: border-color 0.2s, box-shadow 0.2s;
     }
-    .mini-btn.delete { color: var(--danger); border-color: rgba(220,38,38,.16); }
-    .notice { border-left: 4px solid var(--warn); background: rgba(234,88,12,.08); padding: 14px 16px; border-radius: 14px; color: #9a3412; font-size: 13px; line-height: 1.7; }
+    .input:focus, .textarea:focus, .select:focus {
+      outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-dim);
+    }
+    .input::placeholder, .textarea::placeholder { color: var(--text-muted); }
+    .textarea { min-height: 200px; resize: vertical; line-height: 1.7; }
+    .textarea.compact { min-height: 340px; }
+
+    /* ═══ RECORD BTN ═══ */
+    .record-area { text-align: center; padding: 32px 24px; }
+    .record-btn {
+      width: 120px; height: 120px; border-radius: 999px; border: none; cursor: pointer;
+      font-size: 44px; color: #fff;
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+      box-shadow: 0 20px 50px rgba(139,92,246,0.35), var(--glow);
+      transition: transform 0.2s, box-shadow 0.2s;
+      display: inline-flex; align-items: center; justify-content: center;
+    }
+    .record-btn:hover { transform: scale(1.05); box-shadow: 0 24px 60px rgba(139,92,246,0.45); }
+    .record-btn.recording {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      box-shadow: 0 20px 50px rgba(239,68,68,0.35);
+      animation: rec-pulse 1.6s ease-in-out infinite;
+    }
+    @keyframes rec-pulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 20px 50px rgba(239,68,68,0.35); }
+      50% { transform: scale(1.06); box-shadow: 0 20px 70px rgba(239,68,68,0.5), 0 0 0 16px rgba(239,68,68,0); }
+    }
+    .rec-status { font-size: 15px; font-weight: 800; margin-top: 16px; color: var(--text-2); }
+    .rec-status.live { color: var(--danger); }
+    .rec-timer { font-size: 36px; font-weight: 900; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; margin-top: 10px; font-family: 'Inter', monospace; }
+    .wave {
+      display: flex; justify-content: center; align-items: flex-end; gap: 5px;
+      height: 52px; margin-top: 18px;
+    }
+    .bar {
+      width: 6px; border-radius: 999px;
+      background: rgba(139,92,246,0.35); transition: height 0.2s ease;
+    }
+    .wave.recording .bar { background: var(--danger); animation: wave 0.9s ease-in-out infinite; }
+    .wave.recording .bar:nth-child(1) { animation-delay: 0s; }
+    .wave.recording .bar:nth-child(2) { animation-delay: 0.12s; }
+    .wave.recording .bar:nth-child(3) { animation-delay: 0.24s; }
+    .wave.recording .bar:nth-child(4) { animation-delay: 0.36s; }
+    .wave.recording .bar:nth-child(5) { animation-delay: 0.48s; }
+    @keyframes wave { 0%, 100% { height: 14px; } 50% { height: 48px; } }
+    .chips { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 14px; }
+    .chip {
+      font-size: 11px; font-weight: 700; padding: 5px 12px; border-radius: 999px;
+      background: var(--primary-dim); color: #a78bfa; border: 1px solid rgba(139,92,246,0.18);
+    }
+    .chip.accent { background: var(--accent-dim); color: #34d399; border-color: rgba(52,211,153,0.18); }
+    .chip.warn { background: rgba(251,146,60,0.1); color: var(--warn); border-color: rgba(251,146,60,0.18); }
+
+    /* ═══ NOTICE ═══ */
+    .notice {
+      border-left: 3px solid var(--warn); background: rgba(251,146,60,0.06);
+      padding: 12px 14px; border-radius: var(--radius-xs); font-size: 12px;
+      color: rgba(255,255,255,0.6); line-height: 1.7; margin-top: 14px;
+    }
+
+    /* ═══ TOOLBAR ═══ */
+    .toolbar { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+    .btn {
+      border: none; border-radius: 999px; padding: 10px 16px; cursor: pointer;
+      font-size: 13px; font-weight: 700; font-family: var(--font); transition: all 0.15s;
+      position: relative; overflow: hidden; flex: 1; min-width: 120px; text-align: center;
+    }
+    .btn::after { content: ''; position: absolute; inset: 0; background: rgba(255,255,255,0); transition: background 0.12s; pointer-events: none; }
+    .btn:hover { transform: translateY(-1px); }
+    .btn:active { transform: translateY(0); }
+    .btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none !important; }
+    .btn-primary { background: linear-gradient(135deg, var(--primary), var(--primary-2)); color: #fff; }
+    .btn-primary:hover { box-shadow: 0 8px 24px rgba(139,92,246,0.3); }
+    .btn-ghost {
+      background: var(--card); color: var(--text-2); border: 1px solid var(--border-bright);
+    }
+    .btn-ghost:hover { border-color: var(--primary); color: var(--primary); }
+    .btn-accent { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #000; }
+    .btn-accent:hover { box-shadow: 0 8px 24px rgba(52,211,153,0.3); }
+    .btn-danger { background: var(--danger-dim); color: var(--danger); border: 1px solid rgba(248,113,113,0.2); }
+    .btn-danger:hover { border-color: var(--danger); }
+
+    /* ═══ OUTPUT BOX ═══ */
+    .output {
+      background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: var(--radius-sm);
+      padding: 14px; min-height: 160px; max-height: 280px; overflow: auto; white-space: pre-wrap;
+      line-height: 1.8; color: rgba(255,255,255,0.82); font-size: 13px;
+    }
+
+    /* ═══ HISTORY ═══ */
+    .history-list { display: grid; gap: 10px; }
+    .history-item {
+      background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: var(--radius-sm);
+      padding: 14px 16px; transition: border-color 0.15s;
+    }
+    .history-item:hover { border-color: rgba(139,92,246,0.2); }
+    .history-item h4 { font-size: 15px; font-weight: 800; }
+    .history-meta { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+    .history-preview { font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .history-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+    .mini-btn {
+      border: none; cursor: pointer; border-radius: 999px; padding: 6px 12px;
+      font-size: 11px; font-weight: 700; background: var(--card); border: 1px solid var(--border-bright);
+      color: var(--text-2); font-family: var(--font); transition: all 0.15s;
+    }
+    .mini-btn:hover { border-color: var(--primary); color: var(--primary); }
+    .mini-btn.danger { color: var(--danger); border-color: rgba(248,113,113,0.2); }
+    .mini-btn.danger:hover { border-color: var(--danger); background: var(--danger-dim); }
+
+    /* ═══ DETAIL PANEL ═══ */
+    .detail-panel {
+      background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 20px; margin-top: 16px;
+    }
+    .detail-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+    .detail-head h3 { font-size: 16px; font-weight: 800; }
+    .detail-meta { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+    .audio-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+    audio {
+      width: 100%; height: 38px; border-radius: var(--radius-xs); opacity: 0.85;
+      filter: invert(1) hue-rotate(180deg);
+    }
+    .empty-msg { color: var(--text-muted); font-size: 13px; text-align: center; padding: 20px; }
+
+    /* ═══ TOAST ═══ */
     .toast {
-      position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%) translateY(20px);
-      background: rgba(15,23,42,.96); color: white; padding: 14px 20px; border-radius: 14px; font-size: 14px;
-      opacity: 0; pointer-events: none; transition: .3s cubic-bezier(0.34,1.56,0.64,1); z-index: 20;
-      backdrop-filter: blur(8px); box-shadow: 0 12px 40px rgba(15,23,42,.25);
+      position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(24px);
+      background: rgba(16,16,30,0.96); color: var(--text); padding: 13px 22px;
+      border-radius: var(--radius-xs); font-size: 14px; font-weight: 600;
+      opacity: 0; pointer-events: none; transition: .3s cubic-bezier(0.34,1.56,0.64,1);
+      z-index: 200; backdrop-filter: blur(16px);
+      box-shadow: 0 16px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
     }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-    .detail-card { padding: 20px; background: rgba(255,255,255,.76); border: 1px solid var(--line); border-radius: 22px; margin-top: 14px; transition: box-shadow .2s ease; }
-    .detail-card:focus-within { box-shadow: var(--shadow), 0 0 0 3px rgba(50,107,255,.15); }
-    .detail-card h3 { font-size: 20px; margin-bottom: 8px; }
-    .detail-meta { color: var(--muted); font-size: 13px; line-height: 1.8; margin-bottom: 14px; }
-    .detail-grid { display: grid; gap: 14px; grid-template-columns: 1fr 1fr; }
-    .detail-audio { margin-top: 14px; }
-    audio { width: 100%; margin-top: 8px; }
-    @media (max-width: 920px) { .hero, .grid, .detail-grid { grid-template-columns: 1fr; } h1 { max-width: none; } }
+
+    /* ═══ RESPONSIVE ═══ */
+    @media (max-width: 960px) {
+      .app-grid { grid-template-columns: 1fr; }
+      .stat-strip { grid-template-columns: 1fr 1fr; }
+      .detail-grid { grid-template-columns: 1fr; }
+      .page-header { flex-direction: column; align-items: flex-start; }
+    }
     @media (max-width: 640px) {
-      .shell { padding-inline: 14px; }
-      .hero-main, .hero-side, .panel, .record-card { padding: 20px; }
-      .hero-actions, .toolbar, .tabs { flex-direction: column; }
-      .record-btn { width: 116px; height: 116px; }
+      .shell { padding: 76px 14px 40px; }
+      .stat-strip { grid-template-columns: 1fr 1fr; }
+      .toolbar { flex-direction: column; }
+      .btn { min-width: unset; }
     }
   </style>
 </head>
 <body>
-  <div class="shell">
-    <section class="hero">
-      <div class="card hero-main">
-        <span class="eyebrow">Meeting Recorder</span>
-        <h1>會議錄音、逐字稿、正式會議記錄，一站式整理。</h1>
-        <p>
-          這是一個 <strong>honest browser-only MVP</strong>：先把錄音、逐字稿整理、正式 meeting minutes 與本機歷史保存做好。
-          若瀏覽器支援 Web Speech API，可提供基礎即時辨識；若不支援，也會誠實顯示限制，不假裝已接完整 AI 後端。
-        </p>
-        <div class="hero-actions">
-          <button class="btn btn-primary" id="jumpRecordBtn">開始錄音</button>
-          <button class="btn btn-secondary" id="jumpHistoryBtn">查看歷史紀錄</button>
-        </div>
+
+<!-- NAV -->
+<nav>
+  <a href="/" class="nav-logo">Meeting<span>.</span>rec</a>
+  <div class="nav-links">
+    <a href="/app" class="active">工作台</a>
+    <a href="/dashboard">歷史</a>
+    <a href="/pricing">定價</a>
+  </div>
+  <div class="nav-right">
+    <span class="nav-badge">Browser-native</span>
+  </div>
+</nav>
+
+<div class="shell">
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">會議工作台 <span>//</span></h1>
+      <p class="page-sub">瀏覽器原生錄音・AI 逐字稿・Meeting Minutes，資料完全留在本機。</p>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-ghost" id="jumpHistoryBtn" style="flex:none;">📜 歷史記錄</button>
+    </div>
+  </div>
+
+  <!-- STAT STRIP -->
+  <div class="stat-strip">
+    <div class="stat-tile">
+      <div class="stat-tile-icon">🎙️</div>
+      <div>
+        <div class="stat-tile-val" id="stat-recordings">0</div>
+        <div class="stat-tile-lbl">歷史錄音</div>
       </div>
-      <div class="card hero-side">
-        <div class="metric"><span>產品定位</span><strong>Browser-first Meeting Minutes Workspace</strong></div>
-        <div class="metric"><span>已支援</span><strong>錄音、逐字稿、正式會議記錄、歷史保存</strong></div>
-        <div class="metric"><span>這輪新增</span><strong>單筆刪除、音檔綁定、正式 minutes 升級</strong></div>
+    </div>
+    <div class="stat-tile">
+      <div class="stat-tile-icon accent">⏱️</div>
+      <div>
+        <div class="stat-tile-val" id="stat-duration">00:00</div>
+        <div class="stat-tile-lbl">本次錄音時長</div>
       </div>
-    </section>
-
-    <div class="grid">
-      <div class="stack">
-        <div class="card panel">
-          <div class="tabs">
-            <button class="tab active" data-tab="record">錄音工具</button>
-            <button class="tab" data-tab="history">歷史紀錄</button>
-          </div>
-
-          <div class="tab-pane active" id="tab-record">
-            <div class="field">
-              <label for="meetingTitle">會議主題</label>
-              <input class="input" id="meetingTitle" placeholder="例如：週會、客戶回顧、產品討論" />
-            </div>
-            <div class="field">
-              <label for="meetingParticipants">與會人員</label>
-              <input class="input" id="meetingParticipants" placeholder="例如：Sean、PM、設計、工程" />
-            </div>
-
-            <div class="card record-card" id="recordSection">
-              <button class="record-btn" id="recordBtn" aria-label="開始或停止錄音">🎙️</button>
-              <div class="status" id="recordStatus">待命中，點擊開始錄音</div>
-              <div class="timer" id="recordTimer">00:00:00</div>
-              <div class="wave" id="waveform">
-                <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
-              </div>
-              <div class="chips">
-                <span class="chip">MediaRecorder</span>
-                <span class="chip" id="speechStatusChip">Web Speech：檢查中</span>
-                <span class="chip">音檔與歷史記錄已綁定</span>
-              </div>
-            </div>
-
-            <div class="notice" id="capabilityNotice"></div>
-          </div>
-
-          <div class="tab-pane" id="tab-history">
-            <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap;">
-              <div>
-                <div class="panel-title" style="margin-bottom:4px;">歷史紀錄</div>
-                <div class="panel-sub" style="margin-bottom:0;">每筆紀錄都會保存文字內容與音檔資料，可單獨刪除、重新載入，或用關鍵字搜尋。</div>
-              </div>
-              <button class="btn btn-danger" id="clearHistoryBtn">清除全部</button>
-            </div>
-            <div class="field">
-              <label for="historySearch">搜尋歷史紀錄</label>
-              <input class="input" id="historySearch" placeholder="輸入主題、與會人員、逐字稿或摘要關鍵字" />
-            </div>
-            <div class="history-list" id="historyList"></div>
-          </div>
-        </div>
+    </div>
+    <div class="stat-tile">
+      <div class="stat-tile-icon">📝</div>
+      <div>
+        <div class="stat-tile-val" id="stat-transcript">–</div>
+        <div class="stat-tile-lbl">逐字稿狀態</div>
       </div>
-
-      <div class="stack">
-        <div class="card panel">
-          <div class="panel-title">逐字稿</div>
-          <div class="panel-sub">錄音結束後會依瀏覽器能力提供即時辨識，或顯示 honest fallback 提示。你也可以直接手動補寫、貼上或整理逐字稿。</div>
-          <textarea class="textarea" id="transcriptEditor" placeholder="逐字稿會顯示在這裡，也可以手動貼上或編輯內容"></textarea>
-          <div class="toolbar">
-            <button class="btn btn-secondary" id="copyTranscriptBtn">複製逐字稿</button>
-            <button class="btn btn-secondary" id="downloadTranscriptBtn">下載 TXT</button>
-            <button class="btn btn-secondary" id="clearTranscriptBtn">清空逐字稿</button>
-            <button class="btn btn-secondary" id="sendToBackendBtn">送後端轉錄</button>
-            <button class="btn btn-primary" id="saveMeetingBtn">儲存記錄</button>
-          </div>
-        </div>
-
-        <div class="card panel">
-          <div class="panel-title">正式 Meeting Minutes</div>
-          <div class="panel-sub">目前使用本機規則化整理：會議資訊、決策、重點、風險、行動項與後續追蹤。你可以直接編輯，再匯出成 Markdown 或 JSON。</div>
-          <textarea class="textarea compact" id="summaryEditor" placeholder="點擊「產生正式紀要」後會顯示內容，也可以直接手動編輯"></textarea>
-          <div class="toolbar">
-            <button class="btn btn-secondary" id="summarizeBtn">產生正式紀要</button>
-            <button class="btn btn-secondary" id="copySummaryBtn">複製紀要</button>
-            <button class="btn btn-secondary" id="downloadMarkdownBtn">下載 Markdown</button>
-            <button class="btn btn-secondary" id="downloadJsonBtn">下載 JSON</button>
-          </div>
-        </div>
-
-        <div class="detail-card" id="meetingDetail">
-          <h3>目前會議資料</h3>
-          <div class="detail-meta" id="detailMeta">尚未載入會議紀錄</div>
-          <div class="detail-grid">
-            <div>
-              <div class="panel-sub" style="margin-bottom:8px;">逐字稿預覽</div>
-              <div class="output" style="min-height:160px;max-height:220px;" id="detailTranscript"></div>
-            </div>
-            <div>
-              <div class="panel-sub" style="margin-bottom:8px;">會議紀要預覽</div>
-              <div class="output" style="min-height:160px;max-height:220px;" id="detailSummary"></div>
-            </div>
-          </div>
-          <div class="detail-audio">
-            <div class="panel-sub" style="margin-bottom:0;">綁定音檔</div>
-            <audio id="detailAudio" controls preload="metadata"></audio>
-          </div>
-          <div class="toolbar tight">
-            <button class="btn btn-secondary" id="downloadAudioBtn">下載音檔</button>
-            <button class="btn btn-secondary" id="loadLatestBtn">載入最新記錄</button>
-            <button class="btn btn-primary" id="updateRecordBtn">覆寫目前記錄</button>
-            <button class="btn btn-ghost-danger" id="deleteCurrentBtn">刪除目前記錄</button>
-          </div>
-        </div>
+    </div>
+    <div class="stat-tile">
+      <div class="stat-tile-icon accent">✅</div>
+      <div>
+        <div class="stat-tile-val" id="stat-summary">–</div>
+        <div class="stat-tile-lbl">紀要狀態</div>
       </div>
     </div>
   </div>
 
-  <div class="toast" id="toast"></div>
+  <div class="app-grid">
+    <!-- LEFT COLUMN -->
+    <div class="app-stack">
 
-  <script>
-    const STORAGE_KEY = 'meetingRecordsV3'
-    const LEGACY_STORAGE_KEY = 'meetingRecords'
+      <!-- Record Card -->
+      <div class="card card-pad">
+        <div class="card-head">
+          <div>
+            <div class="card-title">🎙️ 錄音工具</div>
+            <div class="card-sub">一鍵開始，錄音同時啟動即時辨識</div>
+          </div>
+        </div>
+
+        <div class="tabs" id="mainTabs">
+          <button class="tab active" data-tab="record">錄音</button>
+          <button class="tab" data-tab="history">歷史</button>
+        </div>
+
+        <div class="tab-pane active" id="pane-record">
+          <div class="field">
+            <label for="meetingTitle">會議主題</label>
+            <input class="input" id="meetingTitle" placeholder="例如：週會、產品回顧、客戶對齊" />
+          </div>
+          <div class="field">
+            <label for="meetingParticipants">與會人員</label>
+            <input class="input" id="meetingParticipants" placeholder="例如：Sean、PM、設計、工程" />
+          </div>
+
+          <div class="record-area">
+            <button class="record-btn" id="recordBtn" aria-label="開始或停止錄音">🎙️</button>
+            <div class="rec-status" id="recordStatus">待命中，點擊開始錄音</div>
+            <div class="rec-timer" id="recordTimer">00:00</div>
+            <div class="wave" id="waveform">
+              <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+            </div>
+            <div class="chips">
+              <span class="chip">MediaRecorder</span>
+              <span class="chip accent" id="speechChip">Web Speech：檢測中</span>
+              <span class="chip">音檔已綁定</span>
+            </div>
+          </div>
+
+          <div class="notice" id="capabilityNotice"></div>
+        </div>
+
+        <div class="tab-pane" id="pane-history">
+          <div class="card-head" style="margin-top:4px;">
+            <div>
+              <div class="card-title">📜 歷史記錄</div>
+              <div class="card-sub">每筆記錄含文字與音檔，支援關鍵字搜尋</div>
+            </div>
+            <button class="btn btn-danger" id="clearHistoryBtn" style="flex:none;min-width:unset;padding:8px 14px;font-size:12px;">清除全部</button>
+          </div>
+          <div class="field">
+            <label for="historySearch">搜尋</label>
+            <input class="input" id="historySearch" placeholder="搜尋主題、與會者、逐字稿…" />
+          </div>
+          <div class="history-list" id="historyList"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div class="app-stack">
+
+      <!-- Transcript -->
+      <div class="card card-pad">
+        <div class="card-head">
+          <div>
+            <div class="card-title">✍️ 逐字稿</div>
+            <div class="card-sub">錄音結束後即時顯示，可手動編輯或送後端</div>
+          </div>
+        </div>
+        <textarea class="textarea" id="transcriptEditor" placeholder="逐字稿會顯示在這裡，也可以直接貼上或編輯內容"></textarea>
+        <div class="toolbar">
+          <button class="btn btn-ghost" id="copyTranscriptBtn">複製</button>
+          <button class="btn btn-ghost" id="downloadTranscriptBtn">下載 TXT</button>
+          <button class="btn btn-ghost" id="clearTranscriptBtn">清空</button>
+          <button class="btn btn-ghost" id="sendToBackendBtn">送後端</button>
+        </div>
+      </div>
+
+      <!-- Summary -->
+      <div class="card card-pad">
+        <div class="card-head">
+          <div>
+            <div class="card-title">📋 Meeting Minutes</div>
+            <div class="card-sub">自動從逐字稿整理為結構化紀要</div>
+          </div>
+        </div>
+        <textarea class="textarea compact" id="summaryEditor" placeholder="點擊「產生紀要」後會自動生成，也可以直接編輯"></textarea>
+        <div class="toolbar">
+          <button class="btn btn-primary" id="summarizeBtn">產生紀要</button>
+          <button class="btn btn-ghost" id="copySummaryBtn">複製</button>
+          <button class="btn btn-ghost" id="downloadMarkdownBtn">Markdown</button>
+          <button class="btn btn-ghost" id="downloadJsonBtn">JSON</button>
+        </div>
+      </div>
+
+      <!-- Detail Panel -->
+      <div class="detail-panel" id="meetingDetail">
+        <div class="detail-head">
+          <div>
+            <h3 id="detailTitle">目前會議資料</h3>
+            <div class="detail-meta" id="detailMeta">尚未載入會議紀錄</div>
+          </div>
+          <div class="toolbar" style="margin-top:0;flex-wrap:wrap;gap:6px;">
+            <button class="btn btn-primary" id="saveMeetingBtn" style="flex:none;min-width:unset;padding:8px 16px;font-size:12px;">💾 儲存</button>
+            <button class="btn btn-ghost" id="loadLatestBtn" style="flex:none;min-width:unset;padding:8px 14px;font-size:12px;">最新</button>
+            <button class="btn btn-danger" id="deleteCurrentBtn" style="flex:none;min-width:unset;padding:8px 14px;font-size:12px;">🗑</button>
+          </div>
+        </div>
+        <div class="detail-grid">
+          <div>
+            <div class="card-sub" style="margin-bottom:6px;">逐字稿預覽</div>
+            <div class="output" id="detailTranscript"></div>
+          </div>
+          <div>
+            <div class="card-sub" style="margin-bottom:6px;">紀要預覽</div>
+            <div class="output" id="detailSummary"></div>
+          </div>
+        </div>
+        <div class="audio-row">
+          <audio id="detailAudio" controls preload="metadata" style="width:100%;"></audio>
+        </div>
+        <div class="toolbar" style="margin-top:10px;">
+          <button class="btn btn-ghost" id="downloadAudioBtn">下載音檔</button>
+          <button class="btn btn-ghost" id="updateRecordBtn">覆寫目前</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+    const STORAGE_KEY = 'meetingRecordsV3';
+    const LEGACY_STORAGE_KEY = 'meetingRecords';
 
     const state = {
       isRecording: false,
@@ -304,65 +506,77 @@
       activeInterimText: '',
       historySearch: '',
       backendJobId: '',
-    }
+    };
 
+    // ── DOM refs ──────────────────────────────────────────────────────
+    const $ = (s) => document.querySelector(s);
+    const $$ = (s) => [...document.querySelectorAll(s)];
     const el = {
-      tabs: [...document.querySelectorAll('.tab')],
-      panes: [...document.querySelectorAll('.tab-pane')],
-      jumpRecordBtn: document.getElementById('jumpRecordBtn'),
-      jumpHistoryBtn: document.getElementById('jumpHistoryBtn'),
-      clearHistoryBtn: document.getElementById('clearHistoryBtn'),
-      historySearch: document.getElementById('historySearch'),
-      recordBtn: document.getElementById('recordBtn'),
-      recordStatus: document.getElementById('recordStatus'),
-      recordTimer: document.getElementById('recordTimer'),
-      waveform: document.getElementById('waveform'),
-      transcriptEditor: document.getElementById('transcriptEditor'),
-      summaryEditor: document.getElementById('summaryEditor'),
-      saveMeetingBtn: document.getElementById('saveMeetingBtn'),
-      sendToBackendBtn: document.getElementById('sendToBackendBtn'),
-      summarizeBtn: document.getElementById('summarizeBtn'),
-      copyTranscriptBtn: document.getElementById('copyTranscriptBtn'),
-      copySummaryBtn: document.getElementById('copySummaryBtn'),
-      downloadTranscriptBtn: document.getElementById('downloadTranscriptBtn'),
-      clearTranscriptBtn: document.getElementById('clearTranscriptBtn'),
-      downloadMarkdownBtn: document.getElementById('downloadMarkdownBtn'),
-      downloadJsonBtn: document.getElementById('downloadJsonBtn'),
-      downloadAudioBtn: document.getElementById('downloadAudioBtn'),
-      loadLatestBtn: document.getElementById('loadLatestBtn'),
-      updateRecordBtn: document.getElementById('updateRecordBtn'),
-      deleteCurrentBtn: document.getElementById('deleteCurrentBtn'),
-      meetingTitle: document.getElementById('meetingTitle'),
-      meetingParticipants: document.getElementById('meetingParticipants'),
-      historyList: document.getElementById('historyList'),
-      toast: document.getElementById('toast'),
-      capabilityNotice: document.getElementById('capabilityNotice'),
-      speechStatusChip: document.getElementById('speechStatusChip'),
-      detailMeta: document.getElementById('detailMeta'),
-      detailTranscript: document.getElementById('detailTranscript'),
-      detailSummary: document.getElementById('detailSummary'),
-      detailAudio: document.getElementById('detailAudio'),
+      mainTabs: $$('.tab'),
+      panes: $$('.tab-pane'),
+      jumpHistoryBtn: $('#jumpHistoryBtn'),
+      recordBtn: $('#recordBtn'),
+      recordStatus: $('#recordStatus'),
+      recordTimer: $('#recordTimer'),
+      waveform: $('#waveform'),
+      transcriptEditor: $('#transcriptEditor'),
+      summaryEditor: $('#summaryEditor'),
+      saveMeetingBtn: $('#saveMeetingBtn'),
+      sendToBackendBtn: $('#sendToBackendBtn'),
+      summarizeBtn: $('#summarizeBtn'),
+      copyTranscriptBtn: $('#copyTranscriptBtn'),
+      copySummaryBtn: $('#copySummaryBtn'),
+      downloadTranscriptBtn: $('#downloadTranscriptBtn'),
+      clearTranscriptBtn: $('#clearTranscriptBtn'),
+      downloadMarkdownBtn: $('#downloadMarkdownBtn'),
+      downloadJsonBtn: $('#downloadJsonBtn'),
+      downloadAudioBtn: $('#downloadAudioBtn'),
+      loadLatestBtn: $('#loadLatestBtn'),
+      updateRecordBtn: $('#updateRecordBtn'),
+      deleteCurrentBtn: $('#deleteCurrentBtn'),
+      meetingTitle: $('#meetingTitle'),
+      meetingParticipants: $('#meetingParticipants'),
+      historyList: $('#historyList'),
+      historySearch: $('#historySearch'),
+      clearHistoryBtn: $('#clearHistoryBtn'),
+      toast: $('#toast'),
+      capabilityNotice: $('#capabilityNotice'),
+      speechChip: $('#speechChip'),
+      detailTitle: $('#detailTitle'),
+      detailMeta: $('#detailMeta'),
+      detailTranscript: $('#detailTranscript'),
+      detailSummary: $('#detailSummary'),
+      detailAudio: $('#detailAudio'),
+      statRecordings: $('#stat-recordings'),
+      statDuration: $('#stat-duration'),
+      statTranscript: $('#stat-transcript'),
+      statSummary: $('#stat-summary'),
+    };
+
+    // ── Init ──────────────────────────────────────────────────────────
+    init();
+    function init() {
+      migrateLegacyData();
+      loadMeetingsFromStorage();
+      setupTabs();
+      setupSpeechRecognition();
+      renderCapabilityNotice();
+      renderHistory();
+      bindEvents();
+      loadLatestMeeting(false);
+      updateStats();
     }
 
-    init()
-
-    function init() {
-      migrateLegacyData()
-      loadMeetingsFromStorage()
-      setupTabs()
-      setupSpeechRecognition()
-      renderCapabilityNotice()
-      renderHistory()
-      bindEvents()
-      loadLatestMeeting(false)
+    function updateStats() {
+      el.statRecordings.textContent = state.meetings.length;
     }
 
     function migrateLegacyData() {
-      if (localStorage.getItem(STORAGE_KEY)) return
-      const legacyRaw = localStorage.getItem(LEGACY_STORAGE_KEY)
-      if (!legacyRaw) return
+      if (localStorage.getItem(STORAGE_KEY)) return;
+      const raw = localStorage.getItem(LEGACY_STORAGE_KEY);
+      if (!raw) return;
       try {
-        const legacy = JSON.parse(legacyRaw)
+        const legacy = JSON.parse(raw);
         const migrated = (Array.isArray(legacy) ? legacy : []).map(item => ({
           ...item,
           audioBase64: item.audioBase64 || '',
@@ -377,231 +591,405 @@
             existingLinkedAt: item.audio?.linkedAt,
           }),
           schemaVersion: 3,
-        }))
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated))
+        }));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
       } catch {}
     }
 
     function loadMeetingsFromStorage() {
       try {
-        const raw = localStorage.getItem(STORAGE_KEY)
-        state.meetings = JSON.parse(raw || '[]').map(normalizeMeetingRecord)
-      } catch {
-        state.meetings = []
-      }
+        const raw = localStorage.getItem(STORAGE_KEY);
+        state.meetings = JSON.parse(raw || '[]').map(normalizeMeetingRecord);
+      } catch { state.meetings = []; }
     }
 
     function persistMeetings() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state.meetings.map(normalizeMeetingRecord)))
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state.meetings.map(normalizeMeetingRecord)));
     }
 
-    function bindEvents() {
-      el.jumpRecordBtn.addEventListener('click', () => activateTab('record'))
-      el.jumpHistoryBtn.addEventListener('click', () => activateTab('history'))
-      el.recordBtn.addEventListener('click', toggleRecording)
-      el.copyTranscriptBtn.addEventListener('click', () => copyText(cleanTranscriptForExport(state.transcript), '已複製逐字稿'))
-      el.copySummaryBtn.addEventListener('click', () => copyText(el.summaryEditor.value, '已複製會議紀要'))
-      el.downloadTranscriptBtn.addEventListener('click', downloadTranscript)
-      el.clearTranscriptBtn.addEventListener('click', clearTranscript)
-      el.downloadMarkdownBtn.addEventListener('click', downloadMarkdown)
-      el.downloadJsonBtn.addEventListener('click', downloadMeetingJson)
-      el.downloadAudioBtn.addEventListener('click', downloadAudio)
-      el.loadLatestBtn.addEventListener('click', () => loadLatestMeeting(true))
-      el.updateRecordBtn.addEventListener('click', updateCurrentRecord)
-      el.deleteCurrentBtn.addEventListener('click', () => deleteRecordById(state.currentRecord?.id, true))
-      el.summarizeBtn.addEventListener('click', summarizeMeeting)
-      el.saveMeetingBtn.addEventListener('click', saveMeeting)
-      el.sendToBackendBtn.addEventListener('click', sendLatestAudioToBackend)
-      el.clearHistoryBtn.addEventListener('click', clearAllHistory)
-      el.transcriptEditor.addEventListener('input', handleTranscriptEditorInput)
-      el.historySearch.addEventListener('input', handleHistorySearch)
-    }
-
+    // ── Tabs ─────────────────────────────────────────────────────────
     function setupTabs() {
-      el.tabs.forEach((tab) => tab.addEventListener('click', () => activateTab(tab.dataset.tab)))
+      el.mainTabs.forEach(tab => tab.addEventListener('click', () => activateTab(tab.dataset.tab)));
     }
 
     function activateTab(name) {
-      el.tabs.forEach((tab) => tab.classList.toggle('active', tab.dataset.tab === name))
-      el.panes.forEach((pane) => pane.classList.toggle('active', pane.id === `tab-${name}`))
+      el.mainTabs.forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+      $$('.tab-pane').forEach(p => p.classList.toggle('active', p.id === `pane-${name}`));
     }
 
+    // ── Speech Recognition ────────────────────────────────────────────
     function setupSpeechRecognition() {
-      const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition
+      const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (!Recognition) {
-        state.recognitionSupported = false
-        el.speechStatusChip.textContent = 'Web Speech：瀏覽器未支援'
-        return
+        state.recognitionSupported = false;
+        el.speechChip.textContent = 'Web Speech：未支援';
+        el.speechChip.classList.remove('accent');
+        el.speechChip.classList.add('warn');
+        return;
       }
-      state.recognitionSupported = true
-      const recognition = new Recognition()
-      recognition.lang = 'zh-TW'
-      recognition.continuous = true
-      recognition.interimResults = true
+      state.recognitionSupported = true;
+      const recognition = new Recognition();
+      recognition.lang = 'zh-TW';
+      recognition.continuous = true;
+      recognition.interimResults = true;
       recognition.onresult = (event) => {
-        let finalText = ''
-        let interimText = ''
+        let finalText = '', interimText = '';
         for (let i = event.resultIndex; i < event.results.length; i++) {
-          const text = event.results[i][0].transcript
-          if (event.results[i].isFinal) finalText += text + '\n'
-          else interimText += text
+          const text = event.results[i][0].transcript;
+          if (event.results[i].isFinal) finalText += text + '\n';
+          else interimText += text;
         }
-        if (finalText) state.transcript += finalText
-        state.activeInterimText = interimText
-        renderTranscript(state.transcript, interimText)
-      }
+        if (finalText) state.transcript += finalText;
+        state.activeInterimText = interimText;
+        renderTranscript(state.transcript, interimText);
+        el.statTranscript.textContent = '辨識中…';
+      };
       recognition.onerror = () => {
-        if (state.isRecording) showToast('語音辨識中斷，但錄音仍可繼續。')
-      }
-      state.speechRecognition = recognition
-      el.speechStatusChip.textContent = 'Web Speech：可用'
+        if (state.isRecording) showToast('語音辨識中斷，錄音仍繼續。');
+      };
+      state.speechRecognition = recognition;
+      el.speechChip.textContent = 'Web Speech：可用';
+      el.speechChip.classList.add('accent');
     }
 
     function renderCapabilityNotice() {
-      const parts = []
-      if (!navigator.mediaDevices?.getUserMedia) parts.push('此瀏覽器不支援麥克風錄音。')
-      if (!state.recognitionSupported) parts.push('此瀏覽器不支援 Web Speech API，因此無法自動產出逐字稿。建議下一階段接 Whisper 後端。')
-      if (parts.length === 0) parts.push('目前瀏覽器支援錄音與基礎語音辨識，可作為 honest MVP 使用。')
-      el.capabilityNotice.textContent = parts.join(' ')
+      const parts = [];
+      if (!navigator.mediaDevices?.getUserMedia) parts.push('此瀏覽器不支援麥克風錄音。');
+      if (!state.recognitionSupported) parts.push('不支援 Web Speech API，可接入 Whisper 後端獲得精準逐字稿。');
+      if (parts.length === 0) parts.push('瀏覽器支援錄音與語音辨識，可作為 honest MVP 使用。');
+      el.capabilityNotice.textContent = parts.join(' ');
     }
 
+    // ── Recording ─────────────────────────────────────────────────────
     async function toggleRecording() {
-      if (state.isRecording) stopRecording()
-      else await startRecording()
+      if (state.isRecording) stopRecording();
+      else await startRecording();
     }
 
     async function startRecording() {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-        state.stream = stream
-        const mimeType = pickSupportedMimeType()
-        state.mediaRecorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream)
-        state.audioChunks = []
-        state.latestAudioBlob = null
-        revokeLatestAudioUrl()
-        state.transcript = ''
-        state.activeInterimText = ''
-        renderTranscript('', '')
-        renderSummary('')
-        state.elapsedSeconds = 0
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        state.stream = stream;
+        const mimeType = pickSupportedMimeType();
+        state.mediaRecorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
+        state.audioChunks = [];
+        state.latestAudioBlob = null;
+        revokeLatestAudioUrl();
+        state.transcript = '';
+        state.activeInterimText = '';
+        renderTranscript('', '');
+        renderSummary('');
+        state.elapsedSeconds = 0;
 
         state.mediaRecorder.ondataavailable = (event) => {
-          if (event.data.size > 0) state.audioChunks.push(event.data)
-        }
-
+          if (event.data.size > 0) state.audioChunks.push(event.data);
+        };
         state.mediaRecorder.onstop = async () => {
-          const mime = state.mediaRecorder.mimeType || mimeType || 'audio/webm'
-          state.latestAudioBlob = new Blob(state.audioChunks, { type: mime })
-          state.latestAudioUrl = URL.createObjectURL(state.latestAudioBlob)
+          const mime = state.mediaRecorder.mimeType || mimeType || 'audio/webm';
+          state.latestAudioBlob = new Blob(state.audioChunks, { type: mime });
+          state.latestAudioUrl = URL.createObjectURL(state.latestAudioBlob);
           if (!state.recognitionSupported) {
-            renderTranscript('錄音已完成，但此瀏覽器無法提供自動逐字稿。你仍然可以儲存會議、下載音檔，或在下一階段接入 Whisper / 後端 STT。', '')
+            renderTranscript('錄音已完成，此瀏覽器不支援即時辨識。請接入 Whisper 後端或手動整理逐字稿。', '');
           }
-          cleanupStream()
-        }
+          el.statTranscript.textContent = '已完成';
+          cleanupStream();
+        };
 
-        state.mediaRecorder.start()
-        state.isRecording = true
-        state.timer = setInterval(updateTimer, 1000)
-        updateTimer()
+        state.mediaRecorder.start();
+        state.isRecording = true;
+        state.timer = setInterval(updateTimer, 1000);
+        updateTimer();
 
         if (state.speechRecognition) {
-          try { state.speechRecognition.start() } catch {}
+          try { state.speechRecognition.start(); } catch {}
         }
 
-        el.recordBtn.classList.add('recording')
-        el.waveform.classList.add('recording')
-        el.recordStatus.textContent = state.recognitionSupported ? '錄音中，並嘗試即時辨識…' : '錄音中…但不支援即時辨識'
-        el.recordStatus.classList.add('recording')
+        el.recordBtn.classList.add('recording');
+        el.waveform.classList.add('recording');
+        el.recordStatus.textContent = state.recognitionSupported ? '錄音中，即時辨識…' : '錄音中…';
+        el.recordStatus.classList.add('live');
       } catch (error) {
-        showToast(`無法開始錄音：${error.message || '請檢查麥克風權限'}`)
+        showToast(`無法開始錄音：${error.message || '請檢查麥克風權限'}`);
       }
     }
 
     function stopRecording() {
-      if (!state.isRecording) return
-      state.isRecording = false
-      clearInterval(state.timer)
-      if (state.mediaRecorder && state.mediaRecorder.state !== 'inactive') state.mediaRecorder.stop()
+      if (!state.isRecording) return;
+      state.isRecording = false;
+      clearInterval(state.timer);
+      if (state.mediaRecorder && state.mediaRecorder.state !== 'inactive') state.mediaRecorder.stop();
       if (state.speechRecognition) {
-        try { state.speechRecognition.stop() } catch {}
+        try { state.speechRecognition.stop(); } catch {}
       }
-      state.activeInterimText = ''
-      renderTranscript(state.transcript, '')
-      el.recordBtn.classList.remove('recording')
-      el.waveform.classList.remove('recording')
-      el.recordStatus.textContent = '錄音已停止，可儲存或下載結果。'
-      el.recordStatus.classList.remove('recording')
+      state.activeInterimText = '';
+      renderTranscript(state.transcript, '');
+      el.recordBtn.classList.remove('recording');
+      el.waveform.classList.remove('recording');
+      el.recordStatus.textContent = '錄音已停止，可儲存或下載。';
+      el.recordStatus.classList.remove('live');
+      el.statDuration.textContent = el.recordTimer.textContent;
     }
 
     function cleanupStream() {
-      if (state.stream) state.stream.getTracks().forEach((track) => track.stop())
-      state.stream = null
+      if (state.stream) state.stream.getTracks().forEach(track => track.stop());
+      state.stream = null;
     }
 
     function updateTimer() {
-      el.recordTimer.textContent = formatDuration(state.elapsedSeconds)
-      state.elapsedSeconds += 1
+      const total = state.elapsedSeconds;
+      const m = String(Math.floor(total / 60)).padStart(2, '0');
+      const s = String(total % 60).padStart(2, '0');
+      el.recordTimer.textContent = `${m}:${s}`;
+      state.elapsedSeconds++;
     }
 
-    function formatDuration(totalSeconds) {
-      const h = String(Math.floor(totalSeconds / 3600)).padStart(2, '0')
-      const m = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0')
-      const s = String(totalSeconds % 60).padStart(2, '0')
-      return `${h}:${m}:${s}`
+    function pickSupportedMimeType() {
+      const c = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg;codecs=opus'];
+      return c.find(t => window.MediaRecorder?.isTypeSupported?.(t)) || '';
     }
 
+    // ── Transcript & Summary ───────────────────────────────────────────
     function renderTranscript(text, interimText = '') {
-      state.transcript = text || ''
-      const view = [state.transcript.trim(), interimText ? `[辨識中] ${interimText}` : ''].filter(Boolean).join('\n')
-      el.transcriptEditor.value = view
+      state.transcript = text || '';
+      const view = [state.transcript.trim(), interimText ? `[辨識中] ${interimText}` : ''].filter(Boolean).join('\n');
+      el.transcriptEditor.value = view;
     }
 
     function handleTranscriptEditorInput() {
-      const raw = String(el.transcriptEditor.value || '')
-      state.transcript = raw.replace(/\n?\[辨識中\].*$/s, '').trim()
-      if (!raw.trim()) state.activeInterimText = ''
+      const raw = String(el.transcriptEditor.value || '');
+      state.transcript = raw.replace(/\n?\[辨識中\].*$/s, '').trim();
+      if (!raw.trim()) state.activeInterimText = '';
     }
 
+    function renderSummary(text) { el.summaryEditor.value = text || ''; }
     function clearTranscript() {
-      state.transcript = ''
-      state.activeInterimText = ''
-      el.transcriptEditor.value = ''
-      showToast('已清空逐字稿')
+      state.transcript = '';
+      state.activeInterimText = '';
+      el.transcriptEditor.value = '';
+      el.statTranscript.textContent = '–';
+      showToast('已清空逐字稿');
     }
 
+    // ── Meeting Record CRUD ───────────────────────────────────────────
+    async function createMeetingRecord({ reuseCurrentId = false } = {}) {
+      const duration = el.recordTimer.textContent !== '00:00' ? el.recordTimer.textContent : (state.currentRecord?.duration || '00:00');
+      const nowIso = new Date().toISOString();
+      const existingAudio = getAudioAssetFromRecord(state.currentRecord);
+      const audioDataUrl = state.latestAudioBlob ? await blobToDataUrl(state.latestAudioBlob) : (existingAudio?.dataUrl || '');
+      const audioMimeType = state.latestAudioBlob?.type || existingAudio?.mimeType || state.currentRecord?.audioMimeType || 'audio/webm';
+      const audio = buildStoredAudioAsset({
+        dataUrl: audioDataUrl, mimeType: audioMimeType,
+        title: el.meetingTitle.value.trim() || state.currentRecord?.title || '未命名會議',
+        duration,
+        existingId: state.latestAudioBlob ? null : existingAudio?.id,
+        existingCreatedAt: existingAudio?.createdAt,
+        existingLinkedAt: existingAudio?.linkedAt,
+      });
+      return normalizeMeetingRecord({
+        id: reuseCurrentId && state.currentRecord?.id ? state.currentRecord.id : `${Date.now()}`,
+        title: el.meetingTitle.value.trim() || state.currentRecord?.title || '未命名會議',
+        participants: el.meetingParticipants.value.trim() || state.currentRecord?.participants || '未填寫',
+        duration,
+        transcript: cleanTranscriptForExport(state.transcript || state.currentRecord?.transcript || ''),
+        summary: el.summaryEditor.value || state.currentRecord?.summary || '',
+        createdAt: reuseCurrentId && state.currentRecord?.createdAt ? state.currentRecord.createdAt : nowIso,
+        updatedAt: nowIso,
+        audio,
+        schemaVersion: 3,
+      });
+    }
+
+    async function saveMeeting() {
+      const record = await createMeetingRecord({ reuseCurrentId: false });
+      state.meetings.unshift(record);
+      persistMeetings();
+      state.currentRecord = record;
+      renderHistory();
+      renderDetail(record);
+      updateStats();
+      activateTab('history');
+      showToast('已新增會議紀錄（含綁定音檔）');
+    }
+
+    async function updateCurrentRecord() {
+      if (!state.currentRecord?.id) { showToast('目前沒有可覆寫的歷史記錄'); return; }
+      const next = await createMeetingRecord({ reuseCurrentId: true });
+      state.meetings = state.meetings.map(m => m.id === next.id ? next : m);
+      persistMeetings();
+      state.currentRecord = next;
+      renderHistory();
+      renderDetail(next);
+      showToast('已覆寫目前會議記錄');
+    }
+
+    // ── History ────────────────────────────────────────────────────────
     function handleHistorySearch() {
-      state.historySearch = String(el.historySearch.value || '').trim().toLowerCase()
-      renderHistory()
+      state.historySearch = String(el.historySearch.value || '').trim().toLowerCase();
+      renderHistory();
     }
 
-    function renderSummary(text) {
-      el.summaryEditor.value = text || ''
+    function renderHistory() {
+      const filtered = state.meetings.filter(m => {
+        if (!state.historySearch) return true;
+        const h = [m.title, m.participants, m.transcript, m.summary].join(' ').toLowerCase();
+        return h.includes(state.historySearch);
+      });
+
+      if (!state.meetings.length) {
+        el.historyList.innerHTML = '<div class="empty-msg">尚無歷史紀錄，先錄一段會議再儲存吧。</div>';
+        return;
+      }
+      if (!filtered.length) {
+        el.historyList.innerHTML = '<div class="empty-msg">找不到符合條件的紀錄。</div>';
+        return;
+      }
+
+      el.historyList.innerHTML = filtered.map(m => {
+        const audio = getAudioAssetFromRecord(m);
+        const hasAudio = Boolean(audio?.dataUrl);
+        return `
+          <div class="history-item">
+            <h4>${escHtml(m.title)}</h4>
+            <div class="history-meta">${new Date(m.createdAt).toLocaleString('zh-TW')}｜${escHtml(m.participants)}｜${escHtml(m.duration)}｜${hasAudio ? '🔊 音檔已綁定' : '無音檔'}</div>
+            <div class="history-preview">${escHtml((m.summary || m.transcript || '尚無內容').slice(0, 120))}</div>
+            <div class="history-actions">
+              <button class="mini-btn" data-action="load" data-id="${m.id}">📂 載入</button>
+              <button class="mini-btn" data-action="audio" data-id="${m.id}">▶ 播放</button>
+              <button class="mini-btn danger" data-action="delete" data-id="${m.id}">🗑 刪除</button>
+            </div>
+          </div>`;
+      }).join('');
+
+      el.historyList.querySelectorAll('[data-action]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const record = state.meetings.find(m => m.id === btn.dataset.id);
+          if (!record) return;
+          if (btn.dataset.action === 'load') {
+            loadRecord(record, true);
+          } else if (btn.dataset.action === 'audio') {
+            loadRecord(record, false);
+            if (getAudioAssetFromRecord(record)?.dataUrl) {
+              try { el.detailAudio.play(); showToast('已播放'); } catch { showToast('已載入音檔'); }
+            } else { showToast('這筆記錄沒有音檔'); }
+          } else if (btn.dataset.action === 'delete') {
+            deleteRecordById(btn.dataset.id, false);
+          }
+        });
+      });
     }
 
+    function loadRecord(record, showToastFlag = true) {
+      state.currentRecord = record;
+      state.latestAudioBlob = null;
+      revokeLatestAudioUrl();
+      renderDetail(record);
+      if (showToastFlag) showToast('已載入歷史紀錄');
+    }
+
+    function loadLatestMeeting(showToastFlag = true) {
+      const latest = state.meetings[0] || null;
+      state.currentRecord = latest;
+      renderDetail(latest);
+      if (latest && showToastFlag) showToast('已載入最新記錄');
+    }
+
+    function deleteRecordById(id, fromDetail) {
+      if (!id) return;
+      const record = state.meetings.find(m => m.id === id);
+      if (!record) return;
+      if (!confirm(`確定刪除「${record.title}」嗎？音檔也會一併刪除。`)) return;
+      state.meetings = state.meetings.filter(m => m.id !== id);
+      persistMeetings();
+      if (state.currentRecord?.id === id) {
+        state.currentRecord = state.meetings[0] || null;
+        if (state.currentRecord) renderDetail(state.currentRecord);
+        else { resetComposer(); renderDetail(null); }
+      }
+      renderHistory();
+      updateStats();
+      showToast(fromDetail ? '已刪除目前記錄' : '已刪除單筆記錄');
+    }
+
+    function clearAllHistory() {
+      if (!state.meetings.length) return showToast('目前沒有可清除的歷史');
+      if (!confirm('確定清除所有會議紀錄（含音檔）？')) return;
+      state.meetings = [];
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(LEGACY_STORAGE_KEY);
+      state.currentRecord = null;
+      resetComposer();
+      renderHistory();
+      renderDetail(null);
+      updateStats();
+      showToast('已清除全部歷史');
+    }
+
+    function renderDetail(record) {
+      if (!record) {
+        el.detailMeta.textContent = '尚未載入會議紀錄';
+        el.detailTranscript.textContent = '';
+        el.detailSummary.textContent = '';
+        el.detailAudio.removeAttribute('src');
+        el.detailAudio.load();
+        return;
+      }
+      const audio = getAudioAssetFromRecord(record);
+      const audioLabel = audio?.dataUrl ? `🔊 已綁定 ${audio.fileName || ''}`.trim() : '未綁定音檔';
+      el.detailTitle.textContent = record.title;
+      el.detailMeta.textContent = `${record.participants}｜${new Date(record.createdAt).toLocaleString('zh-TW')}｜${record.duration}｜${audioLabel}`;
+      el.detailTranscript.textContent = record.transcript || '尚無逐字稿';
+      el.detailSummary.textContent = record.summary || '尚無紀要';
+      el.summaryEditor.value = record.summary || '';
+      el.meetingTitle.value = record.title || '';
+      el.meetingParticipants.value = record.participants || '';
+      renderTranscript(record.transcript || '', '');
+      el.recordTimer.textContent = record.duration || '00:00';
+      el.statDuration.textContent = record.duration || '00:00';
+      el.statTranscript.textContent = record.transcript ? '已就緒' : '–';
+      el.statSummary.textContent = record.summary ? '已就緒' : '–';
+      if (audio?.dataUrl) {
+        el.detailAudio.src = audio.dataUrl;
+      } else {
+        el.detailAudio.removeAttribute('src');
+        el.detailAudio.load();
+      }
+    }
+
+    function resetComposer() {
+      state.transcript = '';
+      state.activeInterimText = '';
+      state.currentRecord = null;
+      state.latestAudioBlob = null;
+      revokeLatestAudioUrl();
+      el.meetingTitle.value = '';
+      el.meetingParticipants.value = '';
+      el.recordTimer.textContent = '00:00';
+      state.elapsedSeconds = 0;
+      renderTranscript('', '');
+      renderSummary('');
+      el.statDuration.textContent = '00:00';
+      el.statTranscript.textContent = '–';
+      el.statSummary.textContent = '–';
+    }
+
+    // ── Summarize ─────────────────────────────────────────────────────
     function summarizeMeeting() {
-      const title = el.meetingTitle.value.trim() || state.currentRecord?.title || '未命名會議'
-      const participants = el.meetingParticipants.value.trim() || state.currentRecord?.participants || '未填寫'
-      const transcript = cleanTranscriptForExport(state.transcript || state.currentRecord?.transcript || '')
-      const transcriptLines = transcript.split('\n').map(line => line.trim()).filter(Boolean)
-      const discussionPoints = uniqueLines(transcriptLines).slice(0, 8)
+      const title = el.meetingTitle.value.trim() || state.currentRecord?.title || '未命名會議';
+      const participants = el.meetingParticipants.value.trim() || state.currentRecord?.participants || '未填寫';
+      const transcript = cleanTranscriptForExport(state.transcript || state.currentRecord?.transcript || '');
+      const lines = transcript.split('\n').map(l => l.trim()).filter(Boolean);
+      const discussion = [...new Set(lines)].slice(0, 8);
+      const decisions = lines.filter(l => /決定|結論|拍板|確認|approved|agreed/i.test(l)).slice(0, 5);
+      const actions = lines.filter(l => /待辦|跟進|follow|action|todo|需要|請/.test(l)).slice(0, 6);
+      const risks = lines.filter(l => /風險|問題|卡住|bug|issue|延後/.test(l)).slice(0, 4);
+      const duration = el.recordTimer.textContent !== '00:00' ? el.recordTimer.textContent : (state.currentRecord?.duration || '未記錄');
+      const meetingDate = new Date(state.currentRecord?.createdAt || Date.now()).toLocaleString('zh-TW');
 
-      const decisionCandidates = findKeywordLines(transcriptLines, ['決定', '結論', '拍板', '確認', 'approve', 'approved', 'agreed'])
-      const actionCandidates = findKeywordLines(transcriptLines, ['待辦', '跟進', 'follow up', 'action', 'todo', '下週', '明天', '本週', '需要', '請'])
-      const riskCandidates = findKeywordLines(transcriptLines, ['風險', '問題', '卡住', '阻塞', 'bug', 'issue', '延後', '未知'])
-      const backgroundCandidates = findKeywordLines(transcriptLines, ['因為', '背景', '目標', '需求', '現況', '目前'])
-      const highlights = uniqueLines([...decisionCandidates, ...actionCandidates, ...discussionPoints]).slice(0, 3)
-      const decisions = decisionCandidates.length ? decisionCandidates.slice(0, 5) : discussionPoints.slice(0, 3)
-      const risks = riskCandidates.length ? riskCandidates.slice(0, 4) : discussionPoints.slice(3, 5)
-      const contextNotes = backgroundCandidates.length ? backgroundCandidates.slice(0, 3) : discussionPoints.slice(0, 3)
-      const actionSource = actionCandidates.length ? actionCandidates.slice(0, 6) : discussionPoints.slice(0, 4)
-      const actionItems = actionSource.map((item, index) => {
-        const owner = inferOwnerFromText(item, participants, index)
-        const due = inferDueDateFromText(item)
-        return `| ${index + 1} | ${owner} | ${truncateText(item, 72)} | ${due} | Open |`
-      })
-      const nextSteps = uniqueLines([...actionSource, ...riskCandidates, ...discussionPoints]).slice(0, 4)
-      const duration = el.recordTimer.textContent !== '00:00:00' ? el.recordTimer.textContent : (state.currentRecord?.duration || '未記錄')
-      const meetingDate = new Date(state.currentRecord?.createdAt || Date.now()).toLocaleString('zh-TW')
+      const actionItems = actions.map((item, i) => {
+        const owner = inferOwner(item, participants, i);
+        const due = inferDue(item);
+        return `| ${i + 1} | ${owner} | ${trunc(item, 72)} | ${due} | Open |`;
+      });
 
       const minutes = [
         '# Meeting Minutes',
@@ -614,278 +1002,54 @@
         `- Record ID: ${state.currentRecord?.id || 'Draft'}`,
         '',
         '## 1. Meeting Objective',
-        contextNotes.length
-          ? contextNotes.map((item, index) => `${index + 1}. ${truncateText(item, 96)}`).join('\n')
-          : '1. 本次會議目標待補充。',
+        discussion.slice(0, 3).map((d, i) => `${i + 1}. ${trunc(d, 96)}`).join('\n') || '1. 本次會議目標待補充。',
         '',
         '## 2. Executive Summary',
-        highlights.length
-          ? highlights.map((item, index) => `${index + 1}. ${truncateText(item, 96)}`).join('\n')
-          : '1. 尚未取得足夠逐字稿內容，建議先完成錄音或補入逐字稿。',
+        discussion.slice(0, 3).map((d, i) => `${i + 1}. ${trunc(d, 96)}`).join('\n') || '1. 尚未取得足夠逐字稿內容。',
         '',
         '## 3. Discussion Highlights',
-        discussionPoints.length
-          ? discussionPoints.slice(0, 6).map((item, index) => `${index + 1}. ${truncateText(item, 108)}`).join('\n')
-          : '1. 尚無內容。',
+        discussion.slice(0, 6).map((d, i) => `${i + 1}. ${trunc(d, 108)}`).join('\n') || '1. 尚無內容。',
         '',
         '## 4. Decisions Made',
-        decisions.length
-          ? decisions.map((item, index) => `${index + 1}. ${truncateText(item, 96)}`).join('\n')
-          : '1. 尚未整理出明確決策。',
+        decisions.length ? decisions.map((d, i) => `${i + 1}. ${trunc(d, 96)}`).join('\n') : '1. 尚未整理出明確決策。',
         '',
         '## 5. Risks / Open Questions',
-        risks.length
-          ? risks.map((item, index) => `${index + 1}. ${truncateText(item, 96)}`).join('\n')
-          : '1. 目前無明確風險或待釐清問題。',
+        risks.length ? risks.map((r, i) => `${i + 1}. ${trunc(r, 96)}`).join('\n') : '1. 目前無明確風險。',
         '',
         '## 6. Action Items',
         '| # | Owner | Action | Due | Status |',
         '| --- | --- | --- | --- | --- |',
-        actionItems.length
-          ? actionItems.join('\n')
-          : '| 1 | TBD | 尚未產生可用行動項 | 待確認 | Open |',
+        actionItems.length ? actionItems.join('\n') : '| 1 | TBD | 尚未產生行動項 | 待確認 | Open |',
         '',
         '## 7. Next Checkpoints',
-        nextSteps.length
-          ? nextSteps.map((item, index) => `${index + 1}. ${truncateText(item, 88)}`).join('\n')
-          : '1. 待安排下一次追蹤。',
+        discussion.slice(0, 4).map((d, i) => `${i + 1}. ${trunc(d, 88)}`).join('\n') || '1. 待安排下一步。',
         '',
         '## 8. Full Transcript',
-        transcript || '尚無逐字稿。'
-      ].join('\n')
+        transcript || '尚無逐字稿。',
+      ].join('\n');
 
-      renderSummary(minutes)
-      showToast('已產生正式 meeting minutes')
+      renderSummary(minutes);
+      el.statSummary.textContent = '已產生';
+      showToast('已產生正式 meeting minutes');
     }
 
-    async function createMeetingRecord({ reuseCurrentId = false } = {}) {
-      const duration = el.recordTimer.textContent !== '00:00:00' ? el.recordTimer.textContent : (state.currentRecord?.duration || '00:00:00')
-      const nowIso = new Date().toISOString()
-      const existingAudio = getAudioAssetFromRecord(state.currentRecord)
-      const audioDataUrl = state.latestAudioBlob ? await blobToDataUrl(state.latestAudioBlob) : (existingAudio?.dataUrl || '')
-      const audioMimeType = state.latestAudioBlob?.type || existingAudio?.mimeType || state.currentRecord?.audioMimeType || 'audio/webm'
-      const audio = buildStoredAudioAsset({
-        dataUrl: audioDataUrl,
-        mimeType: audioMimeType,
-        title: el.meetingTitle.value.trim() || state.currentRecord?.title || '未命名會議',
-        duration,
-        existingId: state.latestAudioBlob ? null : existingAudio?.id,
-        existingCreatedAt: existingAudio?.createdAt,
-        existingLinkedAt: existingAudio?.linkedAt,
-      })
-
-      return normalizeMeetingRecord({
-        id: reuseCurrentId && state.currentRecord?.id ? state.currentRecord.id : `${Date.now()}`,
-        title: el.meetingTitle.value.trim() || state.currentRecord?.title || '未命名會議',
-        participants: el.meetingParticipants.value.trim() || state.currentRecord?.participants || '未填寫',
-        duration,
-        transcript: cleanTranscriptForExport(state.transcript || state.currentRecord?.transcript || ''),
-        summary: el.summaryEditor.value || state.currentRecord?.summary || '',
-        createdAt: reuseCurrentId && state.currentRecord?.createdAt ? state.currentRecord.createdAt : nowIso,
-        updatedAt: nowIso,
-        audio,
-        schemaVersion: 3,
-      })
-    }
-
-    async function saveMeeting() {
-      const record = await createMeetingRecord({ reuseCurrentId: false })
-      state.meetings.unshift(record)
-      persistMeetings()
-      state.currentRecord = record
-      renderHistory()
-      renderDetail(record)
-      activateTab('history')
-      showToast('已新增會議紀錄（含綁定音檔）')
-    }
-
-    async function updateCurrentRecord() {
-      if (!state.currentRecord?.id) {
-        showToast('目前沒有可覆寫的歷史記錄')
-        return
-      }
-      const next = await createMeetingRecord({ reuseCurrentId: true })
-      state.meetings = state.meetings.map((meeting) => meeting.id === next.id ? next : meeting)
-      persistMeetings()
-      state.currentRecord = next
-      renderHistory()
-      renderDetail(next)
-      showToast('已覆寫目前會議記錄')
-    }
-
-    function renderHistory() {
-      const filteredMeetings = state.meetings.filter((meeting) => {
-        if (!state.historySearch) return true
-        const haystack = [meeting.title, meeting.participants, meeting.transcript, meeting.summary].join(' ').toLowerCase()
-        return haystack.includes(state.historySearch)
-      })
-
-      if (!state.meetings.length) {
-        el.historyList.innerHTML = '<div class="history-item"><h4>尚無歷史紀錄</h4><div class="history-preview">先錄一段會議，再儲存進歷史列表。</div></div>'
-        return
-      }
-
-      if (!filteredMeetings.length) {
-        el.historyList.innerHTML = '<div class="history-item"><h4>找不到符合條件的紀錄</h4><div class="history-preview">試試不同關鍵字，例如會議主題、與會人員或逐字稿片段。</div></div>'
-        return
-      }
-
-      el.historyList.innerHTML = filteredMeetings.map((meeting) => {
-        const summaryPreview = meeting.summary || meeting.transcript || '尚無內容'
-        const audio = getAudioAssetFromRecord(meeting)
-        const hasAudio = Boolean(audio?.dataUrl)
-        return `
-          <div class="history-item">
-            <div class="history-header">
-              <div>
-                <h4>${escapeHtml(meeting.title)}</h4>
-                <div class="history-meta">${new Date(meeting.createdAt).toLocaleString('zh-TW')}｜${escapeHtml(meeting.participants)}｜${escapeHtml(meeting.duration)}｜${hasAudio ? `音檔已綁定（${escapeHtml(audio.fileName || 'meeting-audio')})` : '無音檔'}</div>
-              </div>
-            </div>
-            <div class="history-preview">${escapeHtml(summaryPreview.slice(0, 140))}</div>
-            <div class="history-actions">
-              <button class="mini-btn" data-action="load" data-id="${meeting.id}">載入</button>
-              <button class="mini-btn" data-action="audio" data-id="${meeting.id}">播放音檔</button>
-              <button class="mini-btn delete" data-action="delete" data-id="${meeting.id}">刪除</button>
-            </div>
-          </div>
-        `
-      }).join('')
-
-      el.historyList.querySelectorAll('[data-action]').forEach((btn) => {
-        btn.addEventListener('click', () => {
-          const id = btn.dataset.id
-          const action = btn.dataset.action
-          const record = state.meetings.find((meeting) => meeting.id === id)
-          if (!record) return
-          if (action === 'load') {
-            loadRecord(record, true)
-          } else if (action === 'audio') {
-            loadRecord(record, false)
-            if (getAudioAssetFromRecord(record)?.dataUrl) {
-              try {
-                el.detailAudio.play()
-                showToast('已載入並播放綁定音檔')
-              } catch {
-                showToast('已載入綁定音檔')
-              }
-            } else {
-              showToast('這筆記錄沒有綁定音檔')
-            }
-          } else if (action === 'delete') {
-            deleteRecordById(id, false)
-          }
-        })
-      })
-    }
-
-    function renderDetail(record) {
-      if (!record) {
-        el.detailMeta.textContent = '尚未載入會議紀錄'
-        el.detailTranscript.textContent = ''
-        el.detailSummary.textContent = ''
-        el.detailAudio.removeAttribute('src')
-        el.detailAudio.load()
-        return
-      }
-
-      const audio = getAudioAssetFromRecord(record)
-      const audioLabel = audio?.dataUrl ? `已綁定音檔 ${audio.fileName || ''}`.trim() : '未綁定音檔'
-      el.detailMeta.textContent = `${record.title}｜${record.participants}｜${new Date(record.createdAt).toLocaleString('zh-TW')}｜${record.duration}｜${audioLabel}`
-      el.detailTranscript.textContent = record.transcript || '尚無逐字稿'
-      el.detailSummary.textContent = record.summary || '尚無摘要'
-      el.summaryEditor.value = record.summary || ''
-      el.meetingTitle.value = record.title || ''
-      el.meetingParticipants.value = record.participants || ''
-      renderTranscript(record.transcript || '', '')
-      setTimerFromDuration(record.duration)
-
-      if (audio?.dataUrl) {
-        el.detailAudio.src = audio.dataUrl
-      } else {
-        el.detailAudio.removeAttribute('src')
-        el.detailAudio.load()
-      }
-    }
-
-    function loadRecord(record, showLoadedToast = true) {
-      state.currentRecord = record
-      state.latestAudioBlob = null
-      revokeLatestAudioUrl()
-      renderDetail(record)
-      if (showLoadedToast) showToast('已載入歷史紀錄')
-    }
-
-    function loadLatestMeeting(showLoadedToast = true) {
-      const latest = state.meetings[0] || null
-      state.currentRecord = latest
-      renderDetail(latest)
-      if (latest && showLoadedToast) showToast('已載入最新記錄')
-    }
-
-    function clearAllHistory() {
-      if (!state.meetings.length) return showToast('目前沒有可清除的歷史紀錄')
-      if (!confirm('確定要清除所有會議紀錄嗎？此動作會刪除所有文字與綁定音檔。')) return
-      state.meetings = []
-      localStorage.removeItem(STORAGE_KEY)
-      localStorage.removeItem(LEGACY_STORAGE_KEY)
-      state.currentRecord = null
-      resetComposer()
-      renderHistory()
-      renderDetail(null)
-      showToast('已清除全部歷史紀錄')
-    }
-
-    function deleteRecordById(id, fromDetail) {
-      if (!id) return showToast('沒有可刪除的記錄')
-      const record = state.meetings.find(item => item.id === id)
-      if (!record) return showToast('找不到該筆記錄')
-      const ok = confirm(`確定刪除「${record.title}」嗎？\n此動作會連同綁定音檔一併刪除。`)
-      if (!ok) return
-
-      state.meetings = state.meetings.filter(item => item.id !== id)
-      persistMeetings()
-
-      if (state.currentRecord?.id === id) {
-        state.currentRecord = state.meetings[0] || null
-        if (state.currentRecord) renderDetail(state.currentRecord)
-        else {
-          resetComposer()
-          renderDetail(null)
-        }
-      }
-
-      renderHistory()
-      showToast(fromDetail ? '已刪除目前記錄' : '已刪除單筆歷史記錄')
-    }
-
-    async function copyText(text, successMessage) {
-      if (!text) {
-        showToast('目前沒有可複製的內容')
-        return
-      }
-      try {
-        await navigator.clipboard.writeText(text)
-        showToast(successMessage)
-      } catch {
-        showToast('複製失敗，請手動複製')
-      }
+    // ── Copy / Download ───────────────────────────────────────────────
+    async function copyText(text, msg) {
+      if (!text) { showToast('目前沒有可複製的內容'); return; }
+      try { await navigator.clipboard.writeText(text); showToast(msg); } catch { showToast('複製失敗'); }
     }
 
     function downloadBlob(blob, filename) {
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = filename
-      a.click()
-      setTimeout(() => URL.revokeObjectURL(url), 1000)
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = filename; a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
 
     function downloadTranscript() {
-      const text = state.currentRecord?.transcript || cleanTranscriptForExport(state.transcript)
-      if (!text) return showToast('目前沒有逐字稿可下載')
-      downloadBlob(new Blob([text], { type: 'text/plain;charset=utf-8' }), 'meeting-transcript.txt')
-      showToast('已下載逐字稿 TXT')
+      const text = state.currentRecord?.transcript || cleanTranscriptForExport(state.transcript);
+      if (!text) return showToast('目前沒有逐字稿可下載');
+      downloadBlob(new Blob([text], { type: 'text/plain;charset=utf-8' }), 'meeting-transcript.txt');
+      showToast('已下載逐字稿 TXT');
     }
 
     function downloadMeetingJson() {
@@ -895,9 +1059,9 @@
         duration: el.recordTimer.textContent,
         transcript: cleanTranscriptForExport(state.transcript),
         summary: el.summaryEditor.value,
-      }
-      downloadBlob(new Blob([JSON.stringify(record, null, 2)], { type: 'application/json' }), 'meeting-record.json')
-      showToast('已下載會議 JSON')
+      };
+      downloadBlob(new Blob([JSON.stringify(record, null, 2)], { type: 'application/json' }), 'meeting-record.json');
+      showToast('已下載會議 JSON');
     }
 
     function downloadMarkdown() {
@@ -908,7 +1072,7 @@
         transcript: cleanTranscriptForExport(state.transcript),
         summary: el.summaryEditor.value,
         createdAt: new Date().toISOString(),
-      }
+      };
       const md = [
         `# ${record.title}`,
         '',
@@ -918,265 +1082,222 @@
         record.updatedAt ? `- Updated At: ${new Date(record.updatedAt).toLocaleString('zh-TW')}` : '',
         '',
         record.summary || '尚無會議紀要',
-      ].filter(Boolean).join('\n')
-      downloadBlob(new Blob([md], { type: 'text/markdown;charset=utf-8' }), 'meeting-minutes.md')
-      showToast('已下載 Markdown')
+      ].filter(Boolean).join('\n');
+      downloadBlob(new Blob([md], { type: 'text/markdown;charset=utf-8' }), 'meeting-minutes.md');
+      showToast('已下載 Markdown');
     }
 
     function downloadAudio() {
-      const record = state.currentRecord
-      const audio = getAudioAssetFromRecord(record)
+      const record = state.currentRecord;
+      const audio = getAudioAssetFromRecord(record);
       if (audio?.dataUrl) {
-        downloadDataUrl(audio.dataUrl, audio.fileName || getAudioFilename(record), audio.mimeType || 'audio/webm')
-        showToast('已下載綁定音檔')
-        return
+        downloadDataUrl(audio.dataUrl, audio.fileName || getAudioFilename(record), audio.mimeType || 'audio/webm');
+        showToast('已下載綁定音檔');
+        return;
       }
       if (state.latestAudioBlob) {
-        downloadBlob(state.latestAudioBlob, 'meeting-audio.webm')
-        showToast('已下載最新錄音音檔')
-        return
+        downloadBlob(state.latestAudioBlob, 'meeting-audio.webm');
+        showToast('已下載最新錄音');
+        return;
       }
-      showToast('目前沒有可下載的音檔')
+      showToast('目前沒有可下載的音檔');
     }
 
+    // ── Backend / Whisper ─────────────────────────────────────────────
     async function sendLatestAudioToBackend() {
-      const audio = getAudioAssetFromRecord(state.currentRecord)
+      const audio = getAudioAssetFromRecord(state.currentRecord);
       if (!state.latestAudioBlob && !audio?.dataUrl) {
-        showToast('目前沒有可送出的錄音音檔')
-        return
+        showToast('目前沒有可送出的錄音');
+        return;
       }
-
       try {
-        el.sendToBackendBtn.disabled = true
-        el.sendToBackendBtn.textContent = '轉錄中…'
+        el.sendToBackendBtn.disabled = true;
+        el.sendToBackendBtn.textContent = '轉錄中…';
+        const blob = state.latestAudioBlob || dataUrlToBlob(audio.dataUrl);
+        const ext = guessExt(blob.type || audio?.mimeType || 'audio/webm');
+        const file = new File([blob], `meeting-recording.${ext}`, { type: blob.type || 'audio/webm' });
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('meeting_title', el.meetingTitle.value.trim() || state.currentRecord?.title || '未命名');
+        formData.append('participants', el.meetingParticipants.value.trim() || state.currentRecord?.participants || '');
 
-        const blob = state.latestAudioBlob || dataUrlToBlob(audio.dataUrl)
-        const ext = guessExtensionFromMime(blob.type || audio?.mimeType || 'audio/webm')
-        const file = new File([blob], `meeting-recording.${ext}`, { type: blob.type || audio?.mimeType || 'audio/webm' })
-        const formData = new FormData()
-        formData.append('file', file)
-        formData.append('meeting_title', el.meetingTitle.value.trim() || state.currentRecord?.title || '未命名會議')
-        formData.append('participants', el.meetingParticipants.value.trim() || state.currentRecord?.participants || '未填寫')
-
-        const response = await fetch('/api/transcribe', {
-          method: 'POST',
-          body: formData,
-        })
-
+        const response = await fetch('/api/transcribe', { method: 'POST', body: formData });
         if (!response.ok) {
-          const payload = await response.json().catch(() => ({}))
-          throw new Error(payload.detail || '後端轉錄建立失敗')
+          const p = await response.json().catch(() => ({}));
+          throw new Error(p.detail || '後端轉錄建立失敗');
         }
-
-        const job = await response.json()
-        state.backendJobId = job.job_id
-        showToast('已送到後端，開始輪詢轉錄結果')
-        await pollBackendJob(job.job_id)
-      } catch (error) {
-        showToast(`後端轉錄失敗：${error.message || '未知錯誤'}`)
+        const job = await response.json();
+        state.backendJobId = job.job_id;
+        showToast('已送到後端，開始查詢結果…');
+        await pollBackendJob(job.job_id);
+      } catch (err) {
+        showToast(`後端轉錄失敗：${err.message}`);
       } finally {
-        el.sendToBackendBtn.disabled = false
-        el.sendToBackendBtn.textContent = '送後端轉錄'
+        el.sendToBackendBtn.disabled = false;
+        el.sendToBackendBtn.textContent = '送後端';
       }
     }
 
     async function pollBackendJob(jobId) {
-      for (let i = 0; i < 20; i += 1) {
-        const response = await fetch(`/api/jobs/${jobId}`)
-        if (!response.ok) throw new Error('查詢後端任務失敗')
-        const job = await response.json()
-
+      for (let i = 0; i < 30; i++) {
+        const response = await fetch(`/api/jobs/${jobId}`);
+        if (!response.ok) throw new Error('查詢後端任務失敗');
+        const job = await response.json();
         if (job.status === 'completed') {
-          state.transcript = job.transcript || state.transcript
-          renderTranscript(job.transcript || state.transcript, '')
-          renderSummary(job.summary || el.summaryEditor.value)
-          showToast('後端逐字稿與紀要已完成')
-          return job
+          state.transcript = job.transcript || state.transcript;
+          renderTranscript(job.transcript || state.transcript, '');
+          renderSummary(job.summary || el.summaryEditor.value);
+          el.statTranscript.textContent = '已完成';
+          if (job.summary) el.statSummary.textContent = '已完成';
+          showToast('後端逐字稿與紀要已完成');
+          return job;
         }
-
-        if (job.status === 'failed') {
-          throw new Error(job.error || '後端任務失敗')
-        }
-
-        await delay(800)
+        if (job.status === 'failed') throw new Error(job.error || '後端任務失敗');
+        await delay(1000);
       }
-
-      showToast('後端仍在處理中，可稍後再試')
-      return null
+      showToast('後端仍在處理中，可稍後再查詢。');
     }
 
-    function delay(ms) {
-      return new Promise(resolve => setTimeout(resolve, ms))
-    }
+    // ── Helpers ───────────────────────────────────────────────────────
+    function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
 
     function dataUrlToBlob(dataUrl) {
-      const [meta, base64] = String(dataUrl || '').split(',')
-      const mime = (meta.match(/data:(.*?);base64/) || [])[1] || 'audio/webm'
-      const binary = atob(base64 || '')
-      const bytes = new Uint8Array(binary.length)
-      for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i)
-      return new Blob([bytes], { type: mime })
+      const [meta, b64] = String(dataUrl || '').split(',');
+      const mime = (meta.match(/data:(.*?);base64/) || [])[1] || 'audio/webm';
+      const binary = atob(b64 || '');
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+      return new Blob([bytes], { type: mime });
     }
 
-    function guessExtensionFromMime(mime) {
-      const value = String(mime || '').toLowerCase()
-      if (value.includes('mp4') || value.includes('m4a')) return 'm4a'
-      if (value.includes('mpeg') || value.includes('mp3')) return 'mp3'
-      if (value.includes('ogg')) return 'ogg'
-      if (value.includes('wav')) return 'wav'
-      return 'webm'
+    function blobToDataUrl(blob) {
+      return new Promise((res, rej) => {
+        const reader = new FileReader();
+        reader.onloadend = () => res(reader.result);
+        reader.onerror = rej;
+        reader.readAsDataURL(blob);
+      });
+    }
+
+    function guessExt(mime) {
+      const m = String(mime || '').toLowerCase();
+      if (m.includes('mp4') || m.includes('m4a')) return 'm4a';
+      if (m.includes('mpeg') || m.includes('mp3')) return 'mp3';
+      if (m.includes('ogg')) return 'ogg';
+      if (m.includes('wav')) return 'wav';
+      return 'webm';
     }
 
     function showToast(message) {
-      el.toast.textContent = message
-      el.toast.classList.add('show')
-      clearTimeout(showToast._timer)
-      showToast._timer = setTimeout(() => el.toast.classList.remove('show'), 2200)
+      el.toast.textContent = message;
+      el.toast.classList.add('show');
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(() => el.toast.classList.remove('show'), 2200);
     }
 
     function cleanTranscriptForExport(text) {
-      return String(text || '').replace(/\n\[辨識中\].*$/s, '').trim()
-    }
-
-    function resetComposer() {
-      state.transcript = ''
-      state.activeInterimText = ''
-      state.currentRecord = null
-      state.latestAudioBlob = null
-      revokeLatestAudioUrl()
-      el.meetingTitle.value = ''
-      el.meetingParticipants.value = ''
-      el.recordTimer.textContent = '00:00:00'
-      state.elapsedSeconds = 0
-      renderTranscript('', '')
-      renderSummary('')
+      return String(text || '').replace(/\n\[辨識中\].*$/s, '').trim();
     }
 
     function normalizeMeetingRecord(record) {
-      const normalizedAudio = buildStoredAudioAsset({
+      const audio = buildStoredAudioAsset({
         dataUrl: record?.audio?.dataUrl || record?.audioBase64 || '',
         mimeType: record?.audio?.mimeType || record?.audioMimeType || 'audio/webm',
         title: record?.title || 'meeting-audio',
-        duration: record?.duration || '00:00:00',
+        duration: record?.duration || '00:00',
         existingId: record?.audio?.id,
         existingCreatedAt: record?.audio?.createdAt,
         existingLinkedAt: record?.audio?.linkedAt,
         existingFileName: record?.audio?.fileName,
-      })
-
+      });
       return {
         ...record,
-        audio: normalizedAudio,
-        audioBase64: normalizedAudio?.dataUrl || '',
-        audioMimeType: normalizedAudio?.mimeType || 'audio/webm',
+        audio,
+        audioBase64: audio?.dataUrl || '',
+        audioMimeType: audio?.mimeType || 'audio/webm',
         schemaVersion: 3,
-      }
+      };
     }
 
-    function buildStoredAudioAsset({ dataUrl = '', mimeType = 'audio/webm', title = 'meeting-audio', duration = '00:00:00', existingId = null, existingCreatedAt = null, existingLinkedAt = null, existingFileName = '' } = {}) {
-      if (!dataUrl) return null
-      const safeMimeType = mimeType || 'audio/webm'
+    function buildStoredAudioAsset({ dataUrl = '', mimeType = 'audio/webm', title = 'meeting-audio', duration = '00:00', existingId = null, existingCreatedAt = null, existingLinkedAt = null, existingFileName = '' } = {}) {
+      if (!dataUrl) return null;
       return {
         id: existingId || `audio-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
-        dataUrl,
-        mimeType: safeMimeType,
-        duration,
-        fileName: existingFileName || getAudioFilename({ title, audioMimeType: safeMimeType }),
+        dataUrl, mimeType, duration,
+        fileName: existingFileName || getAudioFilename({ title, audioMimeType: mimeType }),
         createdAt: existingCreatedAt || new Date().toISOString(),
         linkedAt: existingLinkedAt || new Date().toISOString(),
-      }
+      };
     }
 
     function getAudioAssetFromRecord(record) {
-      return record?.audio || (record?.audioBase64 ? buildStoredAudioAsset({
-        dataUrl: record.audioBase64,
-        mimeType: record.audioMimeType || 'audio/webm',
-        title: record.title,
-        duration: record.duration,
-      }) : null)
+      return record?.audio || (record?.audioBase64 ? buildStoredAudioAsset({ dataUrl: record.audioBase64, mimeType: record.audioMimeType || 'audio/webm', title: record.title, duration: record.duration }) : null);
     }
 
-    function inferOwnerFromParticipants(participants, index) {
-      const list = String(participants || '').split(/[、,，]/).map(item => item.trim()).filter(Boolean)
-      return list[index % list.length] || 'TBD'
+    function inferOwner(text, participants, index) {
+      const list = String(participants || '').split(/[、,，]/).map(s => s.trim()).filter(Boolean);
+      const matched = list.find(n => n && String(text || '').includes(n));
+      return matched || list[index % list.length] || 'TBD';
     }
 
-    function inferOwnerFromText(text, participants, index) {
-      const list = String(participants || '').split(/[、,，]/).map(item => item.trim()).filter(Boolean)
-      const matched = list.find((name) => name && String(text || '').includes(name))
-      return matched || inferOwnerFromParticipants(participants, index)
+    function inferDue(text) {
+      const t = String(text || '');
+      if (/今天/.test(t)) return '今天';
+      if (/明天/.test(t)) return '明天';
+      if (/下週|下周/.test(t)) return '下週';
+      if (/本週|本周/.test(t)) return '本週';
+      const m = t.match(/\d{1,2}\/\d{1,2}|\d{4}-\d{1,2}-\d{1,2}/);
+      return m?.[0] || '待確認';
     }
 
-    function inferDueDateFromText(text) {
-      const value = String(text || '')
-      if (/今天/.test(value)) return '今天'
-      if (/明天/.test(value)) return '明天'
-      if (/下週|下周/.test(value)) return '下週'
-      if (/本週|本周/.test(value)) return '本週'
-      const match = value.match(/\d{1,2}\/\d{1,2}|\d{4}-\d{1,2}-\d{1,2}/)
-      return match?.[0] || '待確認'
-    }
-
-    function findKeywordLines(lines, keywords) {
-      return uniqueLines(lines.filter((line) => keywords.some((keyword) => line.toLowerCase().includes(String(keyword).toLowerCase()))))
-    }
-
-    function uniqueLines(lines) {
-      return [...new Set((lines || []).map((line) => String(line || '').trim()).filter(Boolean))]
-    }
-
-    function truncateText(text, length) {
-      const t = String(text || '').trim()
-      return t.length > length ? `${t.slice(0, length)}…` : t
-    }
-
-    function pickSupportedMimeType() {
-      const candidates = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg;codecs=opus']
-      return candidates.find(type => window.MediaRecorder?.isTypeSupported?.(type)) || ''
-    }
-
-    function blobToDataUrl(blob) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader()
-        reader.onloadend = () => resolve(reader.result)
-        reader.onerror = reject
-        reader.readAsDataURL(blob)
-      })
-    }
-
-    function downloadDataUrl(dataUrl, filename) {
-      const a = document.createElement('a')
-      a.href = dataUrl
-      a.download = filename
-      a.click()
+    function trunc(text, len) {
+      const t = String(text || '').trim();
+      return t.length > len ? `${t.slice(0, len)}…` : t;
     }
 
     function getAudioFilename(record) {
-      const slug = String(record?.title || 'meeting-audio').replace(/[\\/:*?"<>|]+/g, '-').slice(0, 60)
-      const ext = (record?.audioMimeType || '').includes('mp4') ? 'm4a' : ((record?.audioMimeType || '').includes('ogg') ? 'ogg' : 'webm')
-      return `${slug || 'meeting-audio'}.${ext}`
+      const slug = String(record?.title || 'meeting-audio').replace(/[\\/:*?"<>|]+/g, '-').slice(0, 60);
+      const ext = (record?.audioMimeType || '').includes('mp4') ? 'm4a' : ((record?.audioMimeType || '').includes('ogg') ? 'ogg' : 'webm');
+      return `${slug || 'meeting-audio'}.${ext}`;
     }
 
-    function setTimerFromDuration(duration) {
-      if (!duration || !/^\d{2}:\d{2}:\d{2}$/.test(duration)) return
-      el.recordTimer.textContent = duration
-      const [h, m, s] = duration.split(':').map(Number)
-      state.elapsedSeconds = (h * 3600) + (m * 60) + s
+    function downloadDataUrl(dataUrl, filename) {
+      const a = document.createElement('a');
+      a.href = dataUrl;
+      a.download = filename;
+      a.click();
     }
 
     function revokeLatestAudioUrl() {
-      if (state.latestAudioUrl) URL.revokeObjectURL(state.latestAudioUrl)
-      state.latestAudioUrl = ''
+      if (state.latestAudioUrl) URL.revokeObjectURL(state.latestAudioUrl);
+      state.latestAudioUrl = '';
     }
 
-    function escapeHtml(text) {
-      return String(text)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;')
+    function escHtml(text) {
+      return String(text).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
-  </script>
+
+    // ── Event Bindings ────────────────────────────────────────────────
+    function bindEvents() {
+      el.jumpHistoryBtn.addEventListener('click', () => activateTab('history'));
+      el.recordBtn.addEventListener('click', toggleRecording);
+      el.copyTranscriptBtn.addEventListener('click', () => copyText(cleanTranscriptForExport(state.transcript), '已複製逐字稿'));
+      el.copySummaryBtn.addEventListener('click', () => copyText(el.summaryEditor.value, '已複製會議紀要'));
+      el.downloadTranscriptBtn.addEventListener('click', downloadTranscript);
+      el.clearTranscriptBtn.addEventListener('click', clearTranscript);
+      el.downloadMarkdownBtn.addEventListener('click', downloadMarkdown);
+      el.downloadJsonBtn.addEventListener('click', downloadMeetingJson);
+      el.downloadAudioBtn.addEventListener('click', downloadAudio);
+      el.loadLatestBtn.addEventListener('click', () => loadLatestMeeting(true));
+      el.updateRecordBtn.addEventListener('click', updateCurrentRecord);
+      el.deleteCurrentBtn.addEventListener('click', () => deleteRecordById(state.currentRecord?.id, true));
+      el.summarizeBtn.addEventListener('click', summarizeMeeting);
+      el.saveMeetingBtn.addEventListener('click', saveMeeting);
+      el.sendToBackendBtn.addEventListener('click', sendLatestAudioToBackend);
+      el.clearHistoryBtn.addEventListener('click', clearAllHistory);
+      el.transcriptEditor.addEventListener('input', handleTranscriptEditorInput);
+      el.historySearch.addEventListener('input', handleHistorySearch);
+    }
+</script>
 </body>
 </html>
