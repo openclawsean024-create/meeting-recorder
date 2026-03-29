@@ -8,56 +8,95 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700;800&display=swap" rel="stylesheet">
   <style>
+    /* ══════════════════════════════════════════════════════════════
+       SOLANA-STYLE DESIGN TOKENS
+    ══════════════════════════════════════════════════════════════ */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #0a0a14;
-      --surface: #10101e;
-      --surface-2: #16162a;
-      --card: rgba(255,255,255,0.04);
-      --card-hover: rgba(255,255,255,0.07);
-      --border: rgba(255,255,255,0.07);
-      --border-bright: rgba(255,255,255,0.12);
-      --text: #ffffff;
-      --text-2: rgba(255,255,255,0.72);
-      --text-muted: rgba(255,255,255,0.42);
-      --primary: #8b5cf6;
-      --primary-2: #7c3aed;
-      --primary-dim: rgba(139,92,246,0.13);
-      --accent: #34d399;
-      --accent-2: #10b981;
-      --accent-dim: rgba(52,211,153,0.12);
-      --warn: #fb923c;
-      --danger: #f87171;
-      --danger-dim: rgba(248,113,113,0.12);
-      --shadow: 0 24px 80px rgba(0,0,0,0.55);
-      --glow: 0 0 60px rgba(139,92,246,0.14);
-      --radius: 22px;
+      /* Deep dark backgrounds */
+      --bg:          #0a0a12;
+      --bg-2:        #0f0f1a;
+      --surface:     #13131f;
+      --surface-2:   #191928;
+      --card:        rgba(255,255,255,0.03);
+      --card-hover:  rgba(255,255,255,0.06);
+
+      /* Borders */
+      --border:        rgba(255,255,255,0.07);
+      --border-bright: rgba(255,255,255,0.13);
+
+      /* Text */
+      --text:       #e2e8f0;
+      --text-2:     rgba(226,232,240,0.65);
+      --text-muted: rgba(226,232,240,0.38);
+
+      /* Solana purple/violet accent palette */
+      --primary:       #a78bfa;
+      --primary-2:     #7c3aed;
+      --primary-3:     #8b5cf6;
+      --primary-dim:   rgba(139,92,246,0.13);
+      --primary-glow:  rgba(139,92,246,0.22);
+      --primary-light: #c4b5fd;
+
+      /* Green accent */
+      --accent:       #34d399;
+      --accent-2:     #10b981;
+      --accent-dim:   rgba(52,211,153,0.10);
+      --accent-glow:  rgba(52,211,153,0.14);
+
+      /* Status */
+      --warn:        #fb923c;
+      --warn-dim:    rgba(251,146,60,0.10);
+      --danger:      #f87171;
+      --danger-dim:  rgba(248,113,113,0.10);
+      --danger-glow: rgba(248,113,113,0.20);
+
+      /* Typography */
+      --font: 'Inter', 'Noto Sans TC', sans-serif;
+
+      /* Radius */
+      --radius:    22px;
       --radius-sm: 14px;
       --radius-xs: 8px;
-      --font: 'Inter', 'Noto Sans TC', sans-serif;
+
+      /* Shadows / Glows */
+      --shadow-sm:   0 4px 16px rgba(0,0,0,0.40);
+      --shadow:      0 16px 56px rgba(0,0,0,0.55);
+      --glow-purple: 0 0 48px rgba(139,92,246,0.18);
+      --glow-green:  0 0 48px rgba(52,211,153,0.14);
     }
 
     html { scroll-behavior: smooth; }
-    body { font-family: var(--font); min-height: 100vh; color: var(--text); background: var(--bg); -webkit-font-smoothing: antialiased; }
+    body {
+      font-family: var(--font);
+      min-height: 100vh;
+      color: var(--text);
+      background: var(--bg);
+      -webkit-font-smoothing: antialiased;
+      background-image:
+        radial-gradient(ellipse 70% 50% at 50% -5%, rgba(139,92,246,0.09) 0%, transparent 65%),
+        radial-gradient(ellipse 50% 40% at 85% 0%, rgba(52,211,153,0.04) 0%, transparent 55%);
+    }
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 999px; }
-    ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.18); }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 999px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.15); }
 
     /* ═══ NAV ═══ */
     nav {
       position: fixed; top: 0; left: 0; right: 0; z-index: 100;
       display: flex; align-items: center; justify-content: space-between;
-      padding: 0 32px; height: 64px;
-      background: rgba(10,10,20,0.88); backdrop-filter: blur(20px);
+      padding: 0 32px; height: 60px;
+      background: rgba(10,10,18,0.92); backdrop-filter: blur(24px);
       border-bottom: 1px solid var(--border);
     }
     .nav-logo {
-      font-size: 17px; font-weight: 900; letter-spacing: -0.02em;
-      background: linear-gradient(135deg, #a78bfa, #818cf8);
+      font-size: 17px; font-weight: 900; letter-spacing: -0.03em;
+      background: linear-gradient(135deg, #c4b5fd 0%, #a78bfa 50%, #818cf8 100%);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }
+    .nav-logo span { opacity: 0.45; }
     .nav-links { display: flex; gap: 4px; }
     .nav-links a {
       font-size: 13px; font-weight: 500; color: var(--text-2);
@@ -65,23 +104,31 @@
       transition: color 0.15s, background 0.15s;
     }
     .nav-links a:hover { color: var(--text); background: var(--card); }
-    .nav-links a.active { color: var(--primary); font-weight: 600; }
+    .nav-links a.active { color: var(--primary-light); font-weight: 600; }
     .nav-right { display: flex; align-items: center; gap: 10px; }
     .nav-badge {
       font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 999px;
-      background: var(--primary-dim); color: #a78bfa; border: 1px solid rgba(139,92,246,0.2);
+      background: var(--primary-dim); color: var(--primary-light);
+      border: 1px solid rgba(139,92,246,0.22);
     }
 
     /* ═══ SHELL ═══ */
-    .shell { max-width: 1200px; margin: 0 auto; padding: 84px 24px 60px; }
+    .shell { max-width: 1200px; margin: 0 auto; padding: 80px 24px 60px; }
 
     /* ═══ PAGE HEADER ═══ */
     .page-header {
       display: flex; align-items: flex-end; justify-content: space-between;
       margin-bottom: 28px; gap: 16px; flex-wrap: wrap;
     }
-    .page-title { font-size: 28px; font-weight: 900; letter-spacing: -0.03em; }
-    .page-title span { color: var(--primary); }
+    .page-title {
+      font-size: 28px; font-weight: 900; letter-spacing: -0.03em;
+      background: linear-gradient(135deg, #e2e8f0 0%, #c4b5fd 60%, #a78bfa 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .page-title .accent {
+      background: linear-gradient(135deg, #a78bfa, #34d399);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
     .page-sub { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
 
     /* ═══ STAT STRIP ═══ */
@@ -91,15 +138,20 @@
     .stat-tile {
       background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm);
       padding: 16px 20px; display: flex; align-items: center; gap: 14px;
-      transition: border-color 0.2s, box-shadow 0.2s;
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+      backdrop-filter: blur(12px);
     }
-    .stat-tile:hover { border-color: rgba(139,92,246,0.2); }
+    .stat-tile:hover {
+      border-color: rgba(139,92,246,0.25);
+      background: var(--card-hover);
+      box-shadow: var(--glow-purple);
+    }
     .stat-tile-icon {
       width: 40px; height: 40px; border-radius: 10px;
       background: var(--primary-dim); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0;
     }
     .stat-tile-icon.accent { background: var(--accent-dim); }
-    .stat-tile-val { font-size: 20px; font-weight: 800; line-height: 1.1; }
+    .stat-tile-val { font-size: 20px; font-weight: 800; line-height: 1.1; color: var(--text); }
     .stat-tile-lbl { font-size: 11px; color: var(--text-muted); margin-top: 2px; font-weight: 600; }
 
     /* ═══ GRID ═══ */
@@ -110,34 +162,48 @@
     .card {
       background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
       backdrop-filter: blur(16px);
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
+    .card:hover { border-color: rgba(139,92,246,0.12); }
     .card-pad { padding: 24px; }
     .card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; flex-wrap: wrap; gap: 10px; }
-    .card-title { font-size: 16px; font-weight: 800; }
+    .card-title { font-size: 16px; font-weight: 800; color: var(--text); }
     .card-sub { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
 
     /* ═══ TABS ═══ */
-    .tabs { display: flex; gap: 6px; background: rgba(255,255,255,0.03); border-radius: 999px; padding: 4px; margin-bottom: 20px; }
+    .tabs {
+      display: flex; gap: 4px; background: rgba(255,255,255,0.03);
+      border-radius: 999px; padding: 4px; margin-bottom: 20px;
+      border: 1px solid var(--border);
+    }
     .tab {
       flex: 1; text-align: center; padding: 9px 16px; border-radius: 999px;
       font-size: 13px; font-weight: 700; cursor: pointer; color: var(--text-muted);
       border: none; background: none; transition: all 0.18s;
     }
-    .tab.active { background: linear-gradient(135deg, var(--primary), var(--primary-2)); color: #fff; box-shadow: 0 4px 14px rgba(139,92,246,0.3); }
+    .tab.active {
+      background: linear-gradient(135deg, var(--primary-3), var(--primary-2));
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(139,92,246,0.35);
+    }
     .tab:not(.active):hover { color: var(--text); background: var(--card-hover); }
     .tab-pane { display: none; }
     .tab-pane.active { display: block; }
 
     /* ═══ FORM ELEMENTS ═══ */
     .field { margin-bottom: 14px; }
-    .field label { display: block; font-size: 12px; font-weight: 700; margin-bottom: 7px; color: var(--text-muted); letter-spacing: 0.04em; }
+    .field label {
+      display: block; font-size: 12px; font-weight: 700; margin-bottom: 7px;
+      color: var(--text-muted); letter-spacing: 0.04em;
+    }
     .input, .textarea, .select {
       width: 100%; border: 1px solid var(--border-bright); border-radius: var(--radius-sm);
       background: rgba(255,255,255,0.04); padding: 11px 14px; font-size: 14px; color: var(--text);
       font-family: var(--font); transition: border-color 0.2s, box-shadow 0.2s;
     }
     .input:focus, .textarea:focus, .select:focus {
-      outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-dim);
+      outline: none; border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-dim);
     }
     .input::placeholder, .textarea::placeholder { color: var(--text-muted); }
     .textarea { min-height: 200px; resize: vertical; line-height: 1.7; }
@@ -149,30 +215,39 @@
       width: 120px; height: 120px; border-radius: 999px; border: none; cursor: pointer;
       font-size: 44px; color: #fff;
       background: linear-gradient(135deg, var(--primary), var(--primary-2));
-      box-shadow: 0 20px 50px rgba(139,92,246,0.35), var(--glow);
+      box-shadow: 0 20px 50px rgba(139,92,246,0.38), var(--glow-purple);
       transition: transform 0.2s, box-shadow 0.2s;
       display: inline-flex; align-items: center; justify-content: center;
     }
-    .record-btn:hover { transform: scale(1.05); box-shadow: 0 24px 60px rgba(139,92,246,0.45); }
+    .record-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 24px 60px rgba(139,92,246,0.50), var(--glow-purple);
+    }
     .record-btn.recording {
       background: linear-gradient(135deg, #ef4444, #dc2626);
-      box-shadow: 0 20px 50px rgba(239,68,68,0.35);
+      box-shadow: 0 20px 50px rgba(239,68,68,0.38), 0 0 32px rgba(239,68,68,0.20);
       animation: rec-pulse 1.6s ease-in-out infinite;
     }
     @keyframes rec-pulse {
-      0%, 100% { transform: scale(1); box-shadow: 0 20px 50px rgba(239,68,68,0.35); }
-      50% { transform: scale(1.06); box-shadow: 0 20px 70px rgba(239,68,68,0.5), 0 0 0 16px rgba(239,68,68,0); }
+      0%, 100% { transform: scale(1); box-shadow: 0 20px 50px rgba(239,68,68,0.38); }
+      50% { transform: scale(1.06); box-shadow: 0 20px 70px rgba(239,68,68,0.52), 0 0 0 16px rgba(239,68,68,0); }
     }
     .rec-status { font-size: 15px; font-weight: 800; margin-top: 16px; color: var(--text-2); }
     .rec-status.live { color: var(--danger); }
-    .rec-timer { font-size: 36px; font-weight: 900; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; margin-top: 10px; font-family: 'Inter', monospace; }
+    .rec-timer {
+      font-size: 36px; font-weight: 900; letter-spacing: -0.02em;
+      font-variant-numeric: tabular-nums; margin-top: 10px;
+      font-family: 'Inter', monospace;
+      background: linear-gradient(135deg, #e2e8f0, #c4b5fd);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
     .wave {
       display: flex; justify-content: center; align-items: flex-end; gap: 5px;
       height: 52px; margin-top: 18px;
     }
     .bar {
       width: 6px; border-radius: 999px;
-      background: rgba(139,92,246,0.35); transition: height 0.2s ease;
+      background: rgba(139,92,246,0.30); transition: height 0.2s ease;
     }
     .wave.recording .bar { background: var(--danger); animation: wave 0.9s ease-in-out infinite; }
     .wave.recording .bar:nth-child(1) { animation-delay: 0s; }
@@ -184,16 +259,24 @@
     .chips { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 14px; }
     .chip {
       font-size: 11px; font-weight: 700; padding: 5px 12px; border-radius: 999px;
-      background: var(--primary-dim); color: #a78bfa; border: 1px solid rgba(139,92,246,0.18);
+      background: var(--primary-dim); color: var(--primary-light);
+      border: 1px solid rgba(139,92,246,0.18);
     }
-    .chip.accent { background: var(--accent-dim); color: #34d399; border-color: rgba(52,211,153,0.18); }
-    .chip.warn { background: rgba(251,146,60,0.1); color: var(--warn); border-color: rgba(251,146,60,0.18); }
+    .chip.accent {
+      background: var(--accent-dim); color: var(--accent);
+      border-color: rgba(52,211,153,0.18);
+    }
+    .chip.warn {
+      background: var(--warn-dim); color: var(--warn);
+      border-color: rgba(251,146,60,0.18);
+    }
 
     /* ═══ NOTICE ═══ */
     .notice {
-      border-left: 3px solid var(--warn); background: rgba(251,146,60,0.06);
+      border-left: 3px solid var(--warn);
+      background: var(--warn-dim);
       padding: 12px 14px; border-radius: var(--radius-xs); font-size: 12px;
-      color: rgba(255,255,255,0.6); line-height: 1.7; margin-top: 14px;
+      color: rgba(255,255,255,0.60); line-height: 1.7; margin-top: 14px;
     }
 
     /* ═══ TOOLBAR ═══ */
@@ -207,51 +290,75 @@
     .btn:hover { transform: translateY(-1px); }
     .btn:active { transform: translateY(0); }
     .btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none !important; }
-    .btn-primary { background: linear-gradient(135deg, var(--primary), var(--primary-2)); color: #fff; }
-    .btn-primary:hover { box-shadow: 0 8px 24px rgba(139,92,246,0.3); }
-    .btn-ghost {
-      background: var(--card); color: var(--text-2); border: 1px solid var(--border-bright);
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+      color: #fff;
+      box-shadow: 0 4px 16px rgba(139,92,246,0.28);
     }
-    .btn-ghost:hover { border-color: var(--primary); color: var(--primary); }
-    .btn-accent { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #000; }
-    .btn-accent:hover { box-shadow: 0 8px 24px rgba(52,211,153,0.3); }
-    .btn-danger { background: var(--danger-dim); color: var(--danger); border: 1px solid rgba(248,113,113,0.2); }
+    .btn-primary:hover { box-shadow: 0 8px 24px rgba(139,92,246,0.38); }
+    .btn-ghost {
+      background: var(--card); color: var(--text-2);
+      border: 1px solid var(--border-bright);
+    }
+    .btn-ghost:hover { border-color: var(--primary); color: var(--primary-light); background: var(--primary-dim); }
+    .btn-accent {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: #000;
+      box-shadow: 0 4px 16px rgba(52,211,153,0.25);
+    }
+    .btn-accent:hover { box-shadow: 0 8px 24px rgba(52,211,153,0.35); }
+    .btn-danger {
+      background: var(--danger-dim); color: var(--danger);
+      border: 1px solid rgba(248,113,113,0.20);
+    }
     .btn-danger:hover { border-color: var(--danger); }
 
     /* ═══ OUTPUT BOX ═══ */
     .output {
-      background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: var(--radius-sm);
-      padding: 14px; min-height: 160px; max-height: 280px; overflow: auto; white-space: pre-wrap;
-      line-height: 1.8; color: rgba(255,255,255,0.82); font-size: 13px;
+      background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 14px; min-height: 160px; max-height: 280px;
+      overflow: auto; white-space: pre-wrap; line-height: 1.8;
+      color: rgba(255,255,255,0.78); font-size: 13px;
     }
 
     /* ═══ HISTORY ═══ */
     .history-list { display: grid; gap: 10px; }
     .history-item {
-      background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: var(--radius-sm);
-      padding: 14px 16px; transition: border-color 0.15s;
+      background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 14px 16px;
+      transition: border-color 0.15s, background 0.15s;
     }
-    .history-item:hover { border-color: rgba(139,92,246,0.2); }
-    .history-item h4 { font-size: 15px; font-weight: 800; }
+    .history-item:hover {
+      border-color: rgba(139,92,246,0.22);
+      background: var(--card-hover);
+    }
+    .history-item h4 { font-size: 15px; font-weight: 800; color: var(--text); }
     .history-meta { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
-    .history-preview { font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .history-preview {
+      font-size: 12px; color: rgba(255,255,255,0.48); margin-top: 8px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
     .history-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
     .mini-btn {
       border: none; cursor: pointer; border-radius: 999px; padding: 6px 12px;
-      font-size: 11px; font-weight: 700; background: var(--card); border: 1px solid var(--border-bright);
-      color: var(--text-2); font-family: var(--font); transition: all 0.15s;
+      font-size: 11px; font-weight: 700; background: var(--card);
+      border: 1px solid var(--border-bright); color: var(--text-2);
+      font-family: var(--font); transition: all 0.15s;
     }
-    .mini-btn:hover { border-color: var(--primary); color: var(--primary); }
-    .mini-btn.danger { color: var(--danger); border-color: rgba(248,113,113,0.2); }
+    .mini-btn:hover { border-color: var(--primary); color: var(--primary-light); background: var(--primary-dim); }
+    .mini-btn.danger { color: var(--danger); border-color: rgba(248,113,113,0.20); }
     .mini-btn.danger:hover { border-color: var(--danger); background: var(--danger-dim); }
 
     /* ═══ DETAIL PANEL ═══ */
     .detail-panel {
       background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
       padding: 20px; margin-top: 16px;
+      backdrop-filter: blur(16px);
+      transition: border-color 0.2s;
     }
+    .detail-panel:hover { border-color: rgba(139,92,246,0.15); }
     .detail-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
-    .detail-head h3 { font-size: 16px; font-weight: 800; }
+    .detail-head h3 { font-size: 16px; font-weight: 800; color: var(--text); }
     .detail-meta { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
     .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
     .audio-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
@@ -264,12 +371,12 @@
     /* ═══ TOAST ═══ */
     .toast {
       position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(24px);
-      background: rgba(16,16,30,0.96); color: var(--text); padding: 13px 22px;
+      background: rgba(15,15,26,0.96); color: var(--text); padding: 13px 22px;
       border-radius: var(--radius-xs); font-size: 14px; font-weight: 600;
       opacity: 0; pointer-events: none; transition: .3s cubic-bezier(0.34,1.56,0.64,1);
       z-index: 200; backdrop-filter: blur(16px);
       box-shadow: 0 16px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.08);
+      border: 1px solid rgba(139,92,246,0.18);
     }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
@@ -307,7 +414,7 @@
   <!-- PAGE HEADER -->
   <div class="page-header">
     <div>
-      <h1 class="page-title">會議工作台 <span>//</span></h1>
+      <h1 class="page-title">會議工作台 <span class="accent">//</span></h1>
       <p class="page-sub">瀏覽器原生錄音・AI 逐字稿・Meeting Minutes，資料完全留在本機。</p>
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;">
@@ -332,14 +439,14 @@
       </div>
     </div>
     <div class="stat-tile">
-      <div class="stat-tile-icon">📝</div>
+      <div class="stat-tile-icon">✍️</div>
       <div>
         <div class="stat-tile-val" id="stat-transcript">–</div>
         <div class="stat-tile-lbl">逐字稿狀態</div>
       </div>
     </div>
     <div class="stat-tile">
-      <div class="stat-tile-icon accent">✅</div>
+      <div class="stat-tile-icon accent">📋</div>
       <div>
         <div class="stat-tile-val" id="stat-summary">–</div>
         <div class="stat-tile-lbl">紀要狀態</div>
@@ -508,7 +615,6 @@
       backendJobId: '',
     };
 
-    // ── DOM refs ──────────────────────────────────────────────────────
     const $ = (s) => document.querySelector(s);
     const $$ = (s) => [...document.querySelectorAll(s)];
     const el = {
@@ -553,7 +659,6 @@
       statSummary: $('#stat-summary'),
     };
 
-    // ── Init ──────────────────────────────────────────────────────────
     init();
     function init() {
       migrateLegacyData();
@@ -607,7 +712,6 @@
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state.meetings.map(normalizeMeetingRecord)));
     }
 
-    // ── Tabs ─────────────────────────────────────────────────────────
     function setupTabs() {
       el.mainTabs.forEach(tab => tab.addEventListener('click', () => activateTab(tab.dataset.tab)));
     }
@@ -617,7 +721,6 @@
       $$('.tab-pane').forEach(p => p.classList.toggle('active', p.id === `pane-${name}`));
     }
 
-    // ── Speech Recognition ────────────────────────────────────────────
     function setupSpeechRecognition() {
       const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (!Recognition) {
@@ -660,7 +763,6 @@
       el.capabilityNotice.textContent = parts.join(' ');
     }
 
-    // ── Recording ─────────────────────────────────────────────────────
     async function toggleRecording() {
       if (state.isRecording) stopRecording();
       else await startRecording();
@@ -748,7 +850,6 @@
       return c.find(t => window.MediaRecorder?.isTypeSupported?.(t)) || '';
     }
 
-    // ── Transcript & Summary ───────────────────────────────────────────
     function renderTranscript(text, interimText = '') {
       state.transcript = text || '';
       const view = [state.transcript.trim(), interimText ? `[辨識中] ${interimText}` : ''].filter(Boolean).join('\n');
@@ -770,7 +871,6 @@
       showToast('已清空逐字稿');
     }
 
-    // ── Meeting Record CRUD ───────────────────────────────────────────
     async function createMeetingRecord({ reuseCurrentId = false } = {}) {
       const duration = el.recordTimer.textContent !== '00:00' ? el.recordTimer.textContent : (state.currentRecord?.duration || '00:00');
       const nowIso = new Date().toISOString();
@@ -822,7 +922,6 @@
       showToast('已覆寫目前會議記錄');
     }
 
-    // ── History ────────────────────────────────────────────────────────
     function handleHistorySearch() {
       state.historySearch = String(el.historySearch.value || '').trim().toLowerCase();
       renderHistory();
@@ -972,7 +1071,6 @@
       el.statSummary.textContent = '–';
     }
 
-    // ── Summarize ─────────────────────────────────────────────────────
     function summarizeMeeting() {
       const title = el.meetingTitle.value.trim() || state.currentRecord?.title || '未命名會議';
       const participants = el.meetingParticipants.value.trim() || state.currentRecord?.participants || '未填寫';
@@ -992,38 +1090,29 @@
       });
 
       const minutes = [
-        '# Meeting Minutes',
-        '',
+        '# Meeting Minutes', '',
         '## Document Control',
         `- Meeting Topic: ${title}`,
         `- Meeting Date: ${meetingDate}`,
         `- Participants: ${participants}`,
         `- Duration: ${duration}`,
-        `- Record ID: ${state.currentRecord?.id || 'Draft'}`,
-        '',
+        `- Record ID: ${state.currentRecord?.id || 'Draft'}`, '',
         '## 1. Meeting Objective',
-        discussion.slice(0, 3).map((d, i) => `${i + 1}. ${trunc(d, 96)}`).join('\n') || '1. 本次會議目標待補充。',
-        '',
+        discussion.slice(0, 3).map((d, i) => `${i + 1}. ${trunc(d, 96)}`).join('\n') || '1. 本次會議目標待補充。', '',
         '## 2. Executive Summary',
-        discussion.slice(0, 3).map((d, i) => `${i + 1}. ${trunc(d, 96)}`).join('\n') || '1. 尚未取得足夠逐字稿內容。',
-        '',
+        discussion.slice(0, 3).map((d, i) => `${i + 1}. ${trunc(d, 96)}`).join('\n') || '1. 尚未取得足夠逐字稿內容。', '',
         '## 3. Discussion Highlights',
-        discussion.slice(0, 6).map((d, i) => `${i + 1}. ${trunc(d, 108)}`).join('\n') || '1. 尚無內容。',
-        '',
+        discussion.slice(0, 6).map((d, i) => `${i + 1}. ${trunc(d, 108)}`).join('\n') || '1. 尚無內容。', '',
         '## 4. Decisions Made',
-        decisions.length ? decisions.map((d, i) => `${i + 1}. ${trunc(d, 96)}`).join('\n') : '1. 尚未整理出明確決策。',
-        '',
+        decisions.length ? decisions.map((d, i) => `${i + 1}. ${trunc(d, 96)}`).join('\n') : '1. 尚未整理出明確決策。', '',
         '## 5. Risks / Open Questions',
-        risks.length ? risks.map((r, i) => `${i + 1}. ${trunc(r, 96)}`).join('\n') : '1. 目前無明確風險。',
-        '',
+        risks.length ? risks.map((r, i) => `${i + 1}. ${trunc(r, 96)}`).join('\n') : '1. 目前無明確風險。', '',
         '## 6. Action Items',
         '| # | Owner | Action | Due | Status |',
         '| --- | --- | --- | --- | --- |',
-        actionItems.length ? actionItems.join('\n') : '| 1 | TBD | 尚未產生行動項 | 待確認 | Open |',
-        '',
+        actionItems.length ? actionItems.join('\n') : '| 1 | TBD | 尚未產生行動項 | 待確認 | Open |', '',
         '## 7. Next Checkpoints',
-        discussion.slice(0, 4).map((d, i) => `${i + 1}. ${trunc(d, 88)}`).join('\n') || '1. 待安排下一步。',
-        '',
+        discussion.slice(0, 4).map((d, i) => `${i + 1}. ${trunc(d, 88)}`).join('\n') || '1. 待安排下一步。', '',
         '## 8. Full Transcript',
         transcript || '尚無逐字稿。',
       ].join('\n');
@@ -1033,7 +1122,6 @@
       showToast('已產生正式 meeting minutes');
     }
 
-    // ── Copy / Download ───────────────────────────────────────────────
     async function copyText(text, msg) {
       if (!text) { showToast('目前沒有可複製的內容'); return; }
       try { await navigator.clipboard.writeText(text); showToast(msg); } catch { showToast('複製失敗'); }
@@ -1074,13 +1162,11 @@
         createdAt: new Date().toISOString(),
       };
       const md = [
-        `# ${record.title}`,
-        '',
+        `# ${record.title}`, '',
         `- Participants: ${record.participants}`,
         `- Duration: ${record.duration}`,
         `- Created At: ${new Date(record.createdAt).toLocaleString('zh-TW')}`,
-        record.updatedAt ? `- Updated At: ${new Date(record.updatedAt).toLocaleString('zh-TW')}` : '',
-        '',
+        record.updatedAt ? `- Updated At: ${new Date(record.updatedAt).toLocaleString('zh-TW')}` : '', '',
         record.summary || '尚無會議紀要',
       ].filter(Boolean).join('\n');
       downloadBlob(new Blob([md], { type: 'text/markdown;charset=utf-8' }), 'meeting-minutes.md');
@@ -1103,7 +1189,6 @@
       showToast('目前沒有可下載的音檔');
     }
 
-    // ── Backend / Whisper ─────────────────────────────────────────────
     async function sendLatestAudioToBackend() {
       const audio = getAudioAssetFromRecord(state.currentRecord);
       if (!state.latestAudioBlob && !audio?.dataUrl) {
@@ -1158,7 +1243,6 @@
       showToast('後端仍在處理中，可稍後再查詢。');
     }
 
-    // ── Helpers ───────────────────────────────────────────────────────
     function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
 
     function dataUrlToBlob(dataUrl) {
@@ -1277,7 +1361,6 @@
       return String(text).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
 
-    // ── Event Bindings ────────────────────────────────────────────────
     function bindEvents() {
       el.jumpHistoryBtn.addEventListener('click', () => activateTab('history'));
       el.recordBtn.addEventListener('click', toggleRecording);
