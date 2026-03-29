@@ -4,68 +4,258 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>API Key 設定｜Meeting Recorder</title>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700;800&display=swap" rel="stylesheet">
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    :root { --primary: #326bff; --primary2: #6e45ff; --accent: #16a34a; --danger: #dc2626; --bg: #f7f9fc; --ink: #121826; --muted: #6b7280; --warn: #f59e0b; }
-    body { font-family: 'Noto Sans TC', sans-serif; color: var(--ink); background: var(--bg); min-height: 100vh; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:          #0a0a12;
+      --bg-2:        #0f0f1a;
+      --surface:     #13131f;
+      --surface-2:   #191928;
+      --card:        rgba(255,255,255,0.03);
+      --card-hover:  rgba(255,255,255,0.06);
+      --border:        rgba(255,255,255,0.07);
+      --border-bright: rgba(255,255,255,0.13);
+      --text:       #e2e8f0;
+      --text-2:     rgba(226,232,240,0.60);
+      --text-muted: rgba(226,232,240,0.38);
+      --primary:       #a78bfa;
+      --primary-2:     #7c3aed;
+      --primary-3:     #8b5cf6;
+      --primary-dim:   rgba(139,92,246,0.12);
+      --primary-glow:  rgba(139,92,246,0.20);
+      --primary-light: #c4b5fd;
+      --accent:       #34d399;
+      --accent-2:     #10b981;
+      --accent-dim:   rgba(52,211,153,0.10);
+      --accent-glow:  rgba(52,211,153,0.14);
+      --warn:        #fb923c;
+      --warn-dim:    rgba(251,146,60,0.10);
+      --danger:      #f87171;
+      --danger-dim:  rgba(248,113,113,0.10);
+      --danger-glow: rgba(248,113,113,0.20);
+      --font: 'Inter', 'Noto Sans TC', sans-serif;
+      --radius:    22px;
+      --radius-sm: 14px;
+      --radius-xs: 8px;
+      --shadow:    0 16px 56px rgba(0,0,0,0.55);
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font);
+      min-height: 100vh;
+      color: var(--text);
+      background: var(--bg);
+      -webkit-font-smoothing: antialiased;
+      background-image:
+        radial-gradient(ellipse 60% 40% at 50% -5%, rgba(139,92,246,0.08) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 30% at 85% 0%, rgba(52,211,153,0.04) 0%, transparent 50%);
+    }
     a { text-decoration: none; color: inherit; }
+    button { font-family: inherit; cursor: pointer; border: none; background: none; }
 
-    .topbar { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 60px; position: sticky; top: 0; z-index: 100; }
-    .logo { font-size: 18px; font-weight: 800; color: var(--primary); }
-    .logo span { color: var(--primary2); }
-    .topbar-links { display: flex; gap: 24px; }
-    .topbar-links a { font-size: 14px; color: var(--muted); font-weight: 500; transition: color 0.2s; }
-    .topbar-links a:hover { color: var(--ink); }
-    .topbar-links a.active { color: var(--primary); font-weight: 600; }
-    .user-name { font-size: 14px; font-weight: 600; }
-    .btn-outline { padding: 7px 16px; border: 1.5px solid #e2e8f0; border-radius: 8px; font-size: 13px; font-weight: 600; color: var(--muted); cursor: pointer; background: none; font-family: inherit; }
-    .btn-outline:hover { border-color: var(--danger); color: var(--danger); }
-    .topbar-right { display: flex; align-items: center; gap: 12px; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 999px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.15); }
 
-    .page { max-width: 720px; margin: 0 auto; padding: 36px 24px; }
+    /* ─── Topbar ─── */
+    .topbar {
+      background: rgba(10,10,18,0.92);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+      position: sticky;
+      top: 0;
+      z-index: 200;
+      backdrop-filter: blur(24px);
+    }
+    .logo {
+      font-size: 17px;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, #c4b5fd 0%, #a78bfa 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .logo span { opacity: 0.4; }
+    .topbar-links { display: flex; gap: 4px; }
+    .topbar-links a {
+      font-size: 14px;
+      color: var(--text-2);
+      font-weight: 500;
+      padding: 6px 14px;
+      border-radius: var(--radius-xs);
+      transition: color 0.15s, background 0.15s;
+    }
+    .topbar-links a:hover { color: var(--text); background: var(--card); }
+    .topbar-links a.active { color: var(--primary-light); font-weight: 600; }
+    .topbar-right { display: flex; align-items: center; gap: 10px; }
+    .user-name { font-size: 14px; font-weight: 600; color: var(--text-2); }
+    .btn-outline-sm {
+      padding: 6px 14px;
+      border: 1.5px solid var(--border-bright);
+      border-radius: var(--radius-xs);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-2);
+      background: none;
+      cursor: pointer;
+      font-family: inherit;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .btn-outline-sm:hover { border-color: var(--danger); color: var(--danger); }
 
-    .page-title { font-size: 24px; font-weight: 800; margin-bottom: 4px; }
-    .page-subtitle { color: var(--muted); font-size: 14px; margin-bottom: 28px; line-height: 1.6; }
+    /* ─── Page ─── */
+    .page { max-width: 720px; margin: 0 auto; padding: 40px 24px 60px; }
 
-    .card { background: #fff; border-radius: 20px; padding: 28px; border: 1px solid #e2e8f0; margin-bottom: 20px; }
-    .card-title { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
-    .card-desc { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 20px; }
+    .page-title { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 6px; }
+    .page-subtitle { color: var(--text-2); font-size: 14px; margin-bottom: 32px; line-height: 1.7; }
 
-    .key-display { background: var(--bg); border-radius: 10px; padding: 12px 16px; font-family: monospace; font-size: 14px; color: var(--muted); margin-bottom: 16px; min-height: 44px; display: flex; align-items: center; }
-    .key-display.has-key { color: var(--ink); font-size: 13px; }
-    .key-display-placeholder { font-style: italic; color: var(--muted); font-family: inherit; font-size: 13px; }
+    /* ─── Card ─── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 28px;
+      margin-bottom: 20px;
+    }
+    .card-title { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+    .card-desc { font-size: 13px; color: var(--text-2); line-height: 1.6; margin-bottom: 20px; }
 
+    /* ─── Key Display ─── */
+    .key-display {
+      background: var(--bg-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xs);
+      padding: 12px 16px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      letter-spacing: 0.05em;
+    }
+    .key-display.has-key { color: var(--text); }
+    .key-display-placeholder { font-style: italic; color: var(--text-muted); font-family: var(--font); font-size: 13px; }
+
+    /* ─── Status ─── */
+    .status-row { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; font-size: 13px; }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .status-dot.active { background: var(--accent); box-shadow: 0 0 8px rgba(52,211,153,0.5); }
+    .status-dot.inactive { background: rgba(255,255,255,0.15); }
+
+    /* ─── Form ─── */
     .form-group { margin-bottom: 14px; }
-    .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: #374151; }
-    .form-group input { width: 100%; padding: 11px 14px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 14px; font-family: inherit; color: var(--ink); outline: none; transition: border-color 0.2s; }
-    .form-group input:focus { border-color: var(--primary); }
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--text-2);
+      letter-spacing: 0.03em;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 11px 14px;
+      background: var(--bg-2);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-xs);
+      font-size: 14px;
+      font-family: inherit;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      letter-spacing: 0.03em;
+    }
+    .form-group input::placeholder { color: var(--text-muted); }
+    .form-group input:focus {
+      border-color: var(--primary-3);
+      box-shadow: 0 0 0 3px var(--primary-dim);
+    }
     .form-group input.error { border-color: var(--danger); }
-    .form-hint { font-size: 11px; color: var(--muted); margin-top: 4px; }
+    .form-hint { font-size: 11px; color: var(--text-muted); margin-top: 5px; }
+    .form-hint code {
+      background: var(--primary-dim);
+      color: var(--primary-light);
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-size: 11px;
+    }
 
-    .btn-primary { display: inline-block; padding: 11px 24px; background: linear-gradient(135deg, var(--primary), var(--primary2)); color: #fff; border: none; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; transition: opacity 0.2s; box-shadow: 0 4px 12px rgba(50,107,255,0.25); }
-    .btn-primary:hover { opacity: 0.88; }
-    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
-    .btn-danger { display: inline-block; padding: 11px 24px; background: #fff; color: var(--danger); border: 1.5px solid #fecaca; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; }
-    .btn-danger:hover { background: #fef2f2; }
+    /* ─── Buttons ─── */
+    .btn-primary {
+      display: inline-block;
+      padding: 11px 24px;
+      background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-xs);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      transition: opacity 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 16px rgba(139,92,246,0.3);
+    }
+    .btn-primary:hover { opacity: 0.88; box-shadow: 0 6px 24px rgba(139,92,246,0.4); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-danger {
+      display: inline-block;
+      padding: 11px 24px;
+      background: transparent;
+      color: var(--danger);
+      border: 1.5px solid rgba(248,113,113,0.3);
+      border-radius: var(--radius-xs);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .btn-danger:hover { background: var(--danger-dim); border-color: var(--danger); }
 
     .btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
 
-    .alert { padding: 12px 16px; border-radius: 10px; font-size: 13px; margin-bottom: 16px; display: none; }
+    /* ─── Alerts ─── */
+    .alert {
+      padding: 12px 16px;
+      border-radius: var(--radius-xs);
+      font-size: 13px;
+      margin-bottom: 16px;
+      display: none;
+      line-height: 1.5;
+    }
     .alert.show { display: block; }
-    .alert.error { background: #fef2f2; border: 1px solid #fecaca; color: var(--danger); }
-    .alert.success { background: #f0fdf4; border: 1px solid #bbf7d0; color: #15803d; }
-    .alert.info { background: #eff6ff; border: 1px solid #bfdbfe; color: #1d4ed8; }
+    .alert.error { background: var(--danger-dim); border: 1px solid rgba(248,113,113,0.2); color: var(--danger); }
+    .alert.success { background: var(--accent-dim); border: 1px solid rgba(52,211,153,0.2); color: var(--accent); }
+    .alert.info {
+      background: var(--primary-dim);
+      border: 1px solid rgba(139,92,246,0.15);
+      color: var(--primary-light);
+    }
 
-    .info-box { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; padding: 14px 16px; margin-bottom: 20px; }
-    .info-box h4 { font-size: 13px; font-weight: 700; color: #1d4ed8; margin-bottom: 6px; }
-    .info-box p { font-size: 12px; color: #3b82f6; line-height: 1.6; }
-    .info-box a { color: var(--primary); font-weight: 600; }
-
-    .status-row { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; font-size: 13px; }
-    .status-dot { width: 8px; height: 8px; border-radius: 50%; }
-    .status-dot.active { background: var(--accent); box-shadow: 0 0 6px rgba(22,163,74,0.5); }
-    .status-dot.inactive { background: #d1d5db; }
+    /* ─── Info Box ─── */
+    .info-box {
+      background: var(--primary-dim);
+      border: 1px solid rgba(139,92,246,0.15);
+      border-radius: var(--radius-xs);
+      padding: 14px 16px;
+      margin-bottom: 20px;
+    }
+    .info-box h4 { font-size: 13px; font-weight: 700; color: var(--primary-light); margin-bottom: 6px; }
+    .info-box p { font-size: 12px; color: var(--text-2); line-height: 1.6; }
+    .info-box a { color: var(--primary-light); font-weight: 600; }
+    .info-box a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
@@ -79,7 +269,7 @@
   </div>
   <div class="topbar-right">
     <span class="user-name" id="user-name">載入中...</span>
-    <button class="btn-outline" id="logout-btn">登出</button>
+    <button class="btn-outline-sm" id="logout-btn">登出</button>
   </div>
 </div>
 
@@ -112,7 +302,7 @@
       <div class="form-group">
         <label>API Key（sk-...）</label>
         <input type="password" id="api-key-input" placeholder="sk-..." autocomplete="off">
-        <div class="form-hint">Key 必须以 <code>sk-</code> 開頭，我們不會驗證格式以外的內容。</div>
+        <div class="form-hint">Key 必須以 <code>sk-</code> 開頭，我們不會驗證格式以外的內容。</div>
       </div>
       <div class="btn-row">
         <button type="submit" class="btn-primary" id="save-btn">儲存 Key</button>
@@ -150,7 +340,7 @@
       if (data.has_api_key) {
         dot.className = 'status-dot active';
         text.textContent = 'API Key 已設定';
-        display.innerHTML = `<span style="font-family:monospace;font-size:13px;">${data.masked}</span>`;
+        display.innerHTML = `<span>${data.masked}</span>`;
         display.classList.add('has-key');
         deleteBtn.style.display = 'inline-block';
       } else {
