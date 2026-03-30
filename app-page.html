@@ -4,139 +4,163 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>會議工作台｜Meeting Recorder</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
     /* ══════════════════════════════════════════════════════════════
-       SOLANA-STYLE DESIGN TOKENS
+       SOLANA.COM AUTHENTIC STYLE — Meeting Recorder v3
+       Key: Black canvas + Solana sunset gradient (orange→pink→purple)
     ══════════════════════════════════════════════════════════════ */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:          #0a0a12;
-      --bg-2:        #0f0f1a;
-      --surface:     #13131f;
-      --surface-2:   #191928;
-      --card:        rgba(255,255,255,0.03);
-      --card-hover:  rgba(255,255,255,0.06);
-      --border:        rgba(255,255,255,0.07);
-      --border-bright: rgba(255,255,255,0.13);
-      --text:       #e2e8f0;
-      --text-2:     rgba(226,232,240,0.60);
-      --text-muted: rgba(226,232,240,0.38);
+      --bg:           #000;
+      --bg-2:         #050505;
+      --surface:      #0c0c0c;
+      --surface-2:    #111;
+      --card:         rgba(255,255,255,0.035);
+      --card-hover:   rgba(255,255,255,0.06);
+      --border:       rgba(255,255,255,0.07);
+      --border-bright:rgba(255,255,255,0.13);
+      --text:         #f0f0f5;
+      --text-2:       rgba(240,240,245,0.50);
+      --text-muted:   rgba(240,240,245,0.28);
 
-      /* Solana purple/violet */
-      --primary:       #a78bfa;
-      --primary-2:     #7c3aed;
-      --primary-3:     #8b5cf6;
-      --primary-dim:   rgba(139,92,246,0.12);
-      --primary-glow:  rgba(139,92,246,0.20);
-      --primary-light: #c4b5fd;
+      /* Solana sunset brand (authentic) */
+      --sol-1: #ff9317;   /* orange */
+      --sol-2: #f97316;   /* orange-red */
+      --sol-3: #ec4899;   /* pink */
+      --sol-4: #a855f7;   /* purple */
+      --sol-glow: rgba(249,115,22,0.18);
+      --sol-glow2: rgba(168,85,247,0.14);
 
-      /* Green accent */
-      --accent:       #34d399;
-      --accent-2:     #10b981;
-      --accent-dim:   rgba(52,211,153,0.10);
+      /* accent */
+      --accent: #22d3ee;
+      --accent-dim: rgba(34,211,238,0.08);
 
-      /* Status */
-      --warn:        #fb923c;
-      --warn-dim:    rgba(251,146,60,0.10);
-      --danger:      #f87171;
-      --danger-dim:  rgba(248,113,113,0.10);
-
-      --font: 'Inter', 'Noto Sans TC', sans-serif;
-      --radius:    22px;
-      --radius-sm: 14px;
+      --font: 'Space Grotesk', 'Noto Sans TC', system-ui, sans-serif;
+      --radius: 18px;
+      --radius-sm: 12px;
       --radius-xs: 8px;
     }
 
+    html { scroll-behavior: smooth; }
     body {
       font-family: var(--font);
       min-height: 100vh;
       color: var(--text);
       background: var(--bg);
-      background-image:
-        radial-gradient(ellipse 60% 40% at 50% -5%, rgba(139,92,246,0.08) 0%, transparent 60%),
-        radial-gradient(ellipse 40% 30% at 85% 0%, rgba(52,211,153,0.04) 0%, transparent 50%);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
     }
     a { text-decoration: none; color: inherit; }
     button { font-family: inherit; cursor: pointer; border: none; background: none; }
 
-    /* Topbar */
+    /* ── Background atmosphere ── */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 100vw; height: 600px;
+      background: radial-gradient(ellipse 70% 50% at 50% -10%, rgba(249,115,22,0.12) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0; right: -20%;
+      width: 60vw; height: 600px;
+      background: radial-gradient(circle, rgba(168,85,247,0.08) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Topbar ── */
     .topbar {
-      background: rgba(10,10,18,0.88); border-bottom: 1px solid var(--border);
-      padding: 0 24px; display: flex; align-items: center; justify-content: space-between;
-      height: 60px; position: sticky; top: 0; z-index: 200;
+      background: rgba(0,0,0,0.88);
+      border-bottom: 1px solid var(--border);
+      padding: 0 28px;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 60px;
+      position: sticky; top: 0; z-index: 200;
       backdrop-filter: blur(24px);
     }
     .logo {
-      font-size: 18px; font-weight: 900; letter-spacing: -0.03em;
-      background: linear-gradient(135deg, #c4b5fd 0%, #a78bfa 100%);
+      font-size: 20px; font-weight: 800; letter-spacing: -0.03em;
+      background: linear-gradient(135deg, var(--sol-1), var(--sol-3), var(--sol-4));
       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
-    .logo span { opacity: 0.4; }
+    .logo-sub { opacity: 0.35; }
     .topbar-links { display: flex; gap: 4px; }
     .topbar-links a {
-      font-size: 14px; color: var(--text-2); font-weight: 500;
+      font-size: 13px; color: var(--text-2); font-weight: 600;
       padding: 6px 14px; border-radius: var(--radius-xs);
       transition: color 0.15s, background 0.15s;
     }
     .topbar-links a:hover { color: var(--text); background: var(--card); }
-    .topbar-links a.active { color: var(--primary-light); font-weight: 600; }
+    .topbar-links a.active { color: #fb923c; font-weight: 700; }
     .topbar-right { display: flex; align-items: center; gap: 10px; }
     .user-pill {
-      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+      background: linear-gradient(135deg, var(--sol-2), var(--sol-3), var(--sol-4));
       color: #fff; padding: 5px 14px; border-radius: 999px;
       font-size: 12px; font-weight: 700;
     }
     .btn-outline-sm {
-      padding: 6px 14px; border: 1.5px solid var(--border-bright);
-      border-radius: var(--radius-xs); font-size: 12px; font-weight: 600;
+      padding: 5px 13px;
+      border: 1.5px solid var(--border-bright);
+      border-radius: var(--radius-xs);
+      font-size: 12px; font-weight: 600;
       color: var(--text-2); background: none; cursor: pointer; font-family: inherit;
       transition: border-color 0.2s, color 0.2s;
     }
-    .btn-outline-sm:hover { border-color: var(--danger); color: var(--danger); }
+    .btn-outline-sm:hover { border-color: #f87171; color: #f87171; }
 
-    /* Shell */
-    .shell { max-width: 1180px; margin: 0 auto; padding: 32px 20px 60px; }
+    /* ── Shell ── */
+    .shell { max-width: 1180px; margin: 0 auto; padding: 36px 20px 80px; position: relative; z-index: 1; }
 
-    /* Alert banners */
+    /* ── Alert banners ── */
     .alert-banner {
-      background: var(--warn-dim); border: 1px solid rgba(251,146,60,0.25);
-      border-radius: var(--radius-sm); padding: 12px 16px; font-size: 13px;
-      color: rgba(255,255,255,0.80); margin-bottom: 16px;
-      display: none; align-items: center; gap: 8px;
+      border-radius: var(--radius-sm); padding: 13px 18px;
+      font-size: 13px; margin-bottom: 16px;
+      display: none; align-items: center; gap: 10px;
     }
-    .alert-banner a { color: var(--primary-light); font-weight: 700; }
     .alert-banner.show { display: flex; }
-    .alert-banner.warn {
-      background: var(--primary-dim); border-color: rgba(139,92,246,0.25);
-      color: rgba(255,255,255,0.80);
+    .alert-banner.no-key {
+      background: rgba(249,115,22,0.08);
+      border: 1px solid rgba(249,115,22,0.22);
+      color: rgba(255,255,255,0.75);
     }
+    .alert-banner a { color: #fb923c; font-weight: 700; }
 
-    /* Grid layout */
-    .hero { display: grid; grid-template-columns: 1.35fr .9fr; gap: 18px; margin-bottom: 20px; }
+    /* ── Grid ── */
+    .hero { display: grid; grid-template-columns: 1.35fr .9fr; gap: 18px; margin-bottom: 18px; }
     .card {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 28px 30px;
-      backdrop-filter: blur(16px);
-      transition: border-color 0.2s, box-shadow 0.2s;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 30px;
+      backdrop-filter: blur(20px);
+      transition: border-color 0.25s, box-shadow 0.25s;
     }
-    .card:hover { border-color: rgba(139,92,246,0.12); }
+    .card:hover { border-color: rgba(168,85,247,0.15); }
 
-    /* Section label */
+    /* ── Section label ── */
     .section-label {
-      font-size: 11px; font-weight: 800; text-transform: uppercase;
-      letter-spacing: .12em; color: var(--primary-light); margin-bottom: 10px; display: block;
+      font-size: 10px; font-weight: 800; text-transform: uppercase;
+      letter-spacing: .15em; color: #fb923c; margin-bottom: 12px; display: block;
     }
 
-    /* Meeting info */
-    .info-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+    /* ── Info fields ── */
+    .info-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
     .info-field label {
       display: block; font-size: 12px; font-weight: 600;
       color: var(--text-muted); margin-bottom: 5px;
     }
     .info-field input {
-      width: 100%; padding: 10px 12px;
+      width: 100%; padding: 10px 13px;
       border: 1px solid var(--border-bright);
       border-radius: var(--radius-xs);
       font-size: 13px; font-family: var(--font);
@@ -144,45 +168,70 @@
       outline: none; transition: border-color 0.2s, box-shadow 0.2s;
     }
     .info-field input:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px var(--primary-dim);
+      border-color: var(--sol-3);
+      box-shadow: 0 0 0 3px rgba(236,72,153,0.12);
     }
     .info-field input::placeholder { color: var(--text-muted); }
 
-    /* Recorder card */
-    .recorder-title { font-size: 17px; font-weight: 800; margin-bottom: 16px; color: var(--text); }
-    .recorder-body { display: flex; flex-direction: column; align-items: center; padding: 20px 0; }
+    /* ── Recorder ── */
+    .recorder-body { display: flex; flex-direction: column; align-items: center; padding: 18px 0; }
     .waveform {
-      width: 100%; height: 60px; margin-bottom: 18px;
-      display: flex; align-items: center; justify-content: center; gap: 3px;
+      width: 100%; height: 64px;
+      display: flex; align-items: center; justify-content: center; gap: 3px; margin-bottom: 16px;
     }
-    .wave-bar { width: 4px; height: 20px; background: rgba(255,255,255,0.10); border-radius: 2px; transition: height 0.1s; }
-    .wave-bar.active { background: linear-gradient(to top, var(--primary), var(--primary-light)); }
+    .wave-bar {
+      width: 4px; height: 20px;
+      background: rgba(255,255,255,0.08); border-radius: 2px;
+      transition: height 0.1s, background 0.1s;
+    }
+    .wave-bar.active {
+      background: linear-gradient(to top, var(--sol-1), var(--sol-3));
+    }
     .timer {
-      font-size: 36px; font-weight: 800; color: var(--text);
-      font-variant-numeric: tabular-nums; margin-bottom: 20px;
-      font-family: 'Inter', monospace;
-      background: linear-gradient(135deg, #e2e8f0, #c4b5fd);
+      font-size: 40px; font-weight: 800; color: var(--text);
+      font-variant-numeric: tabular-nums; margin-bottom: 18px;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #f0f0f5, #fb923c);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }
-    .timer.recording { color: var(--danger); }
+    .timer.recording {
+      background: linear-gradient(135deg, #f87171, #f97316);
+      -webkit-background-clip: text;
+      animation: timer-pulse 1s ease-in-out infinite;
+    }
+    @keyframes timer-pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
     .recorder-controls { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
     .btn-rec {
       padding: 12px 28px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 700;
       border: none; transition: all 0.2s;
     }
     .btn-rec.start {
-      background: linear-gradient(135deg, var(--primary), var(--primary-2));
-      color: #fff; box-shadow: 0 4px 16px rgba(139,92,246,0.30);
+      background: linear-gradient(135deg, var(--sol-1), var(--sol-2), var(--sol-3));
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(249,115,22,0.35), 0 0 0 0 rgba(249,115,22,0.2);
     }
-    .btn-rec.start:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(139,92,246,0.42); }
-    .btn-rec.stop { background: var(--danger); color: #fff; box-shadow: 0 4px 16px rgba(239,68,68,0.28); }
+    .btn-rec.start:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(249,115,22,0.50), 0 0 0 1px rgba(249,115,22,0.2);
+    }
+    .btn-rec.stop {
+      background: linear-gradient(135deg, #f87171, #f97316);
+      color: #fff;
+      box-shadow: 0 4px 16px rgba(248,113,113,0.3);
+    }
+    .btn-rec.stop:hover { transform: translateY(-1px); }
     .btn-rec.upload {
       background: var(--card); color: var(--text-2);
       border: 1px solid var(--border-bright);
     }
-    .btn-rec.upload:hover { border-color: var(--primary); color: var(--primary-light); background: var(--primary-dim); }
-    .btn-rec:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+    .btn-rec.upload:hover {
+      border-color: var(--sol-4); color: #c084fc;
+      background: rgba(168,85,247,0.08);
+    }
+    .btn-rec:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
 
     .upload-area { width: 100%; margin-top: 14px; display: none; }
     .upload-area.show { display: block; }
@@ -192,45 +241,47 @@
       text-align: center; font-size: 13px; color: var(--text-muted);
       transition: border-color 0.2s, color 0.2s;
     }
-    .upload-area label:hover { border-color: var(--primary); color: var(--primary-light); }
+    .upload-area label:hover { border-color: var(--sol-4); color: #c084fc; }
     .upload-area input { display: none; }
-    .upload-filename { margin-top: 8px; font-size: 12px; color: var(--accent); font-weight: 600; }
+    .upload-filename { margin-top: 8px; font-size: 12px; color: #34d399; font-weight: 600; }
 
-    /* Status bar */
+    /* ── Status bar ── */
     .status-bar {
       background: var(--card); border: 1px solid var(--border);
-      border-radius: var(--radius-sm); padding: 14px 20px; margin-bottom: 20px;
+      border-radius: var(--radius-sm); padding: 14px 20px; margin-bottom: 18px;
       display: none; align-items: center; gap: 12px;
-      backdrop-filter: blur(16px);
+      backdrop-filter: blur(20px);
     }
     .status-bar.show { display: flex; }
     .status-spinner {
       width: 18px; height: 18px;
       border: 2.5px solid rgba(255,255,255,0.10);
-      border-top-color: var(--primary);
-      border-radius: 50%; animation: spin 0.8s linear infinite; flex-shrink: 0;
+      border-top-color: var(--sol-3);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      flex-shrink: 0;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
     .status-text { font-size: 13px; color: var(--text-muted); flex: 1; }
-    .status-progress { font-size: 13px; font-weight: 700; color: var(--primary-light); }
-    .progress-bar-wrap { flex: 1; height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; }
+    .status-progress { font-size: 13px; font-weight: 700; color: #fb923c; }
+    .progress-bar-wrap { flex: 1; height: 5px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; }
     .progress-bar-fill {
       height: 100%;
-      background: linear-gradient(90deg, var(--primary-3), var(--primary));
+      background: linear-gradient(90deg, var(--sol-1), var(--sol-3), var(--sol-4));
       border-radius: 3px; transition: width 0.4s;
     }
 
-    /* Transcript & Summary */
-    .bottom-grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: 18px; margin-bottom: 20px; }
+    /* ── Bottom grid ── */
+    .bottom-grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: 18px; margin-bottom: 18px; }
     .transcript-area, .history-card {
       background: var(--card); border: 1px solid var(--border);
       border-radius: var(--radius); padding: 28px 30px;
-      backdrop-filter: blur(16px);
-      transition: border-color 0.2s;
+      backdrop-filter: blur(20px);
+      transition: border-color 0.25s;
     }
-    .transcript-area:hover, .history-card:hover { border-color: rgba(139,92,246,0.12); }
+    .transcript-area:hover, .history-card:hover { border-color: rgba(168,85,247,0.15); }
     .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-    .section-header h2 { font-size: 17px; font-weight: 800; color: var(--text); }
+    .section-header h2 { font-size: 16px; font-weight: 800; color: var(--text); }
     .section-header-actions { display: flex; gap: 8px; }
     .btn-sm {
       padding: 6px 14px; border-radius: var(--radius-xs);
@@ -239,11 +290,11 @@
       background: var(--card); color: var(--text-2); cursor: pointer; font-family: inherit;
       transition: all 0.2s;
     }
-    .btn-sm:hover { border-color: var(--primary); color: var(--primary-light); background: var(--primary-dim); }
+    .btn-sm:hover { border-color: var(--sol-4); color: #c084fc; background: rgba(168,85,247,0.08); }
     .btn-sm.primary {
-      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+      background: linear-gradient(135deg, var(--sol-1), var(--sol-3));
       color: #fff; border: none;
-      box-shadow: 0 2px 8px rgba(139,92,246,0.25);
+      box-shadow: 0 2px 10px rgba(249,115,22,0.28);
     }
     .btn-sm.primary:hover { opacity: 0.88; }
 
@@ -253,15 +304,13 @@
       border-radius: var(--radius-sm);
       font-size: 13px; font-family: var(--font); color: var(--text);
       background: rgba(255,255,255,0.03);
-      resize: vertical; outline: none; line-height: 1.7;
+      resize: vertical; outline: none; line-height: 1.75;
       transition: border-color 0.2s, box-shadow 0.2s;
     }
-    textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-dim); }
+    textarea:focus { border-color: var(--sol-3); box-shadow: 0 0 0 3px rgba(236,72,153,0.10); }
     textarea::placeholder { color: var(--text-muted); }
-    .summary-area textarea { min-height: 280px; }
 
-    /* History */
-    .history-card { }
+    /* ── History ── */
     .search-row { display: flex; gap: 10px; margin-bottom: 14px; }
     .search-row input {
       flex: 1; padding: 9px 12px;
@@ -271,11 +320,11 @@
       color: var(--text); background: rgba(255,255,255,0.04);
       transition: border-color 0.2s, box-shadow 0.2s;
     }
-    .search-row input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-dim); }
+    .search-row input:focus { border-color: var(--sol-3); box-shadow: 0 0 0 3px rgba(236,72,153,0.08); }
     .search-row input::placeholder { color: var(--text-muted); }
-    .history-list { list-style: none; max-height: 360px; overflow-y: auto; }
+    .history-list { list-style: none; max-height: 340px; overflow-y: auto; }
     .history-item {
-      padding: 8px; border-radius: var(--radius-xs);
+      padding: 9px 8px; border-radius: var(--radius-xs);
       border-bottom: 1px solid var(--border);
       display: flex; flex-direction: column; gap: 3px;
       cursor: pointer; transition: background 0.15s;
@@ -284,16 +333,36 @@
     .history-item:last-child { border-bottom: none; }
     .history-item-title { font-size: 13px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text); }
     .history-item-meta { font-size: 11px; color: var(--text-muted); }
-    .history-empty { text-align: center; padding: 30px 0; color: var(--text-muted); font-size: 13px; }
+    .history-empty { text-align: center; padding: 32px 0; color: var(--text-muted); font-size: 13px; }
 
-    /* Summary full view */
+    /* ── Summary full ── */
     #summary-card {
       background: var(--card); border: 1px solid var(--border);
       border-radius: var(--radius); padding: 28px 30px;
-      backdrop-filter: blur(16px);
-      transition: border-color 0.2s;
+      backdrop-filter: blur(20px);
+      transition: border-color 0.25s;
     }
-    #summary-card:hover { border-color: rgba(139,92,246,0.12); }
+    #summary-card:hover { border-color: rgba(168,85,247,0.15); }
+
+    /* ── Summary placeholder ── */
+    .summary-placeholder {
+      display: flex; flex-direction: column; justify-content: center;
+      align-items: center; text-align: center; padding: 32px 0; gap: 10px;
+      color: var(--text-muted);
+    }
+    .summary-placeholder-icon {
+      font-size: 42px; line-height: 1;
+      background: linear-gradient(135deg, var(--sol-1), var(--sol-3));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .summary-placeholder p { font-size: 13px; line-height: 1.7; }
+
+    /* ── Top accent line ── */
+    .top-line {
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--sol-1), var(--sol-3), var(--sol-4), transparent);
+      position: relative; z-index: 1;
+    }
 
     @media (max-width: 900px) {
       .hero { grid-template-columns: 1fr; }
@@ -304,9 +373,11 @@
 </head>
 <body>
 
+<div class="top-line"></div>
+
 <!-- Topbar -->
 <div class="topbar">
-  <a href="/" class="logo">Meeting<span>.</span>rec</a>
+  <a href="/" class="logo">Meeting<span class="logo-sub">.</span>rec</a>
   <div class="topbar-links">
     <a href="/app" class="active">錄音工作台</a>
     <a href="/dashboard">使用量</a>
@@ -321,11 +392,11 @@
 <div class="shell">
 
   <!-- Alert: no API key -->
-  <div class="alert-banner" id="alert-no-key">
+  <div class="alert-banner no-key" id="alert-no-key">
     ⚠️ 尚未設定 OpenAI API Key，無法使用轉寫功能。 <a href="/app/api-keys">立即設定 →</a>
   </div>
 
-  <!-- Status bar (processing) -->
+  <!-- Status bar -->
   <div class="status-bar" id="status-bar">
     <div class="status-spinner"></div>
     <span class="status-text" id="status-text">處理中...</span>
@@ -336,7 +407,7 @@
   <!-- Hero: Info + Recorder -->
   <div class="hero">
 
-    <!-- Info card -->
+    <!-- Info + Recorder card -->
     <div class="card">
       <span class="section-label">會議資訊</span>
       <div class="info-row">
@@ -350,16 +421,15 @@
         </div>
       </div>
 
-      <!-- Recorder -->
-      <div style="margin-top: 8px;">
+      <div style="margin-top: 4px;">
         <span class="section-label" style="margin-bottom:14px;">錄音控制</span>
         <div class="recorder-body">
           <div class="waveform" id="waveform">
-            <script>for(let i=0;i<28;i++){document.write('<div class=wave-bar id=wb'+i+'></div>')}</script>
+            <script>for(var i=0;i<28;i++){document.write('<div class=wave-bar id=wb'+i+'></div>')}</script>
           </div>
           <div class="timer" id="timer">00:00</div>
           <div class="recorder-controls">
-            <button class="btn-rec start" id="btn-start">🎙️ 開始錄音</button>
+            <button class="btn-rec start" id="btn-start">🎙 開始錄音</button>
             <button class="btn-rec stop" id="btn-stop" style="display:none;">⏹ 停止錄音</button>
             <label class="btn-rec upload" for="upload-file-input">📁 上傳音訊</label>
           </div>
@@ -373,12 +443,12 @@
       </div>
     </div>
 
-    <!-- Summary card (preview) -->
+    <!-- Summary preview card -->
     <div class="card" style="display:flex;flex-direction:column;">
       <span class="section-label">摘要預覽</span>
-      <div style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:20px 0;color:var(--text-muted);" id="summary-placeholder">
-        <div style="font-size:40px;margin-bottom:12px;">📋</div>
-        <p style="font-size:13px;line-height:1.7;">開始錄音並上傳，<br>AI 會在這裡自動產生<br>結構化 Meeting Minutes</p>
+      <div class="summary-placeholder" id="summary-placeholder">
+        <div class="summary-placeholder-icon">📋</div>
+        <p>開始錄音並上傳<br>AI 會在這裡自動產生<br>結構化 Meeting Minutes</p>
       </div>
       <div id="summary-result" style="display:none;"></div>
     </div>
@@ -390,7 +460,7 @@
 
     <div class="transcript-area">
       <div class="section-header">
-        <h2>✍️ 逐字稿</h2>
+        <h2>✍ 逐字稿</h2>
         <div class="section-header-actions">
           <button class="btn-sm" id="btn-copy-transcript">複製</button>
         </div>
@@ -427,90 +497,94 @@
 </div>
 
 <script>
-  // ─── Auth check ──────────────────────────────────────────────────────────
+  // ── Auth check ──
   async function checkAuth() {
     try {
-      const res = await fetch('/api/auth/me', { credentials: 'include' });
+      var res = await fetch('/api/auth/me', { credentials: 'include' });
       if (!res.ok) { window.location.href = '/auth?redirect=/app'; return; }
-      const { user } = await res.json();
-      document.getElementById('user-name').textContent = user.name || user.email.split('@')[0];
-    } catch { window.location.href = '/auth?redirect=/app'; }
+      var data = await res.json();
+      document.getElementById('user-name').textContent = data.user.name || data.user.email.split('@')[0];
+    } catch(e) { window.location.href = '/auth?redirect=/app'; }
   }
 
   async function checkApiKey() {
     try {
-      const res = await fetch('/api/user/api-key', { credentials: 'include' });
+      var res = await fetch('/api/user/api-key', { credentials: 'include' });
       if (res.ok) {
-        const data = await res.json();
-        if (!data.has_api_key) {
+        var d = await res.json();
+        if (!d.has_api_key) {
           document.getElementById('alert-no-key').classList.add('show');
         }
       }
-    } catch {}
+    } catch(e) {}
   }
 
   checkAuth();
   checkApiKey();
 
-  // ─── Logout ──────────────────────────────────────────────────────────────
-  document.getElementById('logout-btn').addEventListener('click', async () => {
+  // ── Logout ──
+  document.getElementById('logout-btn').addEventListener('click', async function() {
     await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
     window.location.href = '/';
   });
 
-  // ─── Waveform animation ──────────────────────────────────────────────────
-  let waveInterval;
+  // ── Waveform ──
+  var waveInterval;
   function startWave() {
     clearInterval(waveInterval);
-    waveInterval = setInterval(() => {
-      for (let i = 0; i < 28; i++) {
-        const bar = document.getElementById('wb' + i);
-        if (bar) bar.style.height = (15 + Math.random() * 40) + 'px';
+    waveInterval = setInterval(function() {
+      for (var i = 0; i < 28; i++) {
+        var bar = document.getElementById('wb' + i);
+        if (bar) {
+          bar.style.height = (14 + Math.random() * 44) + 'px';
+          bar.classList.add('active');
+        }
       }
-    }, 120);
+    }, 110);
   }
   function stopWave() {
     clearInterval(waveInterval);
-    for (let i = 0; i < 28; i++) {
-      const bar = document.getElementById('wb' + i);
-      if (bar) bar.style.height = '20px';
+    for (var i = 0; i < 28; i++) {
+      var bar = document.getElementById('wb' + i);
+      if (bar) { bar.style.height = '20px'; bar.classList.remove('active'); }
     }
   }
 
-  // ─── Timer ────────────────────────────────────────────────────────────────
-  let timerStart = null, timerInterval = null;
+  // ── Timer ──
+  var timerStart = null, timerInterval = null;
   function startTimer() {
     timerStart = Date.now();
-    timerInterval = setInterval(() => {
-      const secs = Math.floor((Date.now() - timerStart) / 1000);
-      const m = String(Math.floor(secs / 60)).padStart(2, '0');
-      const s = String(secs % 60).padStart(2, '0');
+    timerInterval = setInterval(function() {
+      var secs = Math.floor((Date.now() - timerStart) / 1000);
+      var m = String(Math.floor(secs / 60)).padStart(2, '0');
+      var s = String(secs % 60).padStart(2, '0');
       document.getElementById('timer').textContent = m + ':' + s;
     }, 1000);
   }
-  function stopTimer() { clearInterval(timerInterval); timerInterval = null; }
+  function stopTimer() { clearInterval(timerInterval); }
   function resetTimer() {
     stopTimer();
     document.getElementById('timer').textContent = '00:00';
     document.getElementById('timer').classList.remove('recording');
   }
 
-  // ─── Browser recording ────────────────────────────────────────────────────
-  let mediaRecorder = null, audioChunks = [];
+  // ── Browser recording ──
+  var mediaRecorder = null, audioChunks = [];
 
-  document.getElementById('btn-start').addEventListener('click', async () => {
+  document.getElementById('btn-start').addEventListener('click', async function() {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      var stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
       audioChunks = [];
-      mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
-      mediaRecorder.onstop = () => {
-        const blob = new Blob(audioChunks, { type: 'audio/webm' });
+      mediaRecorder.ondataavailable = function(e) { if (e.data.size > 0) audioChunks.push(e.data); };
+      mediaRecorder.onstop = function() {
+        var blob = new Blob(audioChunks, { type: 'audio/webm' });
         document.getElementById('upload-filename').textContent = '錄音_' + new Date().toLocaleTimeString('zh-TW') + '.webm';
         document.getElementById('upload-area').classList.add('show');
-        document.getElementById('btn-upload').style.display = 'inline-block';
-        document.getElementById('btn-upload').dataset.blob = blob;
-        stream.getTracks().forEach(t => t.stop());
+        var btnUpload = document.getElementById('btn-upload');
+        btnUpload.style.display = 'inline-block';
+        btnUpload.dataset.blob = blob;
+        stream.getTracks().forEach(function(t) { t.stop(); });
       };
       mediaRecorder.start(100);
       document.getElementById('btn-start').style.display = 'none';
@@ -518,13 +592,12 @@
       document.getElementById('timer').classList.add('recording');
       startTimer();
       startWave();
-    } catch (err) {
+    } catch(err) {
       alert('無法存取麥克風，請確認瀏覽器權限已開啟。');
-      console.error(err);
     }
   });
 
-  document.getElementById('btn-stop').addEventListener('click', () => {
+  document.getElementById('btn-stop').addEventListener('click', function() {
     if (mediaRecorder && mediaRecorder.state !== 'inactive') { mediaRecorder.stop(); }
     document.getElementById('btn-start').style.display = 'inline-block';
     document.getElementById('btn-stop').style.display = 'none';
@@ -532,66 +605,65 @@
     stopWave();
   });
 
-  // ─── File upload ─────────────────────────────────────────────────────────
-  const fileInput = document.getElementById('upload-file-input');
-  const uploadArea = document.getElementById('upload-area');
-  const filenameDisplay = document.getElementById('upload-filename');
-  const btnUpload = document.getElementById('btn-upload');
+  // ── File upload ──
+  var fileInput = document.getElementById('upload-file-input');
+  var uploadArea = document.getElementById('upload-area');
+  var filenameDisplay = document.getElementById('upload-filename');
+  var btnUpload = document.getElementById('btn-upload');
 
-  fileInput.addEventListener('change', () => {
-    const file = fileInput.files[0];
+  fileInput.addEventListener('change', function() {
+    var file = fileInput.files[0];
     if (!file) return;
     filenameDisplay.textContent = file.name;
     uploadArea.classList.add('show');
     btnUpload.style.display = 'inline-block';
-    btnUpload.dataset.file = null;
-    const reader = new FileReader();
-    reader.onload = e => { btnUpload.dataset.file = e.target.result; };
+    var reader = new FileReader();
+    reader.onload = function(e) { btnUpload.dataset.file = e.target.result; };
     reader.readAsDataURL(file);
   });
 
-  const uploadLabel = uploadArea.querySelector('label');
-  uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadLabel.style.borderColor = 'var(--primary)'; });
-  uploadArea.addEventListener('dragleave', () => { uploadLabel.style.borderColor = 'var(--border-bright)'; });
-  uploadArea.addEventListener('drop', e => {
+  var uploadLabel = uploadArea.querySelector('label');
+  uploadArea.addEventListener('dragover', function(e) { e.preventDefault(); uploadLabel.style.borderColor = 'var(--sol-4)'; });
+  uploadArea.addEventListener('dragleave', function() { uploadLabel.style.borderColor = 'var(--border-bright)'; });
+  uploadArea.addEventListener('drop', function(e) {
     e.preventDefault();
     uploadLabel.style.borderColor = 'var(--border-bright)';
-    const file = e.dataTransfer.files[0];
+    var file = e.dataTransfer.files[0];
     if (file) {
       fileInput.files = e.dataTransfer.files;
       filenameDisplay.textContent = file.name;
       uploadArea.classList.add('show');
       btnUpload.style.display = 'inline-block';
-      const reader = new FileReader();
-      reader.onload = ev => { btnUpload.dataset.file = ev.target.result; };
+      var reader = new FileReader();
+      reader.onload = function(ev) { btnUpload.dataset.file = ev.target.result; };
       reader.readAsDataURL(file);
     }
   });
 
-  btnUpload.addEventListener('click', async () => {
-    const blob = btnUpload.dataset.blob ? new Blob([Uint8Array.from(atob(btnUpload.dataset.blob.split(',')[1]), c => c.charCodeAt(0))], { type: 'audio/webm' }) : fileInput.files[0];
+  btnUpload.addEventListener('click', async function() {
+    var blob = btnUpload.dataset.blob ? new Blob([Uint8Array.from(atob(btnUpload.dataset.blob.split(',')[1]), function(c) { return c.charCodeAt(0); }))], { type: 'audio/webm' }) : fileInput.files[0];
     if (!blob) { alert('請先選擇檔案或錄製音訊'); return; }
     await submitTranscription(blob, blob.name || 'recording.webm');
   });
 
-  // ─── Transcription ───────────────────────────────────────────────────────
+  // ── Transcription ──
   async function submitTranscription(audioBlob, filename) {
-    const title = document.getElementById('meeting-title').value.trim() || '未命名會議';
-    const participants = document.getElementById('participants').value.trim() || '未填寫';
+    var title = document.getElementById('meeting-title').value.trim() || '未命名會議';
+    var participants = document.getElementById('participants').value.trim() || '未填寫';
     showStatus('正在上傳並排程轉寫任務...', 5);
 
     try {
-      const formData = new FormData();
+      var formData = new FormData();
       formData.append('file', audioBlob, filename);
       formData.append('meeting_title', title);
       formData.append('participants', participants);
 
-      const res = await fetch('/api/transcribe', {
+      var res = await fetch('/api/transcribe', {
         method: 'POST',
         credentials: 'include',
         body: formData,
       });
-      const data = await res.json();
+      var data = await res.json();
       if (!res.ok) {
         if (res.status === 403) {
           hideStatus();
@@ -607,7 +679,7 @@
         throw new Error(data.detail || '轉寫請求失敗');
       }
       pollJob(data.job_id);
-    } catch (err) {
+    } catch(err) {
       hideStatus();
       alert('錯誤：' + err.message);
     }
@@ -615,13 +687,13 @@
 
   function pollJob(jobId) {
     showStatus('排程成功，等待處理...', 10);
-    let attempts = 0;
-    const poll = setInterval(async () => {
+    var attempts = 0;
+    var poll = setInterval(async function() {
       attempts++;
       try {
-        const res = await fetch(`/api/jobs/${jobId}`, { credentials: 'include' });
+        var res = await fetch('/api/jobs/' + jobId, { credentials: 'include' });
         if (!res.ok) return;
-        const job = await res.json();
+        var job = await res.json();
         updateStatus(job.message || '處理中...', job.progress || 10);
         if (job.status === 'completed') {
           clearInterval(poll);
@@ -632,13 +704,13 @@
           hideStatus();
           alert('轉寫失敗：' + (job.error || '未知錯誤'));
         }
-      } catch {}
+      } catch(e) {}
       if (attempts > 120) clearInterval(poll);
     }, 2000);
   }
 
   function showStatus(text, progress) {
-    const bar = document.getElementById('status-bar');
+    var bar = document.getElementById('status-bar');
     bar.classList.add('show');
     document.getElementById('status-text').textContent = text;
     document.getElementById('progress-bar').style.width = progress + '%';
@@ -656,9 +728,8 @@
     document.getElementById('summary-area').value = job.summary || '';
     document.getElementById('summary-card').style.display = 'block';
     document.getElementById('summary-placeholder').style.display = 'none';
-    document.getElementById('summary-result').style.display = 'none';
 
-    const history = JSON.parse(localStorage.getItem('mr_history') || '[]');
+    var history = JSON.parse(localStorage.getItem('mr_history') || '[]');
     history.unshift({
       id: job.job_id,
       title: job.meeting_title,
@@ -671,29 +742,31 @@
     renderHistory();
   }
 
-  // ─── History ──────────────────────────────────────────────────────────────
-  function renderHistory(filter = '') {
-    const history = JSON.parse(localStorage.getItem('mr_history') || '[]');
-    const list = document.getElementById('history-list');
-    const q = filter.toLowerCase();
-    const filtered = history.filter(h =>
-      !q || h.title?.toLowerCase().includes(q) || h.participants?.toLowerCase().includes(q)
-    );
+  // ── History ──
+  function renderHistory(filter) {
+    filter = filter || '';
+    var history = JSON.parse(localStorage.getItem('mr_history') || '[]');
+    var list = document.getElementById('history-list');
+    var q = filter.toLowerCase();
+    var filtered = history.filter(function(h) {
+      return !q || (h.title && h.title.toLowerCase().includes(q)) || (h.participants && h.participants.toLowerCase().includes(q));
+    });
     if (!filtered.length) {
       list.innerHTML = '<li class="history-empty">尚無記錄</li>';
       return;
     }
-    list.innerHTML = filtered.map(h => `
-      <li class="history-item" onclick="loadHistory('${h.id}')">
-        <span class="history-item-title">${h.title || '未命名'}</span>
-        <span class="history-item-meta">${h.participants || ''} · ${new Date(h.date).toLocaleDateString('zh-TW')}</span>
-      </li>
-    `).join('');
+    list.innerHTML = filtered.map(function(h) {
+      return '<li class="history-item" onclick="loadHistory(\'' + h.id + '\')">' +
+        '<span class="history-item-title">' + (h.title || '未命名') + '</span>' +
+        '<span class="history-item-meta">' + (h.participants || '') + ' · ' + new Date(h.date).toLocaleDateString('zh-TW') + '</span>' +
+        '</li>';
+    }).join('');
   }
 
   window.loadHistory = function(id) {
-    const history = JSON.parse(localStorage.getItem('mr_history') || '[]');
-    const h = history.find(x => x.id == id);
+    var history = JSON.parse(localStorage.getItem('mr_history') || '[]');
+    var h = null;
+    for (var i = 0; i < history.length; i++) { if (history[i].id == id) { h = history[i]; break; } }
     if (!h) return;
     document.getElementById('meeting-title').value = h.title || '';
     document.getElementById('participants').value = h.participants || '';
@@ -703,25 +776,29 @@
     document.getElementById('summary-placeholder').style.display = h.summary ? 'none' : 'flex';
   };
 
-  document.getElementById('search-history').addEventListener('input', e => renderHistory(e.target.value));
-  document.getElementById('btn-clear-history').addEventListener('click', () => {
+  document.getElementById('search-history').addEventListener('input', function(e) { renderHistory(e.target.value); });
+  document.getElementById('btn-clear-history').addEventListener('click', function() {
     if (confirm('確定清除所有本地記錄？')) {
       localStorage.removeItem('mr_history');
       renderHistory();
     }
   });
 
-  // ─── Copy buttons ─────────────────────────────────────────────────────────
-  document.getElementById('btn-copy-transcript').addEventListener('click', () => {
+  // ── Copy ──
+  document.getElementById('btn-copy-transcript').addEventListener('click', function() {
     navigator.clipboard.writeText(document.getElementById('transcript-area').value);
-    alert('已複製到剪貼簿！');
+    this.textContent = '已複製!';
+    var self = this;
+    setTimeout(function() { self.textContent = '複製'; }, 1500);
   });
-  document.getElementById('btn-copy-summary').addEventListener('click', () => {
+  document.getElementById('btn-copy-summary').addEventListener('click', function() {
     navigator.clipboard.writeText(document.getElementById('summary-area').value);
-    alert('已複製到剪貼簿！');
+    this.textContent = '已複製!';
+    var self = this;
+    setTimeout(function() { self.textContent = '複製全文'; }, 1500);
   });
 
-  // ─── Init ─────────────────────────────────────────────────────────────────
+  // ── Init ──
   renderHistory();
 </script>
 
