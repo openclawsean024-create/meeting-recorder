@@ -712,7 +712,7 @@
         var res = await fetch('/api/jobs/' + jobId, { credentials: 'include' });
         if (!res.ok) return;
         var job = await res.json();
-        updateStatus(job.message || '處理中...', job.progress || 10);
+        updateStatus(job.status === 'processing' ? '處理中...' : job.status === 'completed' ? '完成' : '失敗', job.progress || 10);
         if (job.status === 'completed') {
           clearInterval(poll);
           hideStatus();
