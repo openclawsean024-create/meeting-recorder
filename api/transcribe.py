@@ -1,4 +1,4 @@
-"""Transcription API endpoint."""
+"""Transcription API endpoint — Phase 3: GPT Summary + Speaker Diarization."""
 from __future__ import annotations
 
 import asyncio
@@ -9,9 +9,8 @@ import uuid
 from pathlib import Path
 
 import httpx
-import supabase
 from supabase import create_client
-from fastapi import APIRouter, File, Form, HTTPException, Request, UploadFile
+from fastapi import APIRouter, BackgroundTasks, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import JSONResponse
 
 router = APIRouter()
@@ -76,38 +75,171 @@ def check_usage_limit(user_id: str, plan: str) -> tuple[bool, int, float]:
     return used < limit, limit, used
 
 
-def build_structured_summary(title: str, participants: str, transcript: str) -> str:
+# ─────────────────────────────────────────────
+# Phase 3: GPT-powered meeting minutes + speaker diarization
+# ─────────────────────────────────────────────
+
+async def call_openai_gpt(prompt: str, api_key: str, model: str = "gpt-4o-mini", temperature: float = 0.3) -> str:
+    """Call GPT-4o-mini for structured output."""
+    async with httpx.AsyncClient(timeout=60.0) as http:
+        resp = await http.post(
+            "https://api.openai.com/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json",
+            },
+            json={
+                "model": model,
+                "messages": [{"role": "user", "content": prompt}],
+                "temperature": temperature,
+            },
+        )
+    if resp.status_code >= 400:
+        raise RuntimeError(f"GPT API error: {resp.status_code} {resp.text}")
+    payload = resp.json()
+    return payload["choices"][0]["message"]["content"]
+
+
+def build_speaker_segmentation_prompt(transcript: str, speaker_count: int) -> str:
+    """Prompt to identify and label speakers in a transcript."""
+    speakers = ", ".join([f"發言者 {chr(65+i)}" for i in range(speaker_count)])
+    return f"""你是一個會議錄音發言者分離助理。請根據以下逐字稿，自動識別並標記不同的發言者。
+
+已知發言者人數：{speaker_count} 人
+發言者名稱：{speakers}
+
+請用以下格式回覆（只回覆標記後的逐字稿，不要有其他說明）：
+
+【發言者 A】：...發言內容...
+【發言者 B】：...發言內容...
+（依此類推）
+
+規則：
+1. 嚴格只使用上述發言者名稱
+2. 盡量保持發言內容完整，不要自行詮釋或濃縮
+3. 如果無法確認發言者，根據發言順序輪流分配
+4. 每個發言區塊以發言者標籤開頭
+
+逐字稿：
+{transcript}"""
+
+
+def build_meeting_minutes_prompt(transcript: str, meeting_title: str, participants: str, language: str = "zh-TW") -> str:
+    """Prompt to generate a structured meeting minutes from transcript."""
+    lang_instruction = "請用繁體中文回覆" if language.startswith("zh") else "Reply in the same language as the transcript."
+    return f"""{lang_instruction}
+
+你是一個專業的會議記錄助理。請根據以下會議逐字稿，產生一份結構化的 Meeting Minutes。
+
+會議標題：{meeting_title}
+與會人員：{participants}
+
+請嚴格按照以下格式輸出：
+
+# Meeting Minutes｜{meeting_title}
+
+## 📋 會議概覽
+- **會議主題：** [主題]
+- **與會人員：** [人員名單]
+- **記錄時間：** [今天日期]
+
+## 📝 逐字稿（發言者標記）
+[按發言者分段顯示的逐字稿]
+
+## 💡 會議摘要
+[2-3 段的會議重點摘要，用自己的話說]
+
+## ✅ 決策記錄
+[列出會議中達成的具體決策]
+
+## 📌 行動項目（待辦）
+[列出每個待辦事項，包含：動作、負責人、期限（如果有的話）]
+格式範例：
+- [ ] [動作描述] — 負責人：[誰]
+- [ ] [動作描述] — 負責人：[誰]
+
+## ⚠️ 風險與待解決問題
+[列出提到的風險、阻塞點、或尚未解決的問題]
+
+## 🔑 關鍵字
+[列出 5-8 個本會議的關鍵字]
+
+---
+
+逐字稿內容：
+{transcript}
+
+請開始產生 Meeting Minutes："""
+
+
+async def segment_speakers(transcript: str, speaker_count: int, api_key: str) -> str:
+    """Use GPT to segment transcript by speaker."""
+    if speaker_count <= 1:
+        return transcript
+    try:
+        prompt = build_speaker_segmentation_prompt(transcript, speaker_count)
+        result = await call_openai_gpt(prompt, api_key)
+        # If GPT returned something reasonable, use it; otherwise return original
+        if result and len(result) > len(transcript) * 0.5:
+            return result
+        return transcript
+    except Exception:
+        return transcript
+
+
+async def generate_gpt_minutes(
+    transcript: str,
+    meeting_title: str,
+    participants: str,
+    api_key: str,
+    language: str = "zh-TW",
+) -> str:
+    """Use GPT-4o-mini to generate structured meeting minutes."""
+    try:
+        prompt = build_meeting_minutes_prompt(transcript, meeting_title, participants, language)
+        result = await call_openai_gpt(prompt, api_key, model="gpt-4o-mini")
+        return result
+    except Exception as e:
+        # Fallback to simple summary
+        return build_simple_summary(transcript, meeting_title, participants)
+
+
+def build_simple_summary(transcript: str, meeting_title: str, participants: str) -> str:
+    """Fallback simple summary when GPT is unavailable."""
     lines = [l.strip() for l in transcript.splitlines() if l.strip()]
-    decision_lines = [l for l in lines if any(k in l for k in ["決定", "結論", "確認"])]
-    action_lines = [l for l in lines if any(k in l for k in ["待辦", "跟進", "action"])]
-    risk_lines = [l for l in lines if any(k in l for k in ["風險", "阻塞", "問題"])]
-    return "\n".join([
-        "# Meeting Minutes",
-        "",
-        f"- **Meeting Topic:** {title}",
-        f"- **Participants:** {participants}",
-        "",
-        "## Executive Summary",
-        "1. 本會議已完成錄音與逐字稿處理。",
-        "2. 以下為結構化摘要，涵蓋決策、行動項與風險。",
-        "",
-        "## Decisions",
-        *(decision_lines or ["* 尚無明確決策記錄。"]),
-        "",
-        "## Action Items",
-        *(action_lines or ["* 尚無明確行動項。"]),
-        "",
-        "## Risks / Open Questions",
-        *(risk_lines or ["* 尚無風險或未決問題。"]),
-    ])
+    decision_lines = [l for l in lines if any(k in l for k in ["決定", "結論", "確認", "通過", "同意"])]
+    action_lines = [l for l in lines if any(k in l for k in ["待辦", "跟進", "action", "負責", "將會", "會去"])]
+    risk_lines = [l for l in lines if any(k in l for k in ["風險", "阻塞", "問題", "擔心", "需要", "缺口"])]
+    return f"""# Meeting Minutes｜{meeting_title}
+
+## 📋 會議概覽
+- **會議主題：** {meeting_title}
+- **與會人員：** {participants}
+- **記錄時間：** {datetime.date.today().isoformat()}
+
+## 💡 會議摘要
+本會議已完成錄音與逐字稿處理。以下為結構化摘要。
+
+## ✅ 決策記錄
+{chr(10).join(f'- {l}' for l in (decision_lines or ['* 尚無明確決策記錄。']))}
+
+## 📌 行動項目（待辦）
+{chr(10).join(f'- [ ] {l}' for l in (action_lines or ['* 尚無明確行動項。']))}
+
+## ⚠️ 風險與待解決問題
+{chr(10).join(f'- {l}' for l in (risk_lines or ['* 尚無風險或未決問題。']))}
+"""
 
 
 @router.post("/api/transcribe")
 async def transcribe(
     request: Request,
+    background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     meeting_title: str = Form("未命名會議"),
     participants: str = Form("未填寫"),
+    speaker_count: int = Form(2),
+    language: str = Form("zh-TW"),
 ):
     user_id, plan = get_user_from_request(request)
 
@@ -133,8 +265,8 @@ async def transcribe(
     with upload_path.open("wb") as f:
         shutil.copyfileobj(file.file, f)
 
-    # Estimate minutes from file size (rough: 1MB ≈ 1 min for webm)
-    estimated_minutes = upload_path.stat().st_size / (1024 * 1024)
+    # Estimate minutes from file size (rough: 1MB ≈ 1 min)
+    estimated_minutes = max(0.5, upload_path.stat().st_size / (1024 * 1024))
 
     # Create job record
     client = get_service_client()
@@ -148,12 +280,17 @@ async def transcribe(
         "transcript": "",
         "summary": "",
         "minutes": round(estimated_minutes, 2),
+        "speaker_count": speaker_count,
+        "language": language,
         "error": None,
     }).execute()
 
-    # Process async
-    asyncio.create_task(
-        run_transcription_job(job_id, upload_path, user_id, api_key)
+    # Process in background (FastAPI BackgroundTasks — runs after response is sent)
+    # Note: Vercel serverless may still cut long-running tasks; for production,
+    # consider Supabase Edge Functions or a dedicated worker queue.
+    background_tasks.add_task(
+        run_transcription_job, job_id, upload_path, user_id, api_key,
+        speaker_count, language
     )
 
     return JSONResponse({
@@ -163,7 +300,14 @@ async def transcribe(
     })
 
 
-async def run_transcription_job(job_id: str, upload_path: Path, user_id: str, api_key: str):
+async def run_transcription_job(
+    job_id: str,
+    upload_path: Path,
+    user_id: str,
+    api_key: str,
+    speaker_count: int,
+    language: str,
+):
     client = get_service_client()
     try:
         # Update to transcribing
@@ -172,11 +316,15 @@ async def run_transcription_job(job_id: str, upload_path: Path, user_id: str, ap
             "progress": 20,
         }).eq("job_id", job_id).execute()
 
-        # Transcribe with Whisper
-        async with httpx.AsyncClient(timeout=180) as http:
+        # ── Step 1: Whisper transcription ──
+        async with httpx.AsyncClient(timeout=300.0) as http:
             with upload_path.open("rb") as f:
                 files = {"file": (upload_path.name, f, "application/octet-stream")}
-                data = {"model": "whisper-1"}
+                data = {
+                    "model": "whisper-1",
+                    "response_format": "verbose_json",
+                    "timestamp_granularities[]": "word",
+                }
                 resp = await http.post(
                     "https://api.openai.com/v1/audio/transcriptions",
                     headers={"Authorization": f"Bearer {api_key}"},
@@ -188,28 +336,46 @@ async def run_transcription_job(job_id: str, upload_path: Path, user_id: str, ap
             raise RuntimeError(f"Whisper API error: {resp.status_code} {resp.text}")
 
         payload = resp.json()
-        transcript = str(payload.get("text") or "").strip()
-        if not transcript:
-            transcript = "（Whisper API 回傳空文字，請確認音訊品質）"
+        transcript_raw = str(payload.get("text") or "").strip()
+        if not transcript_raw:
+            transcript_raw = "（Whisper API 回傳空文字，請確認音訊品質）"
 
-        # Estimate actual minutes from transcript length (rough heuristic)
-        estimated_minutes = max(0.5, len(transcript) / 300)
+        client.table("transcription_jobs").update({
+            "progress": 50,
+        }).eq("job_id", job_id).execute()
 
-        # Build summary
+        # ── Step 2: Speaker Diarization via GPT ──
+        transcript_segmented = await segment_speakers(transcript_raw, speaker_count, api_key)
+
+        client.table("transcription_jobs").update({
+            "progress": 65,
+        }).eq("job_id", job_id).execute()
+
+        # ── Step 3: Estimate actual minutes ──
+        estimated_minutes = max(0.5, len(transcript_raw) / 300)
+
+        # ── Step 4: GPT Meeting Minutes ──
         job = client.table("transcription_jobs").select(
             "meeting_title, participants"
         ).eq("job_id", job_id).execute().data[0]
-        summary = build_structured_summary(
+
+        summary = await generate_gpt_minutes(
+            transcript_segmented,
             job.get("meeting_title", ""),
             job.get("participants", ""),
-            transcript,
+            api_key,
+            language,
         )
 
-        # Update job
+        client.table("transcription_jobs").update({
+            "progress": 90,
+        }).eq("job_id", job_id).execute()
+
+        # ── Step 5: Save results ──
         client.table("transcription_jobs").update({
             "status": "completed",
             "progress": 100,
-            "transcript": transcript,
+            "transcript": transcript_segmented,
             "summary": summary,
             "minutes": round(estimated_minutes, 2),
         }).eq("job_id", job_id).execute()
@@ -218,7 +384,7 @@ async def run_transcription_job(job_id: str, upload_path: Path, user_id: str, ap
         client.table("usage_records").insert({
             "user_id": user_id,
             "job_id": job_id,
-            "characters": len(transcript),
+            "characters": len(transcript_raw),
             "minutes": round(estimated_minutes, 2),
         }).execute()
 
@@ -230,7 +396,6 @@ async def run_transcription_job(job_id: str, upload_path: Path, user_id: str, ap
         }).eq("job_id", job_id).execute()
 
     finally:
-        # Cleanup
         try:
             upload_path.unlink(missing_ok=True)
         except Exception:

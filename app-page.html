@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>會議工作台｜Meeting Recorder</title>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     /* ══════════════════════════════════════════════════════════════
        SOLANA.COM AUTHENTIC STYLE — Meeting Recorder v3
@@ -420,6 +421,32 @@
           <input type="text" id="participants" placeholder="例如：CEO, CTO, PM" value="">
         </div>
       </div>
+      <!-- Phase 3: Speaker count + language -->
+      <div class="info-row" style="margin-top:8px;">
+        <div class="info-field">
+          <label>發言者人數</label>
+          <select id="speaker-count" style="width:100%;padding:10px 13px;border:1px solid var(--border-bright);border-radius:var(--radius-xs);font-size:13px;font-family:var(--font);color:var(--text);background:rgba(255,255,255,0.04);outline:none;">
+            <option value="1">1 人（單人）</option>
+            <option value="2" selected>2 人</option>
+            <option value="3">3 人</option>
+            <option value="4">4 人</option>
+            <option value="5">5 人</option>
+            <option value="6">6 人</option>
+            <option value="8">8 人（多人會議）</option>
+          </select>
+        </div>
+        <div class="info-field">
+          <label>音訊語言</label>
+          <select id="audio-language" style="width:100%;padding:10px 13px;border:1px solid var(--border-bright);border-radius:var(--radius-xs);font-size:13px;font-family:var(--font);color:var(--text);background:rgba(255,255,255,0.04);outline:none;">
+            <option value="zh-TW" selected>繁體中文</option>
+            <option value="zh-CN">簡體中文</option>
+            <option value="en">English</option>
+            <option value="ja">日本語</option>
+            <option value="ko">한국어</option>
+            <option value="auto">自動偵測</option>
+          </select>
+        </div>
+      </div>
 
       <div style="margin-top: 4px;">
         <span class="section-label" style="margin-bottom:14px;">錄音控制</span>
@@ -489,6 +516,8 @@
       <h2>📋 會議紀要（Meeting Minutes）</h2>
       <div class="section-header-actions">
         <button class="btn-sm primary" id="btn-copy-summary">複製全文</button>
+        <button class="btn-sm" id="btn-export-md">📄 Markdown</button>
+        <button class="btn-sm" id="btn-export-pdf">📕 PDF</button>
       </div>
     </div>
     <textarea id="summary-area" readonly style="min-height:200px;"></textarea>
@@ -675,6 +704,8 @@
       formData.append('file', audioBlob, filename);
       formData.append('meeting_title', title);
       formData.append('participants', participants);
+      formData.append('speaker_count', document.getElementById('speaker-count').value);
+      formData.append('language', document.getElementById('audio-language').value);
 
       var res = await fetch('/api/transcribe', {
         method: 'POST',
@@ -814,6 +845,124 @@
     this.textContent = '已複製!';
     var self = this;
     setTimeout(function() { self.textContent = '複製全文'; }, 1500);
+  });
+
+  // ── Phase 3: Multi-format Export ──
+  document.getElementById('btn-export-md').addEventListener('click', function() {
+    var title = document.getElementById('meeting-title').value || '未命名會議';
+    var summary = document.getElementById('summary-area').value;
+    var transcript = document.getElementById('transcript-area').value;
+    var participants = document.getElementById('participants').value || '未填寫';
+    var date = new Date().toLocaleDateString('zh-TW');
+
+    var md = '# ' + title + '｜Meeting Minutes\n\n';
+    md += '> 與會人員：' + participants + ' | 記錄日期：' + date + '\n\n';
+    md += '---\n\n';
+    md += '## 會議紀要\n\n' + (summary || '(無)') + '\n\n';
+    md += '---\n\n## 逐字稿\n\n' + (transcript || '(無)') + '\n';
+
+    var blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = title.replace(/[^\w\u4e00-\u9fa5]/g, '_') + '_會議紀要.md';
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  document.getElementById('btn-export-pdf').addEventListener('click', function() {
+    var title = document.getElementById('meeting-title').value || '未命名會議';
+    var summary = document.getElementById('summary-area').value || '';
+    var transcript = document.getElementById('transcript-area').value || '';
+    var participants = document.getElementById('participants').value || '未填寫';
+    var date = new Date().toLocaleDateString('zh-TW');
+
+    try {
+      var jsPDF = window.jspdf && window.jspdf.jsPDF;
+      if (!jsPDF) {
+        alert('PDF 函式庫載入中，請稍後再試，或使用 Markdown 匯出。');
+        return;
+      }
+      var doc = new jsPDF();
+      var pageW = doc.internal.pageSize.getWidth();
+      var margin = 20;
+      var lineHeight = 7;
+      var y = margin;
+      var maxY = doc.internal.pageSize.getHeight() - margin;
+
+      function addPage() {
+        doc.addPage();
+        y = margin;
+      }
+      function checkPage(needed) {
+        if (y + needed > maxY) { addPage(); }
+      }
+      function wrapText(text, maxW) {
+        var lines = doc.splitTextToSize(text, maxW - margin * 2);
+        for (var i = 0; i < lines.length; i++) {
+          checkPage(lineHeight);
+          doc.setFontSize(10);
+          doc.setTextColor(80);
+          doc.text(lines[i], margin, y);
+          y += lineHeight;
+        }
+      }
+
+      // Header
+      doc.setFontSize(20);
+      doc.setTextColor(30);
+      doc.setFont(undefined, 'bold');
+      doc.text(title, margin, y);
+      y += 10;
+
+      doc.setFontSize(10);
+      doc.setTextColor(140);
+      doc.setFont(undefined, 'normal');
+      doc.text('與會人員：' + participants + '　｜　記錄日期：' + date, margin, y);
+      y += 12;
+
+      // Divider
+      doc.setDrawColor(220);
+      doc.line(margin, y, pageW - margin, y);
+      y += 10;
+
+      // Summary section
+      doc.setFontSize(14);
+      doc.setTextColor(30);
+      doc.setFont(undefined, 'bold');
+      doc.text('Meeting Minutes', margin, y);
+      y += 8;
+
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'normal');
+      doc.setTextColor(60);
+      wrapText(summary || '(無)', pageW);
+      y += 6;
+
+      // Divider
+      checkPage(10);
+      doc.setDrawColor(220);
+      doc.line(margin, y, pageW - margin, y);
+      y += 10;
+
+      // Transcript
+      doc.setFontSize(14);
+      doc.setTextColor(30);
+      doc.setFont(undefined, 'bold');
+      doc.text('逐字稿', margin, y);
+      y += 8;
+
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'normal');
+      doc.setTextColor(60);
+      wrapText(transcript || '(無)', pageW);
+
+      var filename = title.replace(/[^\w\u4e00-\u9fa5]/g, '_') + '_會議紀要.pdf';
+      doc.save(filename);
+    } catch(e) {
+      console.error('PDF export error:', e);
+      alert('PDF 匯出失敗，請嘗試使用 Markdown 匯出。');
+    }
   });
 
   // ── Init ──
