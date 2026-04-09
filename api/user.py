@@ -1,8 +1,8 @@
 """User API: API key management, usage dashboard."""
 from __future__ import annotations
 
+import datetime
 import os
-import supabase
 from supabase import create_client
 from fastapi import APIRouter, Request, HTTPException
 from fastapi.responses import JSONResponse
@@ -16,6 +16,8 @@ SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY", "")
 
 
 def get_service_client():
+    if not SUPABASE_URL or not SUPABASE_SERVICE_KEY:
+        raise HTTPException(500, "Supabase not configured")
     return create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 
 
@@ -131,7 +133,7 @@ def get_usage(request: Request):
     # Get plan
     profile_resp = client.table("users").select("plan").eq("id", user_id).execute()
     plan = profile_resp.data[0].get("plan", "free") if profile_resp.data else "free"
-    limits = {"free": 60, "pro": 600, "business": 6000}
+    limits = {"free": 60, "pro": 600, "business": 3000}
     limit = limits.get(plan, 60)
 
     # Recent jobs
@@ -139,11 +141,4 @@ def get_usage(request: Request):
         "job_id, meeting_title, status, minutes, created_at"
     ).eq("user_id", user_id).order("created_at", desc=True).limit(10).execute()
 
-    return JSONResponse({
-        "plan": plan,
-        "limit_minutes": limit,
-        "used_minutes": total_minutes,
-        "remaining_minutes": max(0, limit - total_minutes),
-        "total_jobs": total_jobs,
-        "recent_jobs": recent_resp.data or [],
-    })
+    return JSONResponse({"plan": plan, "limit_minutes": limit, "used_minutes": total_minutes, "remaining_minutes": max(0, limit - total_minutes), "total_jobs": total_jobs, "total_characters": total_chars, "recent_jobs": recent_resp.data or []})

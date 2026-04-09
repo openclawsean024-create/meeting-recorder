@@ -19,7 +19,7 @@
     { "src": "/dashboard", "dest": "/dashboard.html" },
     { "src": "/app/api-keys", "dest": "/api-keys.html" },
     { "src": "/landing.html", "dest": "/landing.html" },
-    { "src": "/(.*)", "dest": "/landing.html" }
+    { "src": "/(.*)", "dest": "/app.py" }
   ],
   "headers": [
     {
