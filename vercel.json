@@ -20,6 +20,7 @@
     { "src": "/app/api-keys", "dest": "/api-keys.html" },
     { "src": "/landing.html", "dest": "/landing.html" },
     { "src": "/share", "dest": "/share.html" },
+    { "src": "/share.html", "dest": "/share.html" },
     { "src": "/(.*)", "dest": "/app.py" }
   ],
   "headers": [

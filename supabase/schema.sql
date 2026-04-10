@@ -43,3 +43,36 @@ DROP TRIGGER IF EXISTS set_updated_at ON public.users;
 CREATE TRIGGER set_updated_at
     BEFORE UPDATE ON public.users
     FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+-- ── Shared Notes table ──
+CREATE TABLE IF NOT EXISTS public.shared_notes (
+    share_id    TEXT PRIMARY KEY,
+    title       TEXT DEFAULT '',
+    participants TEXT DEFAULT '',
+    transcript  TEXT DEFAULT '',
+    summary     TEXT DEFAULT '',
+    created_at  TEXT DEFAULT '',
+    created_by  UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+    updated_at  TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.shared_notes ENABLE ROW LEVEL SECURITY;
+
+-- Policy: anyone can read shared notes (public read for share links)
+CREATE POLICY "Anyone can read shared notes"
+    ON public.shared_notes FOR SELECT
+    USING (true);
+
+-- Policy: authenticated users can insert/update their own shared notes
+CREATE POLICY "Authenticated users can create shared notes"
+    ON public.shared_notes FOR INSERT
+    WITH CHECK (true);
+
+CREATE POLICY "Authenticated users can update shared notes"
+    ON public.shared_notes FOR UPDATE
+    USING (true);
+
+DROP TRIGGER IF EXISTS set_shared_notes_updated_at ON public.shared_notes;
+CREATE TRIGGER set_shared_notes_updated_at
+    BEFORE INSERT OR UPDATE ON public.shared_notes
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at();
