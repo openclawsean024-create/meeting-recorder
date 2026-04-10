@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>唯讀分享｜Meeting Recorder</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:#000; --card:rgba(255,255,255,0.035); --border:rgba(255,255,255,0.08); --text:#f4f4f5; --text-2:rgba(244,244,245,0.58); --sol-1:#ff9317; --sol-3:#ec4899; --sol-4:#a855f7; --radius:20px;
+    }
+    body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Noto Sans TC', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 40px 20px; }
+    .wrap { max-width: 920px; margin: 0 auto; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 18px; backdrop-filter: blur(18px); }
+    h1 { font-size: 28px; margin-bottom: 8px; background: linear-gradient(135deg, var(--sol-1), var(--sol-3), var(--sol-4)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .meta { color: var(--text-2); font-size: 13px; margin-bottom: 18px; }
+    .label { font-size: 12px; color: var(--text-2); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 8px; }
+    pre { white-space: pre-wrap; word-break: break-word; line-height: 1.75; font-size: 13px; color: var(--text); }
+    .empty { color: var(--text-2); text-align: center; padding: 50px 0; }
+    a { color: #c4b5fd; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1 id="title">載入中...</h1>
+      <div class="meta" id="meta"></div>
+      <div class="empty" id="empty">找不到分享內容，請回到工作台重新產生連結。</div>
+    </div>
+    <div class="card" id="summary-card" style="display:none;">
+      <div class="label">會議摘要</div>
+      <pre id="summary"></pre>
+    </div>
+    <div class="card" id="transcript-card" style="display:none;">
+      <div class="label">逐字稿</div>
+      <pre id="transcript"></pre>
+    </div>
+  </div>
+  <script>
+    const id = (location.hash || '').replace('#', '');
+    const store = JSON.parse(localStorage.getItem('mr_shared_notes') || '{}');
+    const data = store[id];
+    if (data) {
+      document.getElementById('title').textContent = data.title || '未命名會議';
+      document.getElementById('meta').textContent = (data.participants || '') + ' ・ ' + new Date(data.createdAt || Date.now()).toLocaleString('zh-TW');
+      document.getElementById('empty').style.display = 'none';
+      if (data.summary) {
+        document.getElementById('summary-card').style.display = 'block';
+        document.getElementById('summary').textContent = data.summary;
+      }
+      if (data.transcript) {
+        document.getElementById('transcript-card').style.display = 'block';
+        document.getElementById('transcript').textContent = data.transcript;
+      }
+    } else {
+      document.getElementById('title').textContent = '唯讀分享';
+    }
+  </script>
+</body>
+</html>

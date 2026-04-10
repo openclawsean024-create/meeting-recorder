@@ -789,6 +789,70 @@
     });
     localStorage.setItem('mr_history', JSON.stringify(history.slice(0, 50)));
     renderHistory();
+    renderSharePanel(job);
+  }
+
+  function buildMeetingMarkdown(job) {
+    var title = job.meeting_title || '未命名會議';
+    var participants = job.participants || '未填寫';
+    var transcript = job.transcript || '';
+    var summary = job.summary || '';
+    var date = new Date().toLocaleDateString('zh-TW');
+    var md = '# ' + title + '｜Meeting Minutes\n\n';
+    md += '> 與會人員：' + participants + ' | 記錄日期：' + date + '\n\n';
+    md += '---\n\n';
+    md += '## 會議紀要\n\n' + (summary || '(無)') + '\n\n';
+    md += '---\n\n## 逐字稿\n\n' + (transcript || '(無)') + '\n';
+    return md;
+  }
+
+  function getShareStore() {
+    try {
+      return JSON.parse(localStorage.getItem('mr_shared_notes') || '{}');
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function saveShareRecord(payload) {
+    var store = getShareStore();
+    store[payload.shareId] = payload;
+    localStorage.setItem('mr_shared_notes', JSON.stringify(store));
+  }
+
+  function renderSharePanel(job) {
+    var card = document.getElementById('share-card');
+    var urlEl = document.getElementById('share-url');
+    if (!card || !urlEl) return;
+    card.style.display = 'block';
+    var shareId = 'mr_' + (job.job_id || Date.now());
+    var payload = {
+      shareId: shareId,
+      title: job.meeting_title || '未命名會議',
+      participants: job.participants || '未填寫',
+      transcript: job.transcript || '',
+      summary: job.summary || '',
+      createdAt: new Date().toISOString(),
+    };
+    saveShareRecord(payload);
+    urlEl.value = window.location.origin + '/share.html#' + shareId;
+    document.getElementById('btn-copy-share').onclick = function() {
+      navigator.clipboard.writeText(urlEl.value);
+      this.textContent = '已複製';
+      var btn = this;
+      setTimeout(function() { btn.textContent = '複製連結'; }, 1500);
+    };
+  }
+
+  function exportMarkdown(job) {
+    var md = buildMeetingMarkdown(job);
+    var blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = (job.meeting_title || '未命名會議').replace(/[^\w\u4e00-\u9fa5]/g, '_') + '_會議紀要.md';
+    a.click();
+    URL.revokeObjectURL(url);
   }
 
   // ── History ──
@@ -849,25 +913,12 @@
 
   // ── Phase 3: Multi-format Export ──
   document.getElementById('btn-export-md').addEventListener('click', function() {
-    var title = document.getElementById('meeting-title').value || '未命名會議';
-    var summary = document.getElementById('summary-area').value;
-    var transcript = document.getElementById('transcript-area').value;
-    var participants = document.getElementById('participants').value || '未填寫';
-    var date = new Date().toLocaleDateString('zh-TW');
-
-    var md = '# ' + title + '｜Meeting Minutes\n\n';
-    md += '> 與會人員：' + participants + ' | 記錄日期：' + date + '\n\n';
-    md += '---\n\n';
-    md += '## 會議紀要\n\n' + (summary || '(無)') + '\n\n';
-    md += '---\n\n## 逐字稿\n\n' + (transcript || '(無)') + '\n';
-
-    var blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
-    var url = URL.createObjectURL(blob);
-    var a = document.createElement('a');
-    a.href = url;
-    a.download = title.replace(/[^\w\u4e00-\u9fa5]/g, '_') + '_會議紀要.md';
-    a.click();
-    URL.revokeObjectURL(url);
+    exportMarkdown({
+      meeting_title: document.getElementById('meeting-title').value || '未命名會議',
+      participants: document.getElementById('participants').value || '未填寫',
+      transcript: document.getElementById('transcript-area').value,
+      summary: document.getElementById('summary-area').value,
+    });
   });
 
   document.getElementById('btn-export-pdf').addEventListener('click', function() {
@@ -964,6 +1015,14 @@
       alert('PDF 匯出失敗，請嘗試使用 Markdown 匯出。');
     }
   });
+
+  // ── Share panel ──
+  (function initSharePanel() {
+    var existing = document.getElementById('summary-card');
+    if (!existing) return;
+    var shareHtml = '\n  <div class="transcript-area" id="share-card" style="display:none;">\n    <div class="section-header">\n      <h2>🔗 唯讀分享</h2>\n      <div class="section-header-actions">\n        <button class="btn-sm primary" id="btn-copy-share">複製連結</button>\n      </div>\n    </div>\n    <input id="share-url" readonly style="width:100%;padding:12px 14px;border:1px solid var(--border-bright);border-radius:var(--radius-xs);background:rgba(255,255,255,0.03);color:var(--text);font-size:13px;">\n    <p style="margin-top:10px;color:var(--text-muted);font-size:12px;line-height:1.6;">連結會指向本機唯讀頁，方便快速分享會議紀錄。正式多人分享版可再接 Supabase。 </p>\n  </div>';
+    existing.insertAdjacentHTML('afterend', shareHtml);
+  })();
 
   // ── Init ──
   renderHistory();
