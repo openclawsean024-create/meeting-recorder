@@ -818,6 +818,12 @@
     var store = getShareStore();
     store[payload.shareId] = payload;
     localStorage.setItem('mr_shared_notes', JSON.stringify(store));
+    // Also POST to backend for persistence (optional, fails gracefully)
+    fetch('/api/share', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }).catch(function() {});
   }
 
   function renderSharePanel(job) {
@@ -835,7 +841,9 @@
       createdAt: new Date().toISOString(),
     };
     saveShareRecord(payload);
-    urlEl.value = window.location.origin + '/share.html#' + shareId;
+    // Encode full payload in URL hash so share.html works without API call
+    var encoded = btoa(unescape(encodeURIComponent(JSON.stringify(payload)))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+    urlEl.value = window.location.origin + '/share.html#' + shareId + '?d=' + encoded;
     document.getElementById('btn-copy-share').onclick = function() {
       navigator.clipboard.writeText(urlEl.value);
       this.textContent = '已複製';
