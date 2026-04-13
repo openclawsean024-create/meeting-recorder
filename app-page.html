@@ -547,8 +547,7 @@
     <a href="/app/api-keys">API Key</a>
   </div>
   <div class="topbar-right">
-    <span class="user-pill" id="user-name">載入中</span>
-    <button class="btn-outline-sm" id="logout-btn">登出</button>
+    <span class="user-pill" id="user-name">一般使用者</span>
   </div>
 </div>
 
@@ -772,11 +771,7 @@
 document.getElementById('user-name').textContent = '使用者';
 
   // ── Logout ──
-  document.getElementById('logout-btn').addEventListener('click', async function() {
-    window.location.href = '/';
-  });
-
-  // ── Waveform ──
+    // ── Waveform ──
   var waveInterval;
   function startWave() {
     clearInterval(waveInterval);
