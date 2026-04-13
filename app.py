@@ -4,7 +4,7 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, RedirectResponse
 
@@ -20,49 +20,31 @@ app.add_middleware(
 )
 
 # Import and mount API routers
-from api.auth import router as auth_router
-from api.user import router as user_router
 from api.transcribe import router as transcribe_router
 from api.share import router as share_router
+from api.live_transcribe import router as live_transcribe_router
 
-app.include_router(auth_router)
-app.include_router(user_router)
 app.include_router(transcribe_router)
 app.include_router(share_router)
+app.include_router(live_transcribe_router)
 
 
 @app.get("/")
 def root():
-    """Serve landing page for unauthenticated users, or redirect to app."""
-    landing = BASE_DIR / "landing.html"
-    if landing.exists():
-        return FileResponse(landing)
+    """Serve app page directly (no auth required)."""
+    app_file = BASE_DIR / "app-page.html"
+    if app_file.exists():
+        return FileResponse(app_file)
     return {"ok": True, "message": "meeting-recorder"}
 
 
 @app.get("/app")
 def app_page():
-    """Main app page (requires JS auth on client side)."""
+    """Main app page."""
     app_file = BASE_DIR / "app-page.html"
     if app_file.exists():
         return FileResponse(app_file)
-    return RedirectResponse("/landing.html")
-
-
-@app.get("/pricing")
-def pricing_page():
-    p = BASE_DIR / "pricing.html"
-    if p.exists():
-        return FileResponse(p)
-    return RedirectResponse("/landing.html")
-
-
-@app.get("/auth")
-def auth_page():
-    a = BASE_DIR / "auth.html"
-    if a.exists():
-        return FileResponse(a)
-    return RedirectResponse("/landing.html")
+    return {"ok": True}
 
 
 @app.get("/dashboard")

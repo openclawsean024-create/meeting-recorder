@@ -279,67 +279,59 @@
 <script>
   const CIRCUMFERENCE = 2 * Math.PI * 42; // ≈ 264
 
+  // Default quota (no auth needed)
+  const DEFAULT_PLAN = 'pro';
+  const DEFAULT_LIMIT = 600;
+
   async function loadData() {
-    try {
-      const res = await fetch('/api/auth/me', { credentials: 'include' });
-      if (!res.ok) { window.location.href = '/auth'; return; }
-      const { user } = await res.json();
-      document.getElementById('user-name').textContent = user.name || user.email;
+    const meetings = JSON.parse(localStorage.getItem('meetings') || '[]');
+    const usedMinutes = meetings.reduce((sum, m) => sum + (m.duration || 0), 0);
+    const remainingMinutes = Math.max(0, DEFAULT_LIMIT - usedMinutes);
+    const totalJobs = meetings.length;
 
-      const usageRes = await fetch('/api/user/usage', { credentials: 'include' });
-      if (!usageRes.ok) return;
-      const usage = await usageRes.json();
+    document.getElementById('user-name').textContent = '使用者';
+    document.getElementById('stat-minutes').textContent = usedMinutes.toFixed(1);
+    document.getElementById('stat-minutes-limit').textContent = `/ ${DEFAULT_LIMIT} 分鐘`;
+    document.getElementById('stat-jobs').textContent = totalJobs;
+    document.getElementById('stat-remaining').textContent = remainingMinutes.toFixed(1);
+    document.getElementById('stat-plan').textContent = 'Pro';
 
-      const { plan, limit_minutes, used_minutes, remaining_minutes, total_jobs, recent_jobs } = usage;
-      const planNames = { free: 'Free', pro: 'Pro', business: 'Business' };
-      const pct = Math.min(100, Math.round((used_minutes / limit_minutes) * 100));
+    const pct = Math.min(100, Math.round((usedMinutes / DEFAULT_LIMIT) * 100));
+    const bar = document.getElementById('stat-bar-minutes');
+    bar.style.width = pct + '%';
+    if (pct > 80) bar.classList.add('danger');
+    else if (pct > 50) bar.classList.add('warn');
 
-      document.getElementById('stat-minutes').textContent = used_minutes.toFixed(1);
-      document.getElementById('stat-minutes-limit').textContent = `/ ${limit_minutes} 分鐘`;
-      document.getElementById('stat-jobs').textContent = total_jobs;
-      document.getElementById('stat-remaining').textContent = Math.max(0, remaining_minutes).toFixed(1);
-      document.getElementById('stat-plan').textContent = planNames[plan] || plan.toUpperCase();
+    const offset = CIRCUMFERENCE - (pct / 100) * CIRCUMFERENCE;
+    const circle = document.getElementById('quota-circle');
+    circle.style.strokeDashoffset = offset;
+    circle.style.stroke = pct > 80 ? 'var(--danger)' : pct > 50 ? 'var(--warn)' : 'var(--primary)';
+    document.getElementById('quota-pct').textContent = pct + '%';
+    document.getElementById('card-plan-badge').textContent = 'PRO';
+    document.getElementById('quota-plan').textContent = 'Pro';
+    document.getElementById('quota-limit').textContent = DEFAULT_LIMIT + ' 分鐘';
+    document.getElementById('quota-used').textContent = usedMinutes.toFixed(1) + ' 分鐘';
+    document.getElementById('quota-remaining').textContent = remainingMinutes.toFixed(1) + ' 分鐘';
+    document.getElementById('quota-jobs').textContent = totalJobs + ' 筆';
 
-      const bar = document.getElementById('stat-bar-minutes');
-      bar.style.width = pct + '%';
-      if (pct > 80) bar.classList.add('danger');
-      else if (pct > 50) bar.classList.add('warn');
-
-      const offset = CIRCUMFERENCE - (pct / 100) * CIRCUMFERENCE;
-      const circle = document.getElementById('quota-circle');
-      circle.style.strokeDashoffset = offset;
-      circle.style.stroke = pct > 80 ? 'var(--danger)' : pct > 50 ? 'var(--warn)' : 'var(--primary)';
-      document.getElementById('quota-pct').textContent = pct + '%';
-      document.getElementById('card-plan-badge').textContent = (planNames[plan] || plan).toUpperCase();
-      document.getElementById('quota-plan').textContent = planNames[plan] || plan;
-      document.getElementById('quota-limit').textContent = limit_minutes + ' 分鐘';
-      document.getElementById('quota-used').textContent = used_minutes.toFixed(1) + ' 分鐘';
-      document.getElementById('quota-remaining').textContent = Math.max(0, remaining_minutes).toFixed(1) + ' 分鐘';
-      document.getElementById('quota-jobs').textContent = total_jobs + ' 筆';
-
-      const list = document.getElementById('job-list');
-      if (!recent_jobs || recent_jobs.length === 0) {
-        list.innerHTML = '<li class="job-empty">尚無記錄，上傳第一個錄音吧！</li>';
-      } else {
-        list.innerHTML = recent_jobs.map(job => {
-          const date = new Date(job.created_at).toLocaleDateString('zh-TW', { month: 'short', day: 'numeric' });
-          const statusLabel = job.status === 'completed' ? '完成' : job.status === 'processing' ? '處理中' : '失敗';
-          return `<li class="job-item">
-            <span class="job-title">${job.meeting_title || '未命名會議'}</span>
-            <span class="job-meta">${job.minutes?.toFixed(1) || '?'} 分鐘</span>
-            <span class="job-meta">${date}</span>
-            <span class="job-status ${job.status}">${statusLabel}</span>
-          </li>`;
-        }).join('');
-      }
-
-    } catch(err) {
-      console.error(err);
+    const list = document.getElementById('job-list');
+    if (!meetings || meetings.length === 0) {
+      list.innerHTML = '<li class="job-empty">尚無記錄，上傳第一個錄音吧！</li>';
+    } else {
+      list.innerHTML = meetings.map(job => {
+        const date = new Date(job.created_at || Date.now()).toLocaleDateString('zh-TW', { month: 'short', day: 'numeric' });
+        const statusLabel = job.status === 'completed' ? '完成' : job.status === 'processing' ? '處理中' : '失敗';
+        return `<li class="job-item">
+          <span class="job-title">${job.title || '未命名會議'}</span>
+          <span class="job-meta">${(job.duration || 0).toFixed(1)} 分鐘</span>
+          <span class="job-meta">${date}</span>
+          <span class="job-status ${job.status}">${statusLabel}</span>
+        </li>`;
+      }).join('');
     }
   }
 
   document.getElementById('logout-btn').addEventListener('click', async () => {
-    await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
     window.location.href = '/';
   });
 

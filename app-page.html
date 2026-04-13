@@ -527,33 +527,11 @@
 
 <script>
   // ── Auth check ──
-  async function checkAuth() {
-    try {
-      var res = await fetch('/api/auth/me', { credentials: 'include' });
-      if (!res.ok) { window.location.href = '/auth?redirect=/app'; return; }
-      var data = await res.json();
-      document.getElementById('user-name').textContent = data.user.name || data.user.email.split('@')[0];
-    } catch(e) { window.location.href = '/auth?redirect=/app'; }
-  }
-
-  async function checkApiKey() {
-    try {
-      var res = await fetch('/api/user/api-key', { credentials: 'include' });
-      if (res.ok) {
-        var d = await res.json();
-        if (!d.has_api_key) {
-          document.getElementById('alert-no-key').classList.add('show');
-        }
-      }
-    } catch(e) {}
-  }
-
-  checkAuth();
-  checkApiKey();
+  // No auth needed — user is always logged in
+document.getElementById('user-name').textContent = '使用者';
 
   // ── Logout ──
   document.getElementById('logout-btn').addEventListener('click', async function() {
-    await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
     window.location.href = '/';
   });
 
