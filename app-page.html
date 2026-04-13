@@ -365,10 +365,172 @@
       position: relative; z-index: 1;
     }
 
+    .top-line {
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--sol-1), var(--sol-3), var(--sol-4), transparent);
+      position: relative; z-index: 1;
+    }
+
+    /* ── Live mode ── */
+    .live-toggle {
+      display: flex; align-items: center; gap: 8px;
+      margin-top: 14px; padding-top: 14px;
+      border-top: 1px solid var(--border);
+    }
+    .live-toggle-label {
+      font-size: 12px; font-weight: 700; color: var(--text-2);
+      cursor: pointer; display: flex; align-items: center; gap: 6px; user-select: none;
+    }
+    .live-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--text-muted); transition: background 0.3s;
+    }
+    .live-dot.on { background: #22c55e; box-shadow: 0 0 6px #22c55e; animation: live-pulse 1.5s ease-in-out infinite; }
+    .live-dot.recording { background: #ef4444; box-shadow: 0 0 8px #ef4444; animation: live-pulse 0.8s ease-in-out infinite; }
+    @keyframes live-pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(0.85); }
+    }
+    .live-badge {
+      background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.3);
+      color: #4ade80; font-size: 10px; font-weight: 800; padding: 2px 7px;
+      border-radius: 999px; text-transform: uppercase; letter-spacing: .08em;
+    }
+    .live-badge.recording {
+      background: rgba(239,68,68,0.15); border-color: rgba(239,68,68,0.3);
+      color: #f87171;
+    }
+
+    .live-panel {
+      display: none; margin-bottom: 18px;
+    }
+    .live-panel.show { display: block; }
+
+    .live-grid {
+      display: grid;
+      grid-template-columns: 1.3fr 1fr;
+      gap: 18px;
+    }
+    .live-transcript-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 22px 24px;
+      backdrop-filter: blur(20px);
+    }
+    .live-transcript-card:hover { border-color: rgba(168,85,247,0.2); }
+    .live-analysis-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 22px 24px;
+      backdrop-filter: blur(20px);
+      display: flex; flex-direction: column;
+    }
+    .live-analysis-card:hover { border-color: rgba(168,85,247,0.2); }
+
+    .live-tabs {
+      display: flex; gap: 4px; margin-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 4px;
+    }
+    .live-tab {
+      padding: 6px 14px; border-radius: var(--radius-xs) var(--radius-xs) 0 0;
+      font-size: 12px; font-weight: 700; cursor: pointer; color: var(--text-muted);
+      transition: color 0.2s, background 0.2s; border: none; background: none;
+      font-family: var(--font);
+    }
+    .live-tab:hover { color: var(--text); background: var(--card-hover); }
+    .live-tab.active {
+      color: #fb923c;
+      background: rgba(249,115,22,0.08);
+      border-bottom: 2px solid var(--sol-1);
+      margin-bottom: -5px;
+    }
+    .live-tab-count {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 18px; height: 18px; border-radius: 999px;
+      background: rgba(255,255,255,0.08); color: var(--text-muted);
+      font-size: 10px; font-weight: 800; margin-left: 5px;
+      padding: 0 5px;
+    }
+    .live-tab.active .live-tab-count {
+      background: rgba(249,115,22,0.2); color: #fb923c;
+    }
+
+    .live-tab-panels { flex: 1; }
+    .live-tab-panel { display: none; flex-direction: column; gap: 6px; max-height: 360px; overflow-y: auto; }
+    .live-tab-panel.active { display: flex; }
+    .live-item {
+      padding: 9px 12px; border-radius: var(--radius-xs);
+      background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+      font-size: 13px; color: var(--text); line-height: 1.5;
+    }
+    .live-item-meta { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+    .live-empty {
+      text-align: center; padding: 24px 0; color: var(--text-muted);
+      font-size: 12px; line-height: 1.8;
+    }
+    .live-empty-icon { font-size: 28px; margin-bottom: 6px; }
+
+    .live-analyze-spinner {
+      display: none; align-items: center; gap: 8px;
+      padding: 10px 0; font-size: 12px; color: var(--text-muted);
+    }
+    .live-analyze-spinner.on { display: flex; }
+
+    #live-transcript-display {
+      height: 360px; overflow-y: auto; padding: 12px 14px;
+      border: 1px solid var(--border-bright); border-radius: var(--radius-xs);
+      font-size: 13px; color: var(--text); line-height: 1.8;
+      background: rgba(255,255,255,0.02);
+      white-space: pre-wrap; word-break: break-word;
+      transition: border-color 0.2s;
+    }
+    #live-transcript-display:focus-within { border-color: var(--sol-3); }
+    .live-chunk {
+      padding: 2px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+      animation: chunk-fade-in 0.3s ease;
+    }
+    .live-chunk:last-child { border-bottom: none; }
+    .live-chunk-time { font-size: 10px; color: var(--text-muted); margin-right: 6px; }
+    @keyframes chunk-fade-in {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .live-controls-row {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .live-timer {
+      font-size: 28px; font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      background: linear-gradient(135deg, #4ade80, #22d3ee);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      letter-spacing: -0.02em;
+    }
+    .live-timer.recording {
+      background: linear-gradient(135deg, #f87171, #f97316);
+      -webkit-background-clip: text;
+      animation: timer-pulse 0.8s ease-in-out infinite;
+    }
+    .btn-live-start {
+      padding: 9px 20px; border-radius: var(--radius-xs);
+      font-size: 13px; font-weight: 700; border: none;
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: #fff; cursor: pointer; font-family: var(--font);
+      box-shadow: 0 2px 12px rgba(34,197,94,0.3);
+      transition: all 0.2s; display: flex; align-items: center; gap: 6px;
+    }
+    .btn-live-start:hover { transform: translateY(-1px); box-shadow: 0 4px 18px rgba(34,197,94,0.4); }
+    .btn-live-stop {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      box-shadow: 0 2px 12px rgba(239,68,68,0.3);
+    }
+    .btn-live-stop:hover { box-shadow: 0 4px 18px rgba(239,68,68,0.4); }
+    .btn-live-stop:disabled, .btn-live-start:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
     @media (max-width: 900px) {
       .hero { grid-template-columns: 1fr; }
       .bottom-grid { grid-template-columns: 1fr; }
       .info-row { grid-template-columns: 1fr; }
+      .live-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -460,6 +622,15 @@
             <button class="btn-rec stop" id="btn-stop" style="display:none;">⏹ 停止錄音</button>
             <label class="btn-rec upload" for="upload-file-input">📁 上傳音訊</label>
           </div>
+          <!-- Live mode toggle -->
+          <div class="live-toggle">
+            <label class="live-toggle-label" for="live-mode-toggle">
+              <span class="live-dot" id="live-dot"></span>
+              <span class="live-badge" id="live-badge">OFF</span>
+              即時轉寫模式
+            </label>
+            <input type="checkbox" id="live-mode-toggle" style="display:none;">
+          </div>
           <input type="file" id="upload-file-input" accept=".webm,.wav,.mp3,.m4a,.ogg">
           <div class="upload-area" id="upload-area">
             <label for="upload-file-input">點擊選擇音訊檔，或拖放到這裡<br><small style="color:var(--text-muted)">支援 WebM, WAV, MP3, M4A, OGG</small></label>
@@ -480,6 +651,76 @@
       <div id="summary-result" style="display:none;"></div>
     </div>
 
+  </div>
+
+  <!-- Live mode panel -->
+  <div class="live-panel" id="live-panel">
+    <div class="live-grid">
+
+      <!-- Live transcript -->
+      <div class="live-transcript-card">
+        <div class="section-header" style="margin-bottom:10px;">
+          <h2>⚡ 即時逐字稿</h2>
+          <div class="section-header-actions">
+            <button class="btn-sm" id="btn-live-copy">複製</button>
+            <button class="btn-sm" id="btn-live-clear">清除</button>
+          </div>
+        </div>
+        <div class="live-controls-row">
+          <div class="live-timer" id="live-timer">00:00</div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn-live-start" id="btn-live-start">
+              <span id="live-btn-icon">🎙</span>
+              <span id="live-btn-text">開始即時錄音</span>
+            </button>
+          </div>
+        </div>
+        <div id="live-transcript-display" placeholder="按下上方「開始即時錄音」按鈕，麥克風聲音將即時轉寫並顯示在這裡..."></div>
+      </div>
+
+      <!-- Live analysis -->
+      <div class="live-analysis-card">
+        <div class="section-header" style="margin-bottom:0;">
+          <h2>📊 即時會議分析</h2>
+        </div>
+        <div class="live-tabs">
+          <button class="live-tab active" data-tab="decisions" onclick="switchLiveTab('decisions')">
+            決策<span class="live-tab-count" id="count-decisions">0</span>
+          </button>
+          <button class="live-tab" data-tab="actions" onclick="switchLiveTab('actions')">
+            行動項<span class="live-tab-count" id="count-actions">0</span>
+          </button>
+          <button class="live-tab" data-tab="risks" onclick="switchLiveTab('risks')">
+            風險<span class="live-tab-count" id="count-risks">0</span>
+          </button>
+        </div>
+        <div class="live-tab-panels">
+          <div class="live-tab-panel active" id="panel-decisions">
+            <div class="live-empty" id="empty-decisions">
+              <div class="live-empty-icon">⚖️</div>
+              尚無決策記錄<br>開始說話後自動萃取
+            </div>
+          </div>
+          <div class="live-tab-panel" id="panel-actions">
+            <div class="live-empty" id="empty-actions">
+              <div class="live-empty-icon">✅</div>
+              尚無行動項<br>開始說話後自動萃取
+            </div>
+          </div>
+          <div class="live-tab-panel" id="panel-risks">
+            <div class="live-empty" id="empty-risks">
+              <div class="live-empty-icon">⚠️</div>
+              尚無風險記錄<br>開始說話後自動萃取
+            </div>
+          </div>
+        </div>
+        <div class="live-analyze-spinner" id="live-analyze-spinner">
+          <div style="width:14px;height:14px;border:2px solid rgba(255,255,255,0.1);border-top-color:#fb923c;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
+          分析中...
+        </div>
+      </div>
+
+    </div>
   </div>
 
   <!-- Transcript + History -->
@@ -1012,6 +1253,326 @@ document.getElementById('user-name').textContent = '使用者';
 
   // ── Init ──
   renderHistory();
+
+  // ══════════════════════════════════════════════════════════════
+  // LIVE MODE — v3: Real-time transcription + analysis
+  // ══════════════════════════════════════════════════════════════
+
+  // Live mode state
+  var liveActive = false;
+  var liveStream = null;
+  var liveRecorder = null;
+  var liveChunks = [];
+  var liveTimerStart = null;
+  var liveTimerInterval = null;
+  var liveTranscripts = [];      // accumulated transcript text
+  var liveAnalysisResults = { decisions: [], action_items: [], risks: [] };
+  var liveAnalyzeTimer = null;
+  var liveCurrentTab = 'decisions';
+  var liveWaveInterval = null;
+
+  // ── Toggle live panel ──
+  document.getElementById('live-mode-toggle').addEventListener('change', function() {
+    var panel = document.getElementById('live-panel');
+    var dot = document.getElementById('live-dot');
+    var badge = document.getElementById('live-badge');
+    if (this.checked) {
+      panel.classList.add('show');
+      dot.classList.add('on');
+      badge.textContent = 'ON';
+      badge.classList.remove('recording');
+      // Scroll into view
+      panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      panel.classList.remove('show');
+      dot.classList.remove('on', 'recording');
+      badge.textContent = 'OFF';
+      badge.classList.remove('recording');
+      stopLiveRecording();
+    }
+  });
+
+  // ── Tab switching ──
+  window.switchLiveTab = function(tab) {
+    liveCurrentTab = tab;
+    document.querySelectorAll('.live-tab').forEach(function(t) {
+      t.classList.toggle('active', t.dataset.tab === tab);
+    });
+    document.querySelectorAll('.live-tab-panel').forEach(function(p) {
+      p.classList.toggle('active', p.id === 'panel-' + tab);
+    });
+  };
+
+  // ── Live recording ──
+  document.getElementById('btn-live-start').addEventListener('click', async function() {
+    if (!liveActive) {
+      // Start
+      var toggle = document.getElementById('live-mode-toggle');
+      if (!toggle.checked) toggle.checked = true;
+      document.getElementById('live-panel').classList.add('show');
+      document.getElementById('live-dot').classList.add('on');
+      document.getElementById('live-badge').textContent = 'ON';
+      await startLiveRecording();
+    } else {
+      stopLiveRecording();
+    }
+  });
+
+  async function startLiveRecording() {
+    try {
+      liveStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+      liveRecorder = new MediaRecorder(liveStream, { mimeType: 'audio/webm' });
+      liveChunks = [];
+
+      liveRecorder.ondataavailable = function(e) {
+        if (e.data.size > 0) liveChunks.push(e.data);
+      };
+
+      liveRecorder.onstop = function() {
+        processLiveChunk();
+      };
+
+      // Start with small time slice for near-realtime chunks
+      liveRecorder.start(1000); // every 1 second
+      liveActive = true;
+
+      // Update UI
+      var btn = document.getElementById('btn-live-start');
+      btn.classList.add('btn-live-stop');
+      document.getElementById('live-btn-icon').textContent = '⏹';
+      document.getElementById('live-btn-text').textContent = '停止錄音';
+      document.getElementById('live-timer').classList.add('recording');
+      document.getElementById('live-dot').classList.add('recording');
+      document.getElementById('live-dot').classList.remove('on');
+      document.getElementById('live-badge').textContent = 'REC';
+      document.getElementById('live-badge').classList.add('recording');
+
+      // Start timer
+      liveTimerStart = Date.now();
+      liveTimerInterval = setInterval(updateLiveTimer, 1000);
+
+      // Schedule periodic chunk processing
+      scheduleChunkProcessing();
+
+      // Schedule periodic analysis
+      liveAnalyzeTimer = setInterval(runLiveAnalysis, 45000); // every 45 seconds
+
+    } catch(err) {
+      alert('無法存取麥克風，請確認瀏覽器權限已開啟。');
+      console.error(err);
+    }
+  }
+
+  function stopLiveRecording() {
+    if (liveRecorder && liveRecorder.state !== 'inactive') {
+      liveRecorder.stop();
+    }
+    if (liveStream) {
+      liveStream.getTracks().forEach(function(t) { t.stop(); });
+    }
+    liveActive = false;
+
+    clearInterval(liveTimerInterval);
+    clearInterval(liveAnalyzeTimer);
+    clearTimeout(window._chunkTimer);
+
+    // Update UI
+    var btn = document.getElementById('btn-live-start');
+    btn.classList.remove('btn-live-stop');
+    document.getElementById('live-btn-icon').textContent = '🎙';
+    document.getElementById('live-btn-text').textContent = '開始即時錄音';
+    document.getElementById('live-timer').classList.remove('recording');
+    document.getElementById('live-dot').classList.remove('recording');
+    document.getElementById('live-dot').classList.add('on');
+    document.getElementById('live-badge').textContent = 'ON';
+    document.getElementById('live-badge').classList.remove('recording');
+
+    // Run final analysis
+    runLiveAnalysis();
+  }
+
+  function updateLiveTimer() {
+    if (!liveTimerStart) return;
+    var secs = Math.floor((Date.now() - liveTimerStart) / 1000);
+    var m = String(Math.floor(secs / 60)).padStart(2, '0');
+    var s = String(secs % 60).padStart(2, '0');
+    document.getElementById('live-timer').textContent = m + ':' + s;
+  }
+
+  // Schedule chunk processing every ~8 seconds
+  function scheduleChunkProcessing() {
+    if (!liveActive) return;
+    window._chunkTimer = setTimeout(function() {
+      if (liveActive && liveChunks.length > 0) {
+        processLiveChunk();
+      }
+      scheduleChunkProcessing();
+    }, 8000);
+  }
+
+  function processLiveChunk() {
+    if (liveChunks.length === 0) return;
+    var blob = new Blob(liveChunks, { type: 'audio/webm' });
+    liveChunks = []; // reset
+
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var dataUrl = e.target.result;
+      var b64 = dataUrl.split(',')[1];
+      sendLiveChunk(b64);
+    };
+    reader.readAsDataURL(blob);
+  }
+
+  async function sendLiveChunk(audioB64) {
+    var language = document.getElementById('audio-language').value || 'zh-TW';
+    try {
+      var fd = new FormData();
+      fd.append('audio_b64', audioB64);
+      fd.append('language', language);
+      var res = await fetch('/api/live-transcribe', {
+        method: 'POST',
+        credentials: 'include',
+        body: fd,
+      });
+      if (!res.ok) return;
+      var data = await res.json();
+      var text = (data.text || '').trim();
+      if (!text) return;
+
+      // Append to accumulated transcripts
+      liveTranscripts.push(text);
+
+      // Display in live transcript area
+      appendLiveChunk(text);
+
+      // If we have enough text (~100 chars), trigger immediate analysis
+      var totalLen = liveTranscripts.join(' ').length;
+      if (totalLen > 80) {
+        runLiveAnalysis();
+      }
+    } catch(err) {
+      console.error('Live transcribe error:', err);
+    }
+  }
+
+  function appendLiveChunk(text) {
+    var display = document.getElementById('live-transcript-display');
+    var now = new Date();
+    var timeStr = now.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+    var chunkEl = document.createElement('div');
+    chunkEl.className = 'live-chunk';
+    chunkEl.innerHTML = '<span class="live-chunk-time">[' + timeStr + ']</span>' + escapeHtml(text);
+    display.appendChild(chunkEl);
+    display.scrollTop = display.scrollHeight;
+  }
+
+  function escapeHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // ── Live analysis ──
+  async function runLiveAnalysis() {
+    var combined = liveTranscripts.join('\n').trim();
+    if (!combined || combined.length < 10) return;
+
+    var spinner = document.getElementById('live-analyze-spinner');
+    spinner.classList.add('on');
+
+    try {
+      var res = await fetch('/api/analyze-live', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ transcript: combined }),
+      });
+      if (!res.ok) { spinner.classList.remove('on'); return; }
+      var data = await res.json();
+      updateLiveAnalysisPanels(data.decisions || [], data.action_items || [], data.risks || []);
+    } catch(err) {
+      console.error('Live analysis error:', err);
+    } finally {
+      spinner.classList.remove('on');
+    }
+  }
+
+  function updateLiveAnalysisPanels(decisions, actions, risks) {
+    liveAnalysisResults.decisions = decisions;
+    liveAnalysisResults.action_items = actions;
+    liveAnalysisResults.risks = risks;
+
+    // Decisions
+    var decPanel = document.getElementById('panel-decisions');
+    var emptyDec = document.getElementById('empty-decisions');
+    document.getElementById('count-decisions').textContent = decisions.length;
+    if (decisions.length === 0) {
+      decPanel.querySelectorAll('.live-item').forEach(function(el) { el.remove(); });
+      if (!emptyDec) decPanel.innerHTML = '<div class="live-empty" id="empty-decisions"><div class="live-empty-icon">⚖️</div>尚無決策記錄<br>開始說話後自動萃取</div>';
+    } else {
+      if (emptyDec) emptyDec.remove();
+      decPanel.querySelectorAll('.live-item').forEach(function(el) { el.remove(); });
+      decisions.forEach(function(d) {
+        var el = document.createElement('div');
+        el.className = 'live-item';
+        el.textContent = d;
+        decPanel.appendChild(el);
+      });
+    }
+
+    // Actions
+    var actPanel = document.getElementById('panel-actions');
+    var emptyAct = document.getElementById('empty-actions');
+    document.getElementById('count-actions').textContent = actions.length;
+    if (actions.length === 0) {
+      actPanel.querySelectorAll('.live-item').forEach(function(el) { el.remove(); });
+      if (!emptyAct) actPanel.innerHTML = '<div class="live-empty" id="empty-actions"><div class="live-empty-icon">✅</div>尚無行動項<br>開始說話後自動萃取</div>';
+    } else {
+      if (emptyAct) emptyAct.remove();
+      actPanel.querySelectorAll('.live-item').forEach(function(el) { el.remove(); });
+      actions.forEach(function(a) {
+        var el = document.createElement('div');
+        el.className = 'live-item';
+        el.textContent = a;
+        actPanel.appendChild(el);
+      });
+    }
+
+    // Risks
+    var riskPanel = document.getElementById('panel-risks');
+    var emptyRisk = document.getElementById('empty-risks');
+    document.getElementById('count-risks').textContent = risks.length;
+    if (risks.length === 0) {
+      riskPanel.querySelectorAll('.live-item').forEach(function(el) { el.remove(); });
+      if (!emptyRisk) riskPanel.innerHTML = '<div class="live-empty" id="empty-risks"><div class="live-empty-icon">⚠️</div>尚無風險記錄<br>開始說話後自動萃取</div>';
+    } else {
+      if (emptyRisk) emptyRisk.remove();
+      riskPanel.querySelectorAll('.live-item').forEach(function(el) { el.remove(); });
+      risks.forEach(function(r) {
+        var el = document.createElement('div');
+        el.className = 'live-item';
+        el.textContent = r;
+        riskPanel.appendChild(el);
+      });
+    }
+  }
+
+  // ── Live copy & clear ──
+  document.getElementById('btn-live-copy').addEventListener('click', function() {
+    var text = liveTranscripts.join('\n');
+    navigator.clipboard.writeText(text);
+    this.textContent = '已複製!';
+    var self = this;
+    setTimeout(function() { self.textContent = '複製'; }, 1500);
+  });
+
+  document.getElementById('btn-live-clear').addEventListener('click', function() {
+    if (!confirm('確定清除即時逐字稿？')) return;
+    liveTranscripts = [];
+    liveAnalysisResults = { decisions: [], action_items: [], risks: [] };
+    document.getElementById('live-transcript-display').innerHTML = '';
+    updateLiveAnalysisPanels([], [], []);
+  });
 </script>
 
 </body>
