@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+function getOpenAI() {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) throw new Error('OPENAI_API_KEY is not set');
+  return new OpenAI({ apiKey });
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -55,6 +57,7 @@ export async function POST(req: NextRequest) {
     // Use OpenAI Audio API - create a proper file object
     const file = new File([blob], fileName, { type: audioFile.type });
 
+    const openai = getOpenAI();
     const transcript = await openai.audio.transcriptions.create({
       file: file,
       model: 'gpt-4o-transcribe',
