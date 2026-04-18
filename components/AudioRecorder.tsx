@@ -9,7 +9,7 @@ interface AudioRecorderProps {
   onTranscriptUpdate: (audioBlob: Blob) => void;
 }
 
-const CHUNK_INTERVAL_MS = 30000; // Send chunk every 30 seconds
+const CHUNK_INTERVAL_MS = 30000;
 
 export default function AudioRecorder({
   isRecording,
@@ -21,13 +21,16 @@ export default function AudioRecorder({
   const [recordingDuration, setRecordingDuration] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const chunkTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const chunkTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const isPausedRef = useRef(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     isPausedRef.current = isPaused;
@@ -85,26 +88,24 @@ export default function AudioRecorder({
         audioChunksRef.current = [];
       };
 
-      recorder.start(1000); // Collect data frequently
+      recorder.start(1000);
       onStartRecording();
       setRecordingDuration(0);
       isPausedRef.current = false;
 
-      // Duration timer
       timerRef.current = setInterval(() => {
         if (!isPausedRef.current) {
           setRecordingDuration(d => d + 1);
         }
       }, 1000);
 
-      // Chunk timer - send audio periodically
       chunkTimerRef.current = setInterval(() => {
         if (!isPausedRef.current && recorder.state === 'recording') {
           recorder.stop();
           setTimeout(() => {
             if (streamRef.current && recorder.state === 'inactive') {
-              const mimeType = getSupportedMimeType();
-              const newRecorder = new MediaRecorder(streamRef.current, mimeType ? { mimeType } : undefined);
+              const newMimeType = getSupportedMimeType();
+              const newRecorder = new MediaRecorder(streamRef.current, newMimeType ? { mimeType: newMimeType } : undefined);
               mediaRecorderRef.current = newRecorder;
               newRecorder.start(1000);
             }
@@ -154,6 +155,38 @@ export default function AudioRecorder({
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
+  const handleFileUpload = useCallback(async (file: File) => {
+    if (!file) return;
+    const validTypes = ['audio/mp3', 'audio/mpeg', 'audio/mp4', 'audio/x-m4a', 'audio/wav', 'audio/ogg', 'audio/webm'];
+    if (!validTypes.some(t => file.type.includes(t.split('/')[1]))) {
+      setError('不支援的檔案格式，請上傳 MP3, M4A, WAV, OGG 或 WebM 檔案。');
+      return;
+    }
+    setIsUploading(true);
+    setError(null);
+    try {
+      onTranscriptUpdate(file);
+    } finally {
+      setIsUploading(false);
+    }
+  }, [onTranscriptUpdate]);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files[0];
+    if (file) handleFileUpload(file);
+  }, [handleFileUpload]);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  }, []);
+
+  const handleDragLeave = useCallback(() => {
+    setIsDragging(false);
+  }, []);
+
   useEffect(() => {
     if (typeof window !== 'undefined' && !navigator.mediaDevices?.getUserMedia) {
       setIsSupported(false);
@@ -163,7 +196,7 @@ export default function AudioRecorder({
   if (!isSupported) {
     return (
       <div style={styles.card}>
-        <div style={{ ...styles.alert, background: '#7f1d1d', border: '1px solid #991b1b' }}>
+        <div style={styles.alert}>
           ⚠️ 您的瀏覽器不支援錄音功能，請使用 Chrome、Edge 或 Firefox。
         </div>
       </div>
@@ -171,47 +204,104 @@ export default function AudioRecorder({
   }
 
   return (
-    <div style={styles.card}>
+    <div style={styles.card} className="card">
       {error && (
-        <div style={{ ...styles.alert, background: '#7f1d1d', border: '1px solid #991b1b', marginBottom: 16 }}>
+        <div style={styles.alert} role="alert">
           {error}
         </div>
       )}
 
       {!isRecording ? (
-        <button
-          onClick={startRecording}
-          style={styles.recordBtn}
-          onMouseEnter={e => (e.currentTarget.style.background = '#22C55E')}
-          onMouseLeave={e => (e.currentTarget.style.background = '#16a34a')}
-        >
-          <span style={styles.micIcon}>🎙️</span>
-          開始錄音
-        </button>
-      ) : (
-        <div style={styles.recordingArea}>
-          {/* Recording indicator */}
-          <div style={styles.recordingHeader}>
-            <div style={styles.recordingDot}>
-              <div style={styles.pulseRing} />
-            </div>
-            <span style={styles.recordingText}>
-              {isPaused ? '⏸️ 暫停中' : '🔴 錄音中'}
-            </span>
-            <span style={styles.duration}>{formatDuration(recordingDuration)}</span>
+        <div style={styles.idleContainer}>
+          {/* Drag & Drop Zone */}
+          <div
+            style={{
+              ...styles.dropZone,
+              ...(isDragging ? styles.dropZoneActive : {}),
+            }}
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onClick={() => fileInputRef.current?.click()}
+            role="button"
+            tabIndex={0}
+            aria-label="拖放音訊檔案或點擊選擇檔案"
+            onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') fileInputRef.current?.click(); }}
+          >
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="audio/mp3,audio/mpeg,audio/mp4,audio/x-m4a,audio/wav,audio/ogg,audio/webm"
+              style={{ display: 'none' }}
+              onChange={e => {
+                const file = e.target.files?.[0];
+                if (file) handleFileUpload(file);
+              }}
+              aria-hidden="true"
+            />
+            <div style={styles.dropIcon}>📁</div>
+            <p style={styles.dropTitle}>
+              {isDragging ? '放開以上傳檔案' : '拖放音訊檔案至此'}
+            </p>
+            <p style={styles.dropFormats}>支援 MP3, M4A, WAV, OGG，最大 120 分鐘</p>
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm"
+              onClick={e => { e.stopPropagation(); fileInputRef.current?.click(); }}
+              style={{ marginTop: 8 }}
+            >
+              選擇檔案
+            </button>
           </div>
 
-          {/* Waveform visualizer */}
-          <div style={styles.waveform}>
-            {Array.from({ length: 20 }).map((_, i) => (
+          {/* Divider */}
+          <div style={styles.divider}>
+            <span style={styles.dividerText}>或</span>
+          </div>
+
+          {/* Start Recording Button */}
+          <button
+            onClick={startRecording}
+            className="btn btn-success btn-lg"
+            style={{ width: '100%', fontSize: 16 }}
+            aria-label="開始新錄音"
+          >
+            <span aria-hidden="true">🎙️</span>
+            開始新錄音
+          </button>
+
+          {isUploading && (
+            <p style={styles.uploadingText}>上傳中...</p>
+          )}
+        </div>
+      ) : (
+        /* Recording Mode */
+        <div style={styles.recordingContainer}>
+          {/* Recording indicator */}
+          <div style={styles.recordingHeader}>
+            <div style={styles.recordingDotWrapper}>
+              <div style={styles.recordingDot} />
+              <div style={styles.pulseRing} />
+            </div>
+            <span style={styles.recordingLabel}>
+              {isPaused ? '⏸️ 暫停中' : '🔴 錄音中'}
+            </span>
+            <span style={styles.duration} aria-live="polite" aria-label={`錄音時長：${formatDuration(recordingDuration)}`}>
+              {formatDuration(recordingDuration)}
+            </span>
+          </div>
+
+          {/* Waveform */}
+          <div style={styles.waveform} aria-hidden="true" role="img" aria-label="音頻波形">
+            {Array.from({ length: 28 }).map((_, i) => (
               <div
                 key={i}
                 style={{
                   ...styles.waveBar,
-                  animationDelay: `${i * 0.05}s`,
+                  animationDelay: `${i * 0.04}s`,
                   height: isPaused ? 4 : `${Math.random() * 32 + 8}px`,
-                  background: isPaused ? '#64748B' : '#4F46E5',
-                  opacity: isPaused ? 0.4 : 0.8,
+                  background: isPaused ? 'var(--text-muted)' : 'var(--primary)',
+                  opacity: isPaused ? 0.4 : 0.85,
                 }}
               />
             ))}
@@ -221,15 +311,15 @@ export default function AudioRecorder({
           <div style={styles.controls}>
             <button
               onClick={isPaused ? resumeRecording : pauseRecording}
-              style={styles.secondaryBtn}
+              className="btn btn-secondary"
+              aria-label={isPaused ? '繼續錄音' : '暫停錄音'}
             >
               {isPaused ? '▶️ 繼續' : '⏸️ 暫停'}
             </button>
             <button
               onClick={stopRecording}
-              style={styles.stopBtn}
-              onMouseEnter={e => (e.currentTarget.style.background = '#DC2626')}
-              onMouseLeave={e => (e.currentTarget.style.background = '#EF4444')}
+              className="btn btn-danger"
+              aria-label="停止錄音"
             >
               ⏹️ 停止錄音
             </button>
@@ -242,109 +332,128 @@ export default function AudioRecorder({
 
 const styles: Record<string, React.CSSProperties> = {
   card: {
-    background: '#1A1D27',
-    border: '1px solid #2D3748',
-    borderRadius: 12,
-    padding: '20px 24px',
+    background: 'var(--surface)',
+    border: '1px solid var(--border)',
+    borderRadius: 'var(--radius-lg)',
+    padding: '24px',
   },
   alert: {
     padding: '10px 14px',
-    borderRadius: 8,
-    color: '#FCA5A5',
+    borderRadius: 'var(--radius)',
+    background: 'var(--danger-light)',
+    border: '1px solid #FECACA',
+    color: 'var(--danger)',
     fontSize: 14,
-    marginBottom: 12,
+    marginBottom: 16,
   },
-  recordBtn: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 10,
-    padding: '14px 32px',
-    background: '#16a34a',
-    color: '#fff',
-    border: 'none',
-    borderRadius: 50,
-    fontSize: 17,
-    fontWeight: 600,
-    cursor: 'pointer',
-    fontFamily: 'inherit',
-    transition: 'background 0.2s',
-  },
-  micIcon: {
-    fontSize: 20,
-  },
-  recordingArea: {
+  idleContainer: {
     display: 'flex',
     flexDirection: 'column',
     gap: 16,
+  },
+  dropZone: {
+    border: '2px dashed var(--border)',
+    borderRadius: 'var(--radius-lg)',
+    padding: '32px 24px',
+    textAlign: 'center',
+    cursor: 'pointer',
+    transition: 'border-color var(--transition), background var(--transition)',
+    background: 'var(--surface-2)',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: 6,
+  },
+  dropZoneActive: {
+    borderColor: 'var(--primary)',
+    background: 'var(--primary-light)',
+  },
+  dropIcon: {
+    fontSize: 36,
+    marginBottom: 4,
+  },
+  dropTitle: {
+    fontSize: 15,
+    fontWeight: 600,
+    color: 'var(--text-primary)',
+  },
+  dropFormats: {
+    fontSize: 12,
+    color: 'var(--text-muted)',
+  },
+  divider: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 12,
+  },
+  dividerText: {
+    fontSize: 13,
+    color: 'var(--text-muted)',
+    background: 'var(--surface)',
+    padding: '0 8px',
+  },
+  uploadingText: {
+    fontSize: 13,
+    color: 'var(--primary)',
+    textAlign: 'center',
+  },
+  recordingContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 20,
   },
   recordingHeader: {
     display: 'flex',
     alignItems: 'center',
     gap: 12,
   },
-  recordingDot: {
+  recordingDotWrapper: {
     position: 'relative',
     width: 16,
     height: 16,
+    flexShrink: 0,
+  },
+  recordingDot: {
+    position: 'absolute',
+    inset: 0,
+    borderRadius: '50%',
+    background: 'var(--danger)',
   },
   pulseRing: {
     position: 'absolute',
     inset: 0,
     borderRadius: '50%',
-    background: '#EF4444',
-    animation: 'pulse-ring 1.5s ease-out infinite',
+    background: 'var(--danger)',
+    animation: 'pulseRing 1.5s ease-out infinite',
   },
-  recordingText: {
+  recordingLabel: {
     fontSize: 16,
     fontWeight: 600,
-    color: '#F1F5F9',
+    color: 'var(--text-primary)',
     flex: 1,
   },
   duration: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 700,
-    color: '#4F46E5',
+    color: 'var(--primary)',
     fontVariantNumeric: 'tabular-nums',
+    letterSpacing: '0.02em',
   },
   waveform: {
     display: 'flex',
     alignItems: 'center',
     gap: 3,
-    height: 48,
+    height: 52,
     overflow: 'hidden',
   },
   waveBar: {
     width: 4,
     borderRadius: 2,
-    animation: 'wave 0.8s ease-in-out infinite alternate',
+    animation: 'waveBar 0.8s ease-in-out infinite alternate',
     transition: 'height 0.1s',
   },
   controls: {
     display: 'flex',
     gap: 12,
-  },
-  secondaryBtn: {
-    padding: '9px 20px',
-    background: '#2D3748',
-    color: '#e2e8f0',
-    border: '1px solid #4A5568',
-    borderRadius: 8,
-    fontSize: 15,
-    fontWeight: 500,
-    cursor: 'pointer',
-    fontFamily: 'inherit',
-    transition: 'background 0.2s',
-  },
-  stopBtn: {
-    padding: '9px 20px',
-    background: '#EF4444',
-    color: '#fff',
-    border: 'none',
-    borderRadius: 8,
-    fontSize: 15,
-    fontWeight: 500,
-    cursor: 'pointer',
-    fontFamily: 'inherit',
-    transition: 'background 0.2s',
   },
 };
