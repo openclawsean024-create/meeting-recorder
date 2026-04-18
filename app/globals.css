@@ -305,3 +305,25 @@ h1, h2, h3, h4, h5, h6 {
 @media (max-width: 640px) {
   .container { padding: 0 16px; }
 }
+
+/* ============================================
+   Mobile Bottom Tab Bar
+   ============================================ */
+@media (max-width: 640px) {
+  /* Show bottom tab bar only on mobile */
+  nav[aria-label="手機導航列"] {
+    display: flex !important;
+  }
+
+  /* Add bottom padding to main content on mobile */
+  main#main-content {
+    padding-bottom: 80px;
+  }
+}
+
+@media (min-width: 641px) {
+  /* Hide bottom tab bar on tablet/desktop */
+  nav[aria-label="手機導航列"] {
+    display: none !important;
+  }
+}

@@ -4,7 +4,6 @@ import { useState, useCallback, useRef } from 'react';
 import AudioRecorder from '../../components/AudioRecorder';
 import TranscriptPanel from '../../components/TranscriptPanel';
 import AnalysisPanel from '../../components/AnalysisPanel';
-import Header from '../../components/Header';
 
 interface TranscriptSegment {
   id: number;

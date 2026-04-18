@@ -1,7 +1,7 @@
 import Header from '../../components/Header';
 import Link from 'next/link';
 
-export default function SettingsLayout({ children }: { children: React.ReactNode }) {
+export default function HistoryLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
       <Header />
@@ -16,7 +16,7 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
                 </li>
                 <li style={breadcrumbStyles.separator} aria-hidden="true">/</li>
                 <li style={breadcrumbStyles.item} aria-current="page">
-                  <span style={breadcrumbStyles.current}>設定</span>
+                  <span style={breadcrumbStyles.current}>歷史記錄</span>
                 </li>
               </ol>
             </nav>
@@ -34,7 +34,7 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
           <span style={mobileTabStyles.tabIcon}>🎙️</span>
           <span style={mobileTabStyles.tabLabel}>錄音</span>
         </Link>
-        <Link href="/history" style={mobileTabStyles.tab}>
+        <Link href="/history" style={mobileTabStyles.tabActive} aria-current="page">
           <span style={mobileTabStyles.tabIcon}>📋</span>
           <span style={mobileTabStyles.tabLabel}>歷史</span>
         </Link>
@@ -42,7 +42,7 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
           <span style={mobileTabStyles.tabIcon}>📊</span>
           <span style={mobileTabStyles.tabLabel}>儀表板</span>
         </Link>
-        <Link href="/settings" style={mobileTabStyles.tabActive} aria-current="page">
+        <Link href="/settings" style={mobileTabStyles.tab}>
           <span style={mobileTabStyles.tabIcon}>⚙️</span>
           <span style={mobileTabStyles.tabLabel}>設定</span>
         </Link>

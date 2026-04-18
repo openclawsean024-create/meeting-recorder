@@ -49,6 +49,11 @@ export default function TranscriptPanel({ segments, speakerColors }: TranscriptP
     setEditText('');
   };
 
+  const handleTimestampClick = (timestamp: string) => {
+    // TODO: sync audio playback to this timestamp
+    console.log('Jump to timestamp:', timestamp);
+  };
+
   const handleCopyAll = () => {
     const text = segments.map(s => `[${s.timestamp}] ${s.speaker}: ${s.text}`).join('\n');
     navigator.clipboard.writeText(text).catch(() => {});
@@ -118,8 +123,18 @@ export default function TranscriptPanel({ segments, speakerColors }: TranscriptP
                     </span>
                     <span
                       style={styles.timestamp}
-                      aria-label={`時間戳記：${seg.timestamp}`}
+                      onClick={() => handleTimestampClick(seg.timestamp)}
+                      onMouseEnter={e => {
+                        (e.target as HTMLElement).style.background = 'var(--primary-light)';
+                        (e.target as HTMLElement).style.color = 'var(--primary)';
+                      }}
+                      onMouseLeave={e => {
+                        (e.target as HTMLElement).style.background = 'transparent';
+                        (e.target as HTMLElement).style.color = 'var(--text-muted)';
+                      }}
+                      aria-label={`時間戳記：${seg.timestamp}，點擊跳至該時間點`}
                       role="time"
+                      title="點擊跳至該時間點"
                     >
                       {seg.timestamp}
                     </span>
@@ -288,6 +303,11 @@ const styles: Record<string, React.CSSProperties> = {
     color: 'var(--text-muted)',
     fontWeight: 600,
     fontVariantNumeric: 'tabular-nums',
+    cursor: 'pointer',
+    transition: 'color var(--transition)',
+    padding: '2px 6px',
+    borderRadius: 'var(--radius-sm)',
+    background: 'transparent',
   },
   text: {
     fontSize: 14,
