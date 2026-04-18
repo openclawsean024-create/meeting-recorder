@@ -18,9 +18,10 @@ interface SpeakerColor {
 interface TranscriptPanelProps {
   segments: TranscriptSegment[];
   speakerColors?: SpeakerColor[];
+  onUpdateSegment?: (id: number, text: string) => void;
 }
 
-export default function TranscriptPanel({ segments, speakerColors }: TranscriptPanelProps) {
+export default function TranscriptPanel({ segments, speakerColors, onUpdateSegment }: TranscriptPanelProps) {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editText, setEditText] = useState('');
   const panelRef = useRef<HTMLDivElement>(null);
@@ -43,8 +44,8 @@ export default function TranscriptPanel({ segments, speakerColors }: TranscriptP
     setEditText(seg.text);
   };
 
-  const handleSaveEdit = (id: number) => {
-    // In a real app, we'd update the segment here
+  const handleSaveEdit = (id: number, newText: string) => {
+    onUpdateSegment?.(id, newText);
     setEditingId(null);
     setEditText('');
   };
@@ -153,7 +154,7 @@ export default function TranscriptPanel({ segments, speakerColors }: TranscriptP
                       />
                       <div style={styles.editActions}>
                         <button
-                          onClick={() => handleSaveEdit(seg.id)}
+                          onClick={() => handleSaveEdit(seg.id, editText)}
                           className="btn btn-primary btn-sm"
                         >
                           儲存

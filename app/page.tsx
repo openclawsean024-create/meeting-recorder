@@ -59,8 +59,8 @@ export default function LandingPage() {
               <Link href="/app" className="btn btn-primary btn-lg">
                 <span>🎙️</span> 立即開始錄音
               </Link>
-              <Link href="/app#features" className="btn btn-secondary btn-lg">
-                了解更多功能
+              <Link href="/pricing" className="btn btn-secondary btn-lg">
+                查看定價方案
               </Link>
             </div>
             <p style={heroStyles.disclaimer} className="animate-fadeIn">
@@ -122,8 +122,8 @@ export default function LandingPage() {
           <div className="container" style={ctaBannerStyles.inner}>
             <h2 style={ctaBannerStyles.title}>準備好提升會議效率了嗎？</h2>
             <p style={ctaBannerStyles.desc}>馬上開始使用，完全免費（需自備 API Key）</p>
-            <Link href="/app" className="btn btn-primary btn-lg">
-              開始使用 →
+            <Link href="/pricing" style={{ color: 'var(--primary)', fontWeight: 600, textDecoration: 'none', fontSize: 15 }}>
+              查看完整定價方案 →
             </Link>
           </div>
         </section>

@@ -136,10 +136,74 @@ export default function AppPage() {
     }
   }, []);
 
-  const handleExport = async () => {
-    const allText = transcript.map(s => s.text).join('\n');
-    const content = `# ${meetingTitle || '會議紀錄'}
-時間：${new Date().toLocaleString('zh-TW')}
+  const handleExport = async (format: 'md' | 'json' | 'txt' | 'pdf') => {
+    const timestamp = new Date().toLocaleString('zh-TW');
+
+    if (format === 'json') {
+      const data = {
+        title: meetingTitle || '會議紀錄',
+        date: timestamp,
+        transcript: transcript.map(s => ({
+          speaker: s.speaker,
+          text: s.text,
+          timestamp: s.timestamp,
+        })),
+        analysis: {
+          summary: analysis.summary || null,
+          decisions: analysis.decisions || [],
+          actionItems: analysis.actionItems || [],
+          risks: analysis.risks || [],
+        },
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `meeting-${Date.now()}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      return;
+    }
+
+    if (format === 'txt') {
+      const lines = [
+        `會議紀錄：${meetingTitle || '（無標題）'}`,
+        `時間：${timestamp}`,
+        '',
+        '== 逐字稿 ==',
+        ...transcript.map(s => `[${s.timestamp}] ${s.speaker}: ${s.text}`),
+        '',
+        '== 分析摘要 ==',
+        analysis.summary || '（無）',
+        '',
+        '== 決策 ==',
+        ...(analysis.decisions?.length ? analysis.decisions.map(d => `• ${d}`) : ['（無）']),
+        '',
+        '== 行動項 ==',
+        ...(analysis.actionItems?.length
+          ? analysis.actionItems.map(a => `• ${a.task}${a.assignee ? ` @${a.assignee}` : ''}${a.deadline ? ` (${a.deadline})` : ''}`)
+          : ['（無）']),
+        '',
+        '== 風險 ==',
+        ...(analysis.risks?.length ? analysis.risks.map(r => `• ${r}`) : ['（無）']),
+      ];
+      const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `meeting-${Date.now()}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      return;
+    }
+
+    if (format === 'md') {
+      const content = `# ${meetingTitle || '會議紀錄'}
+時間：${timestamp}
 
 ## 逐字稿
 ${transcript.map(s => `**[${s.speaker}]** [${s.timestamp}] ${s.text}`).join('\n')}
@@ -161,16 +225,23 @@ ${analysis.actionItems?.length
 ### 風險
 ${analysis.risks?.length ? analysis.risks.map(r => `- ${r}`).join('\n') : '（無）'}
 `;
+      const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `meeting-${Date.now()}.md`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      return;
+    }
 
-    const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `meeting-${Date.now()}.md`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    if (format === 'pdf') {
+      // Use print dialog for PDF export
+      window.open('', '_blank', 'width=800,height=600');
+      window.print();
+    }
   };
 
   return (
@@ -268,15 +339,30 @@ ${analysis.risks?.length ? analysis.risks.map(r => `- ${r}`).join('\n') : '（�
       {/* Panels */}
       {transcript.length > 0 && (
         <div style={panelsStyles.grid}>
-          <TranscriptPanel segments={transcript} speakerColors={SPEAKER_COLORS} />
+          <TranscriptPanel
+            segments={transcript}
+            speakerColors={SPEAKER_COLORS}
+            onUpdateSegment={(id, text) => {
+              setTranscript(prev => prev.map(s => s.id === id ? { ...s, text } : s));
+            }}
+          />
           <AnalysisPanel analysis={analysis} isAnalyzing={isAnalyzing} />
         </div>
       )}
 
       {/* Export */}
       {transcript.length > 0 && (
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, marginTop: 24 }}>
-          <button onClick={handleExport} className="btn btn-primary">
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, marginTop: 24, flexWrap: 'wrap' }}>
+          <button onClick={() => handleExport('txt')} className="btn btn-secondary">
+            📝 匯出 TXT
+          </button>
+          <button onClick={() => handleExport('json')} className="btn btn-secondary">
+            📋 匯出 JSON
+          </button>
+          <button onClick={() => handleExport('pdf')} className="btn btn-secondary">
+            📄 匯出 PDF
+          </button>
+          <button onClick={() => handleExport('md')} className="btn btn-primary">
             📄 匯出 Markdown
           </button>
         </div>
