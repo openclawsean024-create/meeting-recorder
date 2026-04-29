@@ -47,6 +47,11 @@ def app_page():
     return {"ok": True}
 
 
+@app.get("/recording")
+def recording_page():
+    return RedirectResponse("/app")
+
+
 @app.get("/dashboard")
 def dashboard_page():
     d = BASE_DIR / "dashboard.html"
