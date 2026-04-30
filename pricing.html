@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>定價 - AI 會議錄音</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #000; --bg-2: #0a0a0a; --surface: #111113; --surface-2: #18181b;
+      --card: rgba(255,255,255,0.035); --border: rgba(255,255,255,0.07);
+      --border-bright: rgba(255,255,255,0.13); --text: #f4f4f5;
+      --text-2: rgba(244,244,245,0.55); --text-muted: rgba(244,244,245,0.30);
+      --sol-primary: #9945FF; --sol-secondary: #14F195; --sol-glow: rgba(153,69,255,0.3);
+      --c-purple: #a855f7; --c-green: #10b981;
+    }
+    body {
+      font-family: 'Space Grotesk', 'Noto Sans TC', sans-serif;
+      background: var(--bg); color: var(--text); min-height: 100vh;
+    }
+    a { color: inherit; text-decoration: none; }
+
+    /* NAV */
+    .navbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 32px; border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 100; background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(12px);
+    }
+    .nav-brand {
+      font-size: 17px; font-weight: 700; letter-spacing: -0.3px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .nav-brand .ico { font-size: 22px; }
+    .nav-links { display: flex; gap: 28px; }
+    .nav-links a { font-size: 14px; color: var(--text-2); transition: color 0.2s; }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a.active { color: var(--text); }
+    .nav-cta {
+      padding: 9px 20px; background: var(--c-purple); color: #fff;
+      border-radius: 10px; font-size: 13px; font-weight: 600;
+      transition: opacity 0.2s; cursor: pointer; border: none;
+    }
+    .nav-cta:hover { opacity: 0.85; }
+
+    /* HERO */
+    .hero { text-align: center; padding: 72px 24px 48px; }
+    .hero h1 {
+      font-size: clamp(32px,5vw,52px); font-weight: 700;
+      background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.7) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      margin-bottom: 16px; letter-spacing: -1px;
+    }
+    .hero p { font-size: 17px; color: var(--text-2); max-width: 480px; margin: 0 auto; }
+    .badge-row { display: flex; gap: 10px; justify-content: center; margin-top: 20px; flex-wrap: wrap; }
+    .badge {
+      padding: 5px 12px; border-radius: 20px; font-size: 12px;
+      background: var(--card); border: 1px solid var(--border-bright);
+      color: var(--text-2);
+    }
+
+    /* PRICING GRID */
+    .container { max-width: 960px; margin: 0 auto; padding: 0 24px 80px; }
+    .pricing-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+      margin-bottom: 56px;
+    }
+    .plan {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 20px; padding: 28px 24px;
+      display: flex; flex-direction: column;
+      transition: transform 0.25s, box-shadow 0.25s;
+    }
+    .plan:hover { transform: translateY(-4px); box-shadow: 0 20px 60px rgba(0,0,0,0.4); }
+    .plan.popular {
+      background: linear-gradient(160deg, rgba(153,69,255,0.12), rgba(20,241,149,0.06));
+      border-color: rgba(153,69,255,0.5);
+      position: relative;
+    }
+    .pop-badge {
+      position: absolute; top: -13px; left: 50%; transform: translateX(-50%);
+      background: linear-gradient(135deg, var(--c-purple), #7c3aed);
+      color: #fff; font-size: 11px; font-weight: 700;
+      padding: 4px 16px; border-radius: 20px; white-space: nowrap;
+    }
+    .plan-ico { font-size: 28px; margin-bottom: 14px; }
+    .plan-name { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+    .plan-tag { font-size: 12px; color: var(--text-muted); margin-bottom: 16px; }
+    .plan-price { margin-bottom: 18px; }
+    .plan-price .amt {
+      font-size: 38px; font-weight: 700; line-height: 1;
+    }
+    .plan-price .cur { font-size: 16px; vertical-align: super; margin-right: 2px; }
+    .plan-price .per { font-size: 13px; color: var(--text-muted); }
+    .plan-price .free { color: var(--c-green); }
+    .divider { height: 1px; background: var(--border); margin: 16px 0; }
+    .feat-list { list-style: none; flex: 1; }
+    .feat-list li {
+      padding: 7px 0; font-size: 13px; display: flex;
+      align-items: center; gap: 8px; color: var(--text-2);
+    }
+    .feat-list li .ck { color: var(--c-green); font-weight: 700; }
+    .feat-list li .no { color: var(--text-muted); }
+    .plan-btn {
+      margin-top: 18px; width: 100%; padding: 12px;
+      border-radius: 12px; font-size: 14px; font-weight: 600;
+      cursor: pointer; border: none; transition: opacity 0.2s;
+      background: var(--card); border: 1px solid var(--border-bright);
+      color: var(--text);
+    }
+    .plan-btn:hover { opacity: 0.8; }
+    .plan-btn.primary { background: var(--c-purple); color: #fff; border-color: var(--c-purple); }
+
+    /* FEATURES TABLE */
+    .section-title { font-size: 24px; font-weight: 700; text-align: center; margin-bottom: 24px; }
+    .table-wrap { overflow-x: auto; margin-bottom: 56px; }
+    .feat-table {
+      width: 100%; border-collapse: collapse; border-radius: 16px; overflow: hidden;
+      background: var(--surface); border: 1px solid var(--border);
+    }
+    .feat-table th, .feat-table td {
+      padding: 13px 18px; text-align: center; font-size: 13px;
+      border-bottom: 1px solid var(--border);
+    }
+    .feat-table th {
+      background: var(--bg-2); font-weight: 600; color: var(--text-2);
+    }
+    .feat-table td:first-child, .feat-table th:first-child { text-align: left; font-weight: 500; }
+    .feat-table tr:last-child td { border-bottom: none; }
+    .ck-cell { color: var(--c-green); font-weight: 700; }
+    .no-cell { color: var(--text-muted); }
+
+    /* CTA */
+    .cta-block {
+      background: linear-gradient(135deg, rgba(153,69,255,0.15), rgba(20,241,149,0.08));
+      border: 1px solid rgba(153,69,255,0.3); border-radius: 24px;
+      padding: 48px; text-align: center; margin-bottom: 32px;
+    }
+    .cta-block h2 { font-size: 26px; margin-bottom: 10px; }
+    .cta-block p { color: var(--text-2); font-size: 15px; margin-bottom: 24px; }
+    .cta-block .btn {
+      display: inline-block; padding: 13px 30px;
+      background: var(--c-purple); color: #fff;
+      border-radius: 30px; font-weight: 700; font-size: 15px;
+      transition: transform 0.2s;
+    }
+    .cta-block .btn:hover { transform: scale(1.04); }
+
+    .footer {
+      text-align: center; padding: 24px; color: var(--text-muted); font-size: 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    @media (max-width: 768px) {
+      .pricing-grid { grid-template-columns: 1fr; }
+      .plan.popular { transform: none; }
+      .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <a href="/" class="nav-brand"><span class="ico">🎙️</span> Meeting Recorder</a>
+    <div class="nav-links">
+      <a href="/">首頁</a>
+      <a href="/app">應用</a>
+      <a href="/pricing" class="active">定價</a>
+      <a href="/dashboard">我的</a>
+    </div>
+    <a href="/app"><button class="nav-cta">開始使用</button></a>
+  </nav>
+
+  <div class="hero">
+    <h1>簡單透明的定價</h1>
+    <p>從免費開始，隨著團隊規模成長升級方案。所有方案均無隱藏費用，無縫銜接。</p>
+    <div class="badge-row">
+      <span class="badge">✅ 無需信用卡</span>
+      <span class="badge">🔒 本地處理優先</span>
+      <span class="badge">🌐 支援多語言</span>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="pricing-grid">
+      <!-- Free -->
+      <div class="plan">
+        <div class="plan-ico">🌐</div>
+        <div class="plan-name">免費方案</div>
+        <div class="plan-tag">適合個人試用</div>
+        <div class="plan-price">
+          <span class="amt free">NT$0</span>
+          <span class="per">/ 永久免費</span>
+        </div>
+        <div class="divider"></div>
+        <ul class="feat-list">
+          <li><span class="ck">✓</span> 每月 10 次錄音上傳</li>
+          <li><span class="ck">✓</span> Whisper AI 逐字稿</li>
+          <li><span class="ck">✓</span> 基礎 Meeting Minutes</li>
+          <li><span class="ck">✓</span> 最長 30 分鐘 / 筆</li>
+          <li><span class="no">✗</span> 進階分析</li>
+          <li><span class="no">✗</span> 團隊協作</li>
+          <li><span class="no">✗</span> API 存取</li>
+        </ul>
+        <button class="plan-btn" onclick="window.location='/'">免費開始</button>
+      </div>
+
+      <!-- Starter -->
+      <div class="plan popular">
+        <div class="pop-badge">🔥 最受歡迎</div>
+        <div class="plan-ico">🚀</div>
+        <div class="plan-name">Starter</div>
+        <div class="plan-tag">適合個人創作者</div>
+        <div class="plan-price">
+          <span class="amt">NT$199</span>
+          <span class="per">/ 月</span>
+        </div>
+        <div class="divider"></div>
+        <ul class="feat-list">
+          <li><span class="ck">✓</span> 每月 100 次錄音上傳</li>
+          <li><span class="ck">✓</span> Whisper AI 逐字稿</li>
+          <li><span class="ck">✓</span> 結構化 Meeting Minutes</li>
+          <li><span class="ck">✓</span> 最長 2 小時 / 筆</li>
+          <li><span class="ck">✓</span> 發音人識別</li>
+          <li><span class="no">✗</span> 團隊協作</li>
+          <li><span class="no">✗</span> API 存取</li>
+        </ul>
+        <button class="plan-btn primary" onclick="window.location='/'">選擇 Starter</button>
+      </div>
+
+      <!-- Pro -->
+      <div class="plan">
+        <div class="plan-ico">⚡</div>
+        <div class="plan-name">Pro</div>
+        <div class="plan-tag">適合專業團隊</div>
+        <div class="plan-price">
+          <span class="amt">NT$399</span>
+          <span class="per">/ 月</span>
+        </div>
+        <div class="divider"></div>
+        <ul class="feat-list">
+          <li><span class="ck">✓</span> 無限錄音上傳</li>
+          <li><span class="ck">✓</span> Whisper AI 逐字稿</li>
+          <li><span class="ck">✓</span> 完整 Meeting Minutes</li>
+          <li><span class="ck">✓</span> 無時長限制</li>
+          <li><span class="ck">✓</span> 發音人識別</li>
+          <li><span class="ck">✓</span> 團隊協作（最多 10 人）</li>
+          <li><span class="ck">✓</span> API 存取</li>
+        </ul>
+        <button class="plan-btn" onclick="window.location='/'">選擇 Pro</button>
+      </div>
+    </div>
+
+    <!-- Feature Table -->
+    <div class="section-title">功能對照表</div>
+    <div class="table-wrap">
+      <table class="feat-table">
+        <thead>
+          <tr>
+            <th>功能</th><th>🌐 免費</th><th>🚀 Starter</th><th>⚡ Pro</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>每月上傳次數</td><td>10 次</td><td>100 次</td><td>無上限</td>
+          </tr>
+          <tr>
+            <td>錄音時長上限</td><td>30 分鐘</td><td>2 小時</td><td>無限制</td>
+          </tr>
+          <tr>
+            <td>Whisper AI 逐字稿</td><td class="ck-cell">✓</td><td class="ck-cell">✓</td><td class="ck-cell">✓</td>
+          </tr>
+          <tr>
+            <td>Meeting Minutes</td><td class="ck-cell">基礎</td><td class="ck-cell">結構化</td><td class="ck-cell">完整版</td>
+          </tr>
+          <tr>
+            <td>發音人識別</td><td class="no-cell">✗</td><td class="ck-cell">✓</td><td class="ck-cell">✓</td>
+          </tr>
+          <tr>
+            <td>多語言支援</td><td class="ck-cell">✓</td><td class="ck-cell">✓</td><td class="ck-cell">✓</td>
+          </tr>
+          <tr>
+            <td>團隊協作</td><td class="no-cell">✗</td><td class="no-cell">✗</td><td class="ck-cell">✓（最多 10 人）</td>
+          </tr>
+          <tr>
+            <td>API 存取</td><td class="no-cell">✗</td><td class="no-cell">✗</td><td class="ck-cell">✓</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- CTA -->
+    <div class="cta-block">
+      <h2>準備好提升會議效率了嗎？</h2>
+      <p>免費方案無需註冊，立即上傳第一段錄音。</p>
+      <a href="/app" class="btn">🚀 免費開始使用</a>
+    </div>
+  </div>
+
+  <div class="footer">
+    © 2026 Meeting Recorder · AI 會議錄音與逐字稿服務 ·
+    <a href="/" style="color: var(--c-purple); text-decoration:none;">回到首頁</a>
+  </div>
+</body>
+</html>
