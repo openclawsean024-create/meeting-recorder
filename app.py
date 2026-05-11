@@ -11,9 +11,13 @@ from fastapi.responses import FileResponse, RedirectResponse
 BASE_DIR = Path(__file__).resolve().parent
 
 app = FastAPI(title="meeting-recorder")
+_allowed_origins = [o.strip() for o in os.getenv("ALLOWED_ORIGINS", "").split(",") if o.strip()]
+if not _allowed_origins:
+    _allowed_origins = ["http://localhost:8000"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=_allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

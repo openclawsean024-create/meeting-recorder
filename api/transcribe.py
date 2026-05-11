@@ -4,7 +4,6 @@ from __future__ import annotations
 import asyncio
 import datetime
 import os
-import shutil
 import uuid
 from pathlib import Path
 
@@ -23,6 +22,7 @@ UPLOAD_DIR = Path("/tmp/meeting-recorder-uploads")
 UPLOAD_DIR.mkdir(exist_ok=True)
 
 ALLOWED_EXTENSIONS = {".webm", ".wav", ".mp3", ".m4a", ".ogg"}
+MAX_UPLOAD_BYTES = 100 * 1024 * 1024  # 100 MB
 
 
 def get_service_client():
@@ -260,13 +260,16 @@ async def transcribe(
     if ext not in ALLOWED_EXTENSIONS:
         raise HTTPException(400, "僅支援 webm / wav / mp3 / m4a / ogg")
 
+    contents = await file.read()
+    if len(contents) > MAX_UPLOAD_BYTES:
+        raise HTTPException(400, "檔案大小不可超過 100 MB")
+
     job_id = uuid.uuid4().hex[:12]
     upload_path = UPLOAD_DIR / f"{job_id}{ext}"
-    with upload_path.open("wb") as f:
-        shutil.copyfileobj(file.file, f)
+    upload_path.write_bytes(contents)
 
-    # Estimate minutes from file size (rough: 1MB ≈ 1 min)
-    estimated_minutes = max(0.5, upload_path.stat().st_size / (1024 * 1024))
+    # Rough pre-job estimate from file size (will be updated with Whisper's actual duration)
+    estimated_minutes = max(0.5, len(contents) / (1024 * 1024))
 
     # Create job record
     client = get_service_client()
@@ -351,8 +354,12 @@ async def run_transcription_job(
             "progress": 65,
         }).eq("job_id", job_id).execute()
 
-        # ── Step 3: Estimate actual minutes ──
-        estimated_minutes = max(0.5, len(transcript_raw) / 300)
+        # ── Step 3: Actual duration from Whisper (falls back to char count) ──
+        whisper_duration_sec = payload.get("duration")
+        if whisper_duration_sec:
+            estimated_minutes = max(0.5, float(whisper_duration_sec) / 60)
+        else:
+            estimated_minutes = max(0.5, len(transcript_raw) / 300)
 
         # ── Step 4: GPT Meeting Minutes ──
         job = client.table("transcription_jobs").select(
