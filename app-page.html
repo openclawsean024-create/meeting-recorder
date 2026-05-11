@@ -951,25 +951,36 @@ document.getElementById('user-name').textContent = '使用者';
   function pollJob(jobId) {
     showStatus('排程成功，等待處理...', 10);
     var attempts = 0;
-    var poll = setInterval(async function() {
+    var maxAttempts = 360; // ~50 min max
+    var pollTimer = null;
+
+    function scheduleNext() {
+      // Fast poll for the first 15 attempts (~30s), slow poll after
+      var delay = attempts < 15 ? 2000 : 10000;
+      pollTimer = setTimeout(tick, delay);
+    }
+
+    async function tick() {
       attempts++;
       try {
         var res = await fetch('/api/jobs/' + jobId, { credentials: 'include' });
-        if (!res.ok) return;
+        if (!res.ok) { scheduleNext(); return; }
         var job = await res.json();
         updateStatus(job.status === 'processing' ? '處理中...' : job.status === 'completed' ? '完成' : '失敗', job.progress || 10);
         if (job.status === 'completed') {
-          clearInterval(poll);
           hideStatus();
           displayResult(job);
+          return;
         } else if (job.status === 'failed') {
-          clearInterval(poll);
           hideStatus();
           alert('轉寫失敗：' + (job.error || '未知錯誤'));
+          return;
         }
       } catch(e) {}
-      if (attempts > 120) clearInterval(poll);
-    }, 2000);
+      if (attempts < maxAttempts) scheduleNext();
+    }
+
+    scheduleNext();
   }
 
   function showStatus(text, progress) {

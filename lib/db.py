@@ -1,6 +1,7 @@
 """Supabase client for meeting-recorder backend."""
 from __future__ import annotations
 
+import datetime
 import os
 from supabase import create_client, Client
 from typing import Optional
@@ -79,7 +80,6 @@ def check_usage_limit(supabase: Client, user_id: str, plan: str) -> tuple[bool, 
     limit = limits.get(plan, 60)
 
     # Get current month usage
-    import datetime
     start_of_month = datetime.date.today().replace(day=1).isoformat()
     resp = supabase.table("usage_records").select("minutes").eq(
         "user_id", user_id

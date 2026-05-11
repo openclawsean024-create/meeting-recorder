@@ -428,7 +428,10 @@ async def run_transcription_job(
 def get_job(job_id: str, request: Request):
     user_id, _ = get_user_from_request(request)
     client = get_service_client()
-    resp = client.table("transcription_jobs").select("*").eq("job_id", job_id).execute()
+    resp = client.table("transcription_jobs").select(
+        "job_id, user_id, meeting_title, participants, status, progress, "
+        "transcript, summary, minutes, speaker_count, language, error, created_at"
+    ).eq("job_id", job_id).execute()
     if not resp.data:
         raise HTTPException(404, "找不到任務")
     job = resp.data[0]
