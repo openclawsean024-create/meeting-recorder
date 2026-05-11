@@ -23,14 +23,24 @@ UPLOAD_DIR.mkdir(exist_ok=True)
 
 ALLOWED_EXTENSIONS = {".webm", ".wav", ".mp3", ".m4a", ".ogg"}
 MAX_UPLOAD_BYTES = 100 * 1024 * 1024  # 100 MB
+MAX_SPEAKER_COUNT = 10
+
+_svc_client = None
+_anon_client = None
 
 
 def get_service_client():
-    return create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+    global _svc_client
+    if _svc_client is None:
+        _svc_client = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+    return _svc_client
 
 
 def get_anon_client():
-    return create_client(SUPABASE_URL, SUPABASE_ANON_KEY or SUPABASE_SERVICE_KEY)
+    global _anon_client
+    if _anon_client is None:
+        _anon_client = create_client(SUPABASE_URL, SUPABASE_ANON_KEY or SUPABASE_SERVICE_KEY)
+    return _anon_client
 
 
 def get_user_from_request(request: Request) -> tuple[str, str]:
@@ -243,6 +253,11 @@ async def transcribe(
 ):
     user_id, plan = get_user_from_request(request)
 
+    # Sanitize inputs to prevent prompt injection
+    meeting_title = meeting_title.strip()[:100] or "未命名會議"
+    participants = participants.strip()[:200] or "未填寫"
+    speaker_count = max(1, min(speaker_count, MAX_SPEAKER_COUNT))
+
     # Check API key
     api_key = get_user_api_key(user_id)
     if not api_key:
@@ -276,8 +291,8 @@ async def transcribe(
     client.table("transcription_jobs").insert({
         "job_id": job_id,
         "user_id": user_id,
-        "meeting_title": meeting_title.strip() or "未命名會議",
-        "participants": participants.strip() or "未填寫",
+        "meeting_title": meeting_title,
+        "participants": participants,
         "status": "processing",
         "progress": 5,
         "transcript": "",
