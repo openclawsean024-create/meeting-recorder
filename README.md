@@ -1,105 +1,68 @@
-# Meeting Recorder｜AI 會議錄音、逐字稿、Meeting Minutes
+# MeetingFlow
 
-上傳會議錄音，AI 自動產生逐字稿與結構化 Meeting Minutes。支援 Whisper AI，無需訂閱昂貴的會議錄音服務。
+繁中會議錄音、逐字稿與「會後行動項」工作台。這個版本優先完成**所有人可使用、不需登入**的公開產品流程，會員制與付款留待後續版本。
 
-**👉 立即使用**：https://meeting-recorder-ten.vercel.app
+## 已完成
 
-**⚠️ 首次使用需設定**：請在 [Vercel Dashboard](https://vercel.com/dashboard) → `meeting-recorder` 專案 → Settings → Environment Variables 設定 Supabase 環境變數（`SUPABASE_URL`、`SUPABASE_SERVICE_KEY`、`SUPABASE_ANON_KEY`），並在 Supabase 建立資料庫（執行 `supabase-schema.sql`）。
+- 公開響應式網站：麥克風錄音、音檔拖放、錄音同意、繁中逐字稿編輯
+- 逐字稿本機規則分析：300 字內摘要、決策、風險、行動項、負責人與日期推斷
+- 律師保密模式與案件標籤；保密模式不自動外推
+- Markdown、剪貼簿、Email 草稿、Notion / Slack 未授權降級
+- 本機會議歷史、搜尋與重新載入
+- `OPENAI_API_KEY`：選配。只有同時設定 `PUBLIC_TRANSCRIBE_ENABLED=true` 時，公開 `/api/transcribe` 才會送非保密音檔到 OpenAI；每個來源預設每小時最多 3 次。
+- Chrome Manifest V3 外掛：`tabCapture` + service worker + offscreen document + IndexedDB
+- FastAPI 自動測試與安全邊界（100 MB、格式檢查、無 raw exception）
 
-**📄 GitHub Pages 備用部署**：https://openclawsean024-create.github.io/meeting-recorder/
-
----
-
-## 功能特色
-
-- 🎙️ **瀏覽器錄音** — 直接用麥克風錄製，支援拖放上傳音訊檔（WebM/WAV/MP3/M4A/OGG）
-- 📝 **AI 逐字稿** — Whisper AI 自動轉寫，準確率高
-- 📋 **Meeting Minutes** — AI 自動結構化摘要（決策、行動項、風險）
-- 👤 **用戶系統** — Supabase Auth（Email/Password）
-- 🔑 **API Key 自備** — 用戶自行填入 OpenAI API Key，無需擔心費用爭議
-- 📊 **用量儀表板** — 每月配額追蹤，配額用盡即時警示
-- 💰 **三方案定價** — Free（60分鐘）/ Pro（NT$199，600分鐘）/ Business（NT$599，3000分鐘）
-
----
-
-## 技術架構
-
-```
-前端        → 靜態 HTML（無需建構）
-後端        → FastAPI on Vercel Python Runtime
-數據庫       → Supabase（PostgreSQL + Auth）
-語音轉文字   → OpenAI Whisper API（用戶自備 Key）
-```
-
-### 主要檔案
-
-| 檔案 | 用途 |
-|------|------|
-| `app.py` | FastAPI 路由與頁面服務 |
-| `api/auth.py` | 註冊/登入/登出 |
-| `api/user.py` | 用戶資料、API Key、用量查詢 |
-| `api/transcribe.py` | 轉寫任務建立與執行 |
-| `landing.html` | 公開 landing page |
-| `pricing.html` | 定價頁面 |
-| `auth.html` | 登入/註冊頁面 |
-| `app-page.html` | 主要錄音工作台 |
-| `dashboard.html` | 用量儀表板 |
-| `api-keys.html` | API Key 管理頁面 |
-| `supabase-schema.sql` | Supabase 資料庫初始化 |
-
----
-
-## 部署設定
-
-### 1. Supabase 設定
-
-1. 建立 [Supabase](https://supabase.com) 專案
-2. 在 SQL Editor 執行 `supabase-schema.sql`
-3. 複製 `SUPABASE_URL`、`SUPABASE_SERVICE_KEY`、`SUPABASE_ANON_KEY`
-
-### 2. Vercel 環境變數
-
-在 Vercel Dashboard → meeting-recorder → Settings → Environment Variables 設定：
-
-| 變數名 | 說明 |
-|--------|------|
-| `SUPABASE_URL` | `https://xxxx.supabase.co` |
-| `SUPABASE_SERVICE_KEY` | Service Role Key（機密） |
-| `SUPABASE_ANON_KEY` | Anon Key（可公開） |
-
-### 3. 部署
-
-推送 GitHub 即自動觸發 Vercel 部署，或手動：
+## 本機執行
 
 ```bash
-cd meeting-recorder
-vercel --prod
-```
-
----
-
-## 本地開發
-
-```bash
-git clone https://github.com/openclawsean024-create/meeting-recorder.git
-cd meeting-recorder
+python3 -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
-
-export SUPABASE_URL="https://xxx.supabase.co"
-export SUPABASE_SERVICE_KEY="your-service-key"
-export SUPABASE_ANON_KEY="your-anon-key"
-
-python app.py
-# 開啟 http://localhost:8000
+uvicorn app:app --reload
 ```
 
----
+打開 <http://127.0.0.1:8000>。不設定任何 secret 也能貼上逐字稿並產出整理。
 
-## 待改進
+如需雲端音訊轉寫，複製 `.env.example` 的變數名稱到自己的本機環境設定，並在本機設定 `OPENAI_API_KEY`。請勿把 API key commit 到 repository 或貼到對話。
 
-- [ ] Vercel 密碼保護需手動移除（需用戶操作）
-- [ ] 方案切換功能（目前需手動 DB 更新）
-- [ ] 即時 WebSocket（目前為輪詢）
-- [ ] Speaker Diarization（多人說話者分離）
-- [ ] 匯出至 Notion / Obsidian / Google Drive
-- [ ] 用量估算改為 Whisper actual usage 而非字元數估算
+## Chrome 外掛
+
+詳見 [`extension/README.md`](extension/README.md)。載入未封裝的 `extension/` 目錄後：
+
+1. 在 Meet / Zoom Web 分頁開啟外掛。
+2. 取得與會者同意並勾選確認。
+3. 錄製目前分頁音訊。
+4. 停止並下載 WebM。
+5. 將檔案拖進 MeetingFlow 工作台。
+
+原生 Zoom 桌面程式、DRM 內容或受管理政策封鎖的分頁，不在 Chrome `tabCapture` 支援範圍。
+
+## 測試
+
+```bash
+pytest -q
+python3 -m compileall app.py api
+```
+
+## 部署到 Vercel(零 token)
+
+這個 repo 已經 git push 到 GitHub。Vercel「Git 整合」是**最簡單也最乾淨**的部署方式 — 不需要 `VERCEL_TOKEN`,環境變數在 Vercel dashboard 設定,token 不會進任何人的對話或本機設定檔。
+
+1. 開 `https://vercel.com/new`
+2. 點擊 Import 旁邊的 `openclawsean024-create/meeting-recorder`
+3. Framework Preset 保留「Other」(Vercel 會用 repo 內 `vercel.json`)
+4. **Environment Variables**(需要時才加,選配):
+   - `OPENAI_API_KEY` — 只有想開雲端轉寫才加
+   - `PUBLIC_TRANSCRIBE_ENABLED` — 預設 `false`,雲端轉寫不啟用
+   - `PUBLIC_TRANSCRIBE_LIMIT` — 預設 `3`,每 IP 每小時上限
+5. 點 **Deploy**
+
+之後每次 `git push origin master` 就會自動部署。
+
+## 外部服務限制
+
+- Notion / Slack：本版未假裝完成 OAuth；未授權時提供可複製格式。
+- Email：使用使用者的預設郵件程式建立草稿。
+- 法務：產品提供錄音同意 gate 與保密模式，但不構成法律意見，也不宣稱已完成第三方法務審查。
+- Speech-to-text 品質與速度由設定的外部模型和音訊品質決定。
