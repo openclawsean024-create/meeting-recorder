@@ -81,7 +81,10 @@ def _infer_assignee(sentence: str, participants: list[str]) -> str:
     for name in participants:
         if name and name in sentence:
             return name
-    match = re.search(r"(?:請|由|麻煩)\s*([\u4e00-\u9fffA-Za-z][\u4e00-\u9fffA-Za-z0-9._-]{0,15})", sentence)
+    match = re.search(
+        r"(?:請|由|麻煩)\s*([\u4e00-\u9fffA-Za-z][\u4e00-\u9fffA-Za-z0-9-]{0,15}?)(?=[，。、；\s]|$)",
+        sentence,
+    )
     return match.group(1) if match else "待指派"
 
 

@@ -1,4 +1,20 @@
 const OFFSCREEN_PATH = 'offscreen.html';
+const DEFAULT_APP_URL = 'https://meeting-recorder-ten.vercel.app/app?source=extension';
+const ALLOWED_APP_HOSTS = new Set(['meeting-recorder-ten.vercel.app', 'localhost', '127.0.0.1']);
+
+function safeAppUrl(raw) {
+  if (!raw) return DEFAULT_APP_URL;
+  try {
+    const parsed = new URL(raw);
+    if (parsed.protocol !== 'https:' && parsed.hostname !== 'localhost' && parsed.hostname !== '127.0.0.1') {
+      return DEFAULT_APP_URL;
+    }
+    if (!ALLOWED_APP_HOSTS.has(parsed.hostname)) return DEFAULT_APP_URL;
+    return parsed.toString();
+  } catch (_) {
+    return DEFAULT_APP_URL;
+  }
+}
 
 async function ensureOffscreen() {
   const url = chrome.runtime.getURL(OFFSCREEN_PATH);
@@ -30,9 +46,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     } else if (message.type === 'GET_STATUS') {
       sendResponse(await chrome.storage.local.get(['recording', 'startedAt', 'tabTitle', 'lastRecording']));
     } else if (message.type === 'OPEN_APP') {
-      const { appUrl = 'https://meeting-recorder-ten.vercel.app/app?source=extension' } = await chrome.storage.sync.get('appUrl');
-      await chrome.tabs.create({ url: appUrl });
-      sendResponse({ ok: true });
+      const { appUrl } = await chrome.storage.sync.get('appUrl');
+      const url = safeAppUrl(appUrl);
+      await chrome.tabs.create({ url });
+      sendResponse({ ok: true, url });
     }
   })().catch(error => sendResponse({ ok: false, error: error.message || '操作失敗' }));
   return true;

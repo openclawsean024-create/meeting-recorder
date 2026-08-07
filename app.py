@@ -15,7 +15,7 @@ app = FastAPI(title="MeetingFlow", version="1.0.0")
 allowed_origins = [item.strip() for item in os.getenv("ALLOWED_ORIGINS", "").split(",") if item.strip()]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allowed_origins or ["*"],
+    allow_origins=allowed_origins,
     allow_credentials=bool(allowed_origins),
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["Content-Type"],

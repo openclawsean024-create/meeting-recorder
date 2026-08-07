@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
-from api.public import _infer_due, analyze_transcript, reset_rate_limits
+from api.public import _infer_due, analyze_transcript
 from app import app
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -37,6 +37,50 @@ def test_legal_mode_marks_confidential_case():
     result = analyze_transcript("王小明 vs 大地公司。本案需要阿華明天補件。", participants=["阿華"], mode="legal")
     assert result["confidential"] is True
     assert result["case_tag"] == "王小明 vs 大地公司"
+
+
+def test_infer_assignee_stops_at_sentence_boundary():
+    from api.public import _infer_assignee
+    assert _infer_assignee("請王大明，於8月15日前完成。", []) == "王大明"
+    assert _infer_assignee("由王小明。", []) == "王小明"
+
+
+def test_infer_due_handles_next_week_consistently():
+    from api.public import _infer_due
+    import datetime as dt
+    today = dt.date(2026, 8, 6)
+    assert _infer_due("下週三前完成", today=today) == "2026-08-19"
+    assert _infer_due("下週一前完成", today=today) == "2026-08-17"
+
+
+def test_transcribe_oversized_returns_413(monkeypatch):
+    monkeypatch.setattr("api.public.PUBLIC_TRANSCRIBE_ENABLED", True)
+    monkeypatch.setenv("OPENAI_API_KEY", "sk-fake-for-test")
+
+    def fake_validate(_file):
+        from fastapi import HTTPException
+        raise HTTPException(413, "音檔不可超過 100 MB")
+
+    monkeypatch.setattr("api.public._validate_upload_size", fake_validate)
+    response = client.post(
+        "/api/transcribe",
+        files={"file": ("big.webm", b"x" * 4, "audio/webm")},
+    )
+    assert response.status_code == 413
+
+
+def test_legacy_routes_are_not_mounted():
+    for path in ("/api/jobs", "/api/jobs/abc", "/api/share", "/api/share/abc",
+                 "/api/live-transcribe", "/api/analyze-live", "/api/auth/me"):
+        assert client.get(path).status_code == 404, path
+
+
+def test_no_legacy_files_in_repo():
+    for forbidden in ("app-page.html", "dashboard.html", "api-keys.html", "share.html",
+                      "landing.html", "pricing.html", "auth.html", "PROJECT.md",
+                      "handler.py", "package.json", "package-lock.json"):
+        assert not (ROOT / forbidden).exists(), forbidden
+    assert not (ROOT / "lib").exists()
 
 
 def test_analyze_endpoint_validates_empty_transcript():
@@ -72,6 +116,23 @@ def test_main_page_has_critical_public_features():
     for phrase in ["開始錄音", "上傳音檔", "我已告知與會者", "行動項目", "Slack", "Notion", "保密"]:
         assert phrase in html
     assert "/auth" not in html
+
+
+def test_homepage_has_history_clear_button():
+    html = client.get("/").text
+    assert "清除本機歷史" in html
+
+
+def test_homepage_does_not_expose_payment_or_auth_paths():
+    html = client.get("/").text.lower()
+    for forbidden in ["login", "signin", "stripe", "checkout", "subscribe", "plan-pricing"]:
+        assert forbidden not in html
+
+
+def test_main_page_does_not_expose_payment_paths():
+    html = client.get("/").text
+    for forbidden in ["/auth", "login", "signin", "stripe", "checkout", "subscribe", "付費"]:
+        assert forbidden.lower() not in html.lower()
 
 
 def test_manifest_v3_and_capture_architecture():

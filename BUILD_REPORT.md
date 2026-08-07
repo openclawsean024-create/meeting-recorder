@@ -10,7 +10,15 @@
 - Optional server-side OpenAI Whisper transcription using `OPENAI_API_KEY`; it is disabled unless `PUBLIC_TRANSCRIBE_ENABLED=true`, and is rate-limited.
 - Confidential/legal mode rejects cloud audio transcription before reading or sending the file.
 - Extension MV3 has recorder error/stream-ended cleanup and a visible IndexedDB purge action.
+- Default-deny CORS, CSP `default-src 'self'`, HSTS, X-Frame-Options, Referrer-Policy in `vercel.json`.
+- `OPEN_APP` allow-lists the override URL (https + approved host).
+- Markdown filename falls back to `meeting-<date>.md`; history checkboxes persist as `actionDone[]`; search matches title/participants/transcript/summary/highlights/decisions/risks/actions.
+- Action-item assignee/due-date parsers hardened to stop at sentence boundaries and treat "下週X" as next week consistently.
 - Public FastAPI health/capabilities/analyze/transcribe endpoints with safe extension validation, 100 MB cap and sanitized error messages.
+- Default-deny CORS, CSP `default-src 'self'`, HSTS, X-Frame-Options, Referrer-Policy in `vercel.json`.
+- `OPEN_APP` allow-lists the override URL (https + approved host).
+- Old Supabase routes, schemas and pages purged; `/api/jobs`, `/api/share`, `/api/live-transcribe`, `/api/analyze-live`, `/api/auth/me` return 404.
+- Privacy, README and BUILD_REPORT reflect opt-in transcription, confidential-mode block, and IndexedDB purge.
 - Chrome MV3 extension with `tabCapture`, offscreen document, service worker, IndexedDB persistence and download flow.
 - `/extension` installation page, `/privacy` data-handling page, Vercel routing, env example, tests and docs.
 
@@ -18,7 +26,7 @@
 
 ```text
 PYTHONPATH=. /Users/sean/.hermes/hermes-agent/venv/bin/pytest -q
-10 passed, 1 warning in 0.18s
+18 passed, 1 warning in 0.21s
 
 /Users/sean/.hermes/hermes-agent/venv/bin/python -m compileall -q app.py api
 PASS
@@ -37,6 +45,9 @@ GET /api/capabilities 200
 POST /api/analyze    200 with structured decisions, risks and action_items
 POST /api/transcribe mode=legal → 403 (audio rejected before reading the body)
 POST /api/transcribe without PUBLIC_TRANSCRIBE_ENABLED → 503
+POST /api/transcribe oversized (mocked) → 413
+POST /api/transcribe rate limited after default 3/hour/source
+OPTIONS /api/* with attacker Origin and no ALLOWED_ORIGINS → no ACAO header
 PASS
 ```
 
