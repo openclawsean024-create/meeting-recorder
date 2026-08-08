@@ -1,23 +1,154 @@
-# 會議錄音整理工具 — 規格計劃書 v3.0.0 (sweet-spot-driven rewrite)
+# 會議錄音整理工具 — 規格計劃書 v3.0.0 (sweet-spot-driven rewrite) + v3.0.0-Public Patch
 
-> 版本：v3.0.0｜更新日期：2026-07-19｜維護者：Sophia (CPO) for Sean
+> 版本：v3.0.0 + v3.0.0-Public Patch (2026-08-08)｜更新日期：2026-08-08｜維護者：Sophia (CPO) + Sean + Hermes Agent
 > 對接技術：Alan (CTO) + Hermes Agent
 > 對接 Repo：https://github.com/openclawsean024-create/meeting-recorder
 > Sweet Spot Score：**5 / 10**（investigate — 本次重寫甜蜜點收斂到「會議後動作項自動化」）
 > Recommended Action：**Investigate → Validate（聚焦雅婷逐字稿沒做的甜蜜點）**
+> **v3.0.0-Public Patch**：見下方 §0.5，把 release 順序倒過來——**先做公開版驗證流量，再做會員制變現**（詳見 §0.5）
 
 ---
 
 ## 0. 改版摘要 (What changed since v2.2.1)
 
-| 項目 | v2.2.1（舊）| v3.0.0（新）| 理由 |
+| 項目 | v2.2.1（舊）| v3.0.0（新）| v3.0.0-Public Patch（2026-08-08 新增）|
 |---|---|---|---|
-| 目標市場 | 中小店家 + 業務 + 律師 + 醫師 + 一般 | 只鎖**業務團隊 + 律師事務所**2 個 | 雅婷逐字稿已吃一般用戶，紅海 |
-| 核心功能 | 錄音 + 轉逐字稿 + 摘要 + 標籤 + 搜尋 | 只做**錄音 + 轉逐字稿 + 「會議後動作項自動生成」3 件事** | 雅婷沒做的甜蜜點 |
-| 變現策略 | NT$199/月 + NT$499/月 + 企業版 NT$2,999/月 | **業務版 NT$599/月 + 律師版 NT$999/月 + 企業版 NT$2,999/月** | 鎖定高 ARPU 客群 |
-| 競品定位 | vs 雅婷逐字稿 + Otter + tl;dv | vs **雅婷（一般）+ Otter（國際）+ Fireflies.ai（會議後動作項）** | 紅海轉藍海 |
-| 技術 | Web + mobile + API | **Web only + Zoom/Meet 外掛** | 聚焦 PC 端會議後整理 |
-| 里程碑 | 4 sprint × 2 週 | **3 sprint × 2 週（MVP + Pilot + Scale）** | lean |
+| 目標市場 | 中小店家 + 業務 + 律師 + 醫師 + 一般 | 只鎖**業務團隊 + 律師事務所**2 個 | **先開放給所有繁中使用者，會員制 v1.1 再收斂到甜蜜點** |
+| 核心功能 | 錄音 + 轉逐字稿 + 摘要 + 標籤 + 搜尋 | 只做**錄音 + 轉逐字稿 + 「會議後動作項自動生成」3 件事** | **公開版：錄音 + 上傳 + 貼逐字稿 + 本機整理 + Markdown/Email 匯出**；雲端 STT/LLM 留到會員制 |
+| 變現策略 | NT$199/月 + NT$499/月 + 企業版 NT$2,999/月 | **業務版 NT$599/月 + 律師版 NT$999/月 + 企業版 NT$2,999/月** | **公開版：完全免費、無登入。會員制 v1.1：沿用原 §9 三層價格** |
+| 競品定位 | vs 雅婷逐字稿 + Otter + tl;dv | vs **雅婷（一般）+ Otter（國際）+ Fireflies.ai（會議後動作項）** | 不變 |
+| 技術 | Web + mobile + API | **Web only + Zoom/Meet 外掛** | **Web only + Chrome 擴充（網頁 Meet/Zoom tabCapture + mic 混音）**；OAuth / Stripe / Supabase 延後到 v1.1 |
+| 里程碑 | 4 sprint × 2 週 | **3 sprint × 2 週（MVP + Pilot + Scale）** | **v1 Public（2026-08）：公開版上線驗證流量 → v1.1 Membership（+1-2 月）：加會員制** |
+
+---
+
+## 0.5 ⭐ Public Release Mode (2026-08-08 patch by Sean + Hermes Agent)
+
+### 0.5.1 為什麼加這個 patch
+
+原 v3.0.0 的甜蜜點論證（業務 + 律師付費版）仍然成立，但 release 順序需要倒過來：
+
+- **雅婷逐字稿、Otter、Fireflies 已經佔據會議記錄市場**。新進入者直接打付費版，需要花大量預算教育市場「為什麼要付費給第五家會議記錄工具」。
+- **公開版（freemium funnel top）能驗證一件事：繁中使用者是否真的會主動把音檔交給 AI 整理**。這個假設成立，會員制（funnel bottom）就是順水推舟；不成立，至少我們沒浪費預算。
+- **公開版不啟用雲端 AI**，成本可控（純本機整理 + Vercel serverless）；個資 / 法務爭議最小。
+- **Chrome 擴充的 tabCapture + mic 混音**是公開版的關鍵差異點——雅婷逐字稿沒有擴充，Otter 的擴充只支援 Google Meet（2024 才加）。
+
+這個 patch **不推翻** §1.5 的甜蜜點論證，只把 release 順序倒過來：先驗證流量 → 再做會員制變現。
+
+### 0.5.2 公開版目標（取代原 §1.4 的「試用 → 付費」邏輯）
+
+**任何人免登入即可使用**：
+- ✅ 錄音（瀏覽器麥克風，含 consent gate）
+- ✅ 上傳音檔（WebM / WAV / MP3 / M4A / OGG，≤ 100 MB）
+- ✅ 貼逐字稿（textarea，本機分析）
+- ✅ 本機整理（規則式：摘要 / 決策 / 風險 / 行動項含負責人 + 截止日）
+- ✅ Markdown 下載
+- ✅ Email draft（mailto: 開原生郵件 app）
+- ✅ Notion / Slack 按鈕：未授權時提供可複製 Markdown / 訊息
+- ✅ 保密模式（legal mode）：純本機，**永遠不外推**
+- ✅ 30 筆 localStorage 歷史 + 搜尋 + 編輯
+- ✅ Chrome 擴充（網頁版 Google Meet + Zoom Web 的 tabCapture + mic 混音 → WebM）
+
+**公開版不做**（明確 non-goals for v1）：
+- ❌ **雲端 STT / LLM**（不啟用 `OPENAI_API_KEY` 路徑，避免成本與個資爭議）
+- ❌ **使用者帳號 / 跨裝置同步**（localStorage only）
+- ❌ **30 筆以上的歷史**（localStorage 30 筆上限保留）
+- ❌ **Notion / Slack / Stripe / Supabase OAuth**（全部延後到 v1.1）
+- ❌ **桌面版 Zoom / Teams / Meet app 錄音**（Chrome 權限限制；UI 會寫明「不支援」）
+- ❌ **Speaker diarization**（tabCapture 沒有；v1.1 雲端 STT 才做）
+- ❌ **自動開始錄音**（一定要 user gesture）
+
+### 0.5.3 會員制 v1.1 預留（不寫 code，僅定義邊界）
+
+當公開版跑出足夠流量（≥ 100 個 active users/月 或 ≥ 10 個「願意付費」訪客），開啟 v1.1：
+
+| 功能 | 公開版 | 會員制 v1.1 |
+|---|---|---|
+| 本機整理（錄音 / 上傳 / 逐字稿 / 分析 / Markdown）| ✅ | ✅ |
+| Email draft / Notion 複製 / Slack 複製 | ✅ | ✅ |
+| 保密模式（純本機）| ✅ | ✅ |
+| Chrome 擴充（網頁 Meet/Zoom）| ✅ | ✅ |
+| **雲端 STT**（OpenAI Whisper 或本地 Whisper.cpp）| ❌ | ✅ 業務/律師版 |
+| **LLM 動作項提取**（GPT-4o-mini / Claude Haiku）| ❌ | ✅ 業務/律師版 |
+| **跨裝置歷史同步**（Supabase + pgvector）| ❌ | ✅ |
+| **Notion OAuth**（一鍵推 action items）| ❌ | ✅ |
+| **Slack OAuth**（一鍵 @負責人）| ❌ | ✅ |
+| **30 天以上歷史 + 語意搜尋** | ❌ | ✅ |
+| **Speaker diarization** | ❌ | ✅ |
+| **桌面版 app 錄音**（需 OS 虛擬音訊）| ❌ | 探索 |
+
+### 0.5.4 公開版 KPI（取代原 §1.4 商業 OKR）
+
+**3 個月目標（M0-M2 公開版驗證）**：
+- **O1：驗證「繁中使用者願意把音檔交給 MeetingFlow 整理」**
+  - KR1：100 個 unique visitors 進入 `/app` 工作台（Vercel Analytics / Plausible）
+  - KR2：20 個用戶跑完一次完整分析（從錄音或上傳 → Markdown 下載）
+  - KR3：5 個用戶安裝 Chrome 擴充並完成至少 1 次錄音
+
+**6 個月目標（M3-M5 過渡到會員制）**：
+- **O2：把公開版流量導到會員制**
+  - KR1：500 個 unique visitors / 月
+  - KR2：20 個「願意付費」訊號（email 訂閱 / 預約 demo / 加入 waitlist）
+  - KR3：NT$15,000 MRR（20×NT$599 + 5×NT$999）
+
+**為什麼用 unique visitors 而不是 MRR 當公開版的 KPI**：公開版不收費，MRR 是 0。KPI 必須反映「有沒有人真的用」，不是「有沒有人付錢」。
+
+### 0.5.5 UI/UX 基準（Otter 雙欄 + 7 個差異點）
+
+**基準**：Otter.ai 的雙欄式（transcript ↔ AI summary）
+
+**為什麼選 Otter**：
+- MeetingFlow 的核心結構（左：逐字稿 / 右：AI 摘要 + 行動項）跟 Otter 天然對齊
+- Linear / Vercel 風格（深色高密度）適合 power-user 文字工具，跟「錄音 → 整理」的主軸不合
+- tl;dv / Fireflies 風格（大色塊 + meeting timeline）適合 SaaS 大企業，跟 MeetingFlow 的「個人工作台」定位不合
+
+**「比 Otter 好且更可看」的 7 個差異點**：
+
+1. **繁中排版**：Noto Sans TC + DM Sans、字距、行高、標點擺放，Otter 對繁中支援差
+2. **動作項卡片**：✓ checkbox、負責人 avatar placeholder、截止日 chip、Notion / Slack / Email 各自一個按鈕
+3. **保密模式視覺**：legal mode 整頁加淡紅邊框 + 「不外推」徽章
+4. **即時狀態機**：錄音中 = 紅點脈動、上傳中 = 進度條、分析中 = skeleton loader、錯誤 = 重試按鈕
+5. **空白狀態友善**：沒有歷史時顯示 onboarding（emoji + 文字），不是空白
+6. **深色模式**：長時間整理會議護眼
+7. **快捷鍵**：`⌘+Enter` 分析、`⌘+S` 存歷史、`⌘+D` 下載 Markdown
+
+### 0.5.6 Chrome 擴充範圍（v1 Public）
+
+**做**：
+- ✅ 網頁版 Google Meet（meet.google.com）tabCapture
+- ✅ 網頁版 Zoom Web（app.zoom.us/wc）tabCapture
+- ✅ 麥克風混音：`getUserMedia` + `tabCapture` → Web Audio API mix → 單一 WebM
+- ✅ 會議 URL 偵測 → popup 顯示「偵測到會議，按這裡開始錄」
+- ✅ 手動開始 / 停止 + 計時器
+- ✅ WebM 下載 + IndexedDB metadata + 「拖進 MeetingFlow 工作台」提示
+- ✅ `MediaRecorder.onerror` + stream `track.onended` 清理（popup 不會卡「錄製中」）
+- ✅ IndexedDB purge 按鈕（popup 上清楚標示「下載到磁碟的不受影響」）
+
+**不做（UI 寫明「不支援」）**：
+- ❌ 桌面版 Zoom / Teams / Meet app（Chrome 權限限制）
+- ❌ DRM 內容
+- ❌ 企業政策封鎖（寫進 README，讓使用者找 IT 解鎖）
+- � 會議「自動開始」錄音（一定要 user gesture）
+- ❌ 從擴充端串接 Notion / Slack OAuth（公開版不啟用）
+
+**灰色地帶（做 + 寫限制）**：
+- ⚠️ macOS 系統音訊需要「�幕錄影權限」給 Chrome（擴充會引導）
+- ⚠️ > 2 小時錄音可能爆 IndexedDB quota（擴充會自動分段 + 提示下載）
+- ⚠️ Speaker 標記僅用音量偵測切 Speaker A/B/C（placeholder，diarization 需要雲端 STT）
+
+### 0.5.7 部署
+
+**Vercel Git Integration（零 token）**：
+1. 使用者去 https://vercel.com/new Import `openclawsean024-create/meeting-recorder`
+2. Framework Preset 留 "Other"（vercel.json 已寫好）
+3. 環境變數留空（公開版不需要 `OPENAI_API_KEY` 等）
+4. Deploy → 拿到 *.vercel.app URL
+5. 之後 Hermes commit + push，Vercel 自動部署
+
+**不做的事**：
+- ❌ 不請使用者把 token 貼到對話
+- ❌ 不裝 vercel CLI 或設 VERCEL_TOKEN
+- ❌ 不在沒有使用者明確同意下 `git push`
 
 ---
 
