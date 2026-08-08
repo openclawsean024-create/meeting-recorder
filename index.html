@@ -1,45 +1,801 @@
 <!doctype html>
 <html lang="zh-Hant">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#090b12"><meta name="description" content="MeetingFlow：會議錄音、繁中逐字稿與會後行動項工作台">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0b0d14">
+<meta name="description" content="MeetingFlow — 繁中會議後整理工作台。錄音、上傳、貼逐字稿，本機產出摘要、決策、風險與行動項。免登入、不收費、可裝 Chrome 擴充錄視訊會議。">
 <title>MeetingFlow｜會議結束，行動開始</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+TC:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#090b12;--surface:#10141e;--surface2:#151b28;--line:#263044;--text:#f4f7fb;--muted:#97a3b8;--faint:#657188;--mint:#7cf0d0;--blue:#9cb8ff;--red:#ff7f98;--amber:#ffc979;--radius:18px;--shadow:0 22px 70px #0006}*{box-sizing:border-box}body{margin:0;color:var(--text);background:radial-gradient(900px 500px at 5% -10%,#35407855,transparent 65%),radial-gradient(800px 500px at 100% 0,#0e665055,transparent 65%),var(--bg);font:15px/1.65 'Noto Sans TC','DM Sans',sans-serif;-webkit-font-smoothing:antialiased}button,input,textarea,select{font:inherit}button{cursor:pointer}.top{height:72px;border-bottom:1px solid #ffffff0d;display:flex;align-items:center;justify-content:space-between;padding:0 max(22px,calc((100vw - 1240px)/2));position:sticky;top:0;z-index:10;background:#090b12d9;backdrop-filter:blur(22px)}.brand{display:flex;align-items:center;gap:11px;font-weight:800;letter-spacing:-.03em;font-size:18px}.brand-mark{width:34px;height:34px;display:grid;place-items:center;border-radius:11px;background:linear-gradient(135deg,var(--mint),#7996ff);color:#08111a;font-weight:900}.top nav{display:flex;gap:6px}.top nav a{color:var(--muted);padding:8px 13px;border-radius:9px;text-decoration:none}.top nav a:hover{background:#ffffff0b;color:var(--text)}main{max-width:1240px;margin:auto;padding:54px 22px 100px}.hero{display:grid;grid-template-columns:1.25fr .75fr;gap:30px;align-items:end;margin-bottom:42px}.kicker{color:var(--mint);font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}.hero h1{font-size:clamp(38px,6vw,72px);line-height:1.08;letter-spacing:-.065em;margin:14px 0 20px;max-width:780px}.hero h1 em{font-style:normal;color:var(--mint)}.hero p{color:var(--muted);max-width:650px;font-size:17px}.hero-card{border:1px solid var(--line);background:linear-gradient(145deg,#182232,#10141e);border-radius:var(--radius);padding:25px;box-shadow:var(--shadow)}.hero-card .number{font-size:50px;line-height:1;font-weight:800;color:var(--mint)}.hero-card strong{display:block;margin-top:12px;font-size:18px}.hero-card p{font-size:13px;margin:8px 0 0}.workspace{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(350px,.9fr);gap:18px}.card{border:1px solid var(--line);background:#10141ee8;border-radius:var(--radius);box-shadow:0 10px 40px #0002}.panel{padding:24px}.panel-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:20px}.panel h2{font-size:20px;letter-spacing:-.03em;margin:0}.sub{color:var(--muted);font-size:13px;margin:4px 0 0}.label{display:block;font-size:12px;color:var(--muted);font-weight:700;margin:16px 0 7px}.input,.textarea,.select{width:100%;color:var(--text);background:#0b0f18;border:1px solid var(--line);border-radius:11px;padding:12px 13px;outline:0}.input:focus,.textarea:focus,.select:focus{border-color:var(--mint);box-shadow:0 0 0 3px #7cf0d01c}.textarea{resize:vertical;min-height:220px}.consent{display:flex;gap:10px;align-items:flex-start;background:#141b28;border:1px solid #344158;border-radius:12px;padding:13px;margin:18px 0;color:#d8e0ee;font-size:13px}.consent input{accent-color:var(--mint);margin-top:4px}.btn{border:0;border-radius:10px;padding:11px 16px;font-weight:800;transition:.18s transform,.18s background;min-height:43px}.btn:hover{transform:translateY(-1px)}.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}.primary{background:var(--mint);color:#071319}.secondary{background:#202a3b;color:var(--text);border:1px solid #35445c}.quiet{background:transparent;color:var(--muted);border:1px solid var(--line)}.danger{color:var(--red);border-color:#703445}.row{display:flex;gap:9px;flex-wrap:wrap}.record-zone{display:grid;place-items:center;text-align:center;border:1px dashed #3d4d67;border-radius:15px;padding:30px 20px;background:linear-gradient(160deg,#152032,#0d121c)}.record-button{width:110px;height:110px;border-radius:50%;border:9px solid #7cf0d01c;background:var(--mint);color:#071319;font-size:35px;box-shadow:0 0 0 1px #7cf0d066,0 15px 45px #7cf0d02b}.record-button.live{background:var(--red);border-color:#ff7f982c;animation:pulse 1.5s infinite}.timer{font:700 25px 'DM Sans';margin-top:15px}.record-status{color:var(--muted);margin-top:5px}.drop{border:1px dashed #485875;border-radius:13px;padding:16px;margin-top:14px;text-align:center;color:var(--muted);transition:.2s}.drop.over,.drop:hover{border-color:var(--mint);background:#7cf0d00b;color:var(--text)}.drop input{display:none}.file-name{color:var(--mint);font-size:13px;margin-top:7px}.notice{font-size:12px;color:var(--faint);margin-top:12px}.notice.warn{color:var(--amber)}.result{grid-column:1/-1;display:grid;grid-template-columns:1.15fr .85fr;gap:18px}.result .summary{font-size:16px;line-height:1.8;color:#e9eef7;background:#141b28;border-radius:12px;padding:16px;min-height:84px}.section-title{font-size:13px;font-weight:800;color:var(--muted);margin:22px 0 10px}.chips{display:flex;gap:7px;flex-wrap:wrap}.chip{border:1px solid #31405a;color:var(--blue);padding:4px 9px;border-radius:99px;font-size:12px}.list{display:grid;gap:9px}.action{display:grid;grid-template-columns:24px 1fr auto;gap:10px;align-items:start;background:#141b28;border:1px solid #26344b;border-radius:12px;padding:12px}.action.done{opacity:.55}.action input{accent-color:var(--mint);margin-top:5px}.action strong{display:block;font-size:14px}.action small{color:var(--muted)}.badge{font-size:11px;border-radius:99px;padding:3px 8px;background:#24354a;color:var(--blue);white-space:nowrap}.badge.amber{background:#574521;color:var(--amber)}.history{grid-column:1/-1}.history-list{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}.meeting{padding:15px;border:1px solid var(--line);background:#141a26;border-radius:13px;cursor:pointer}.meeting:hover{border-color:#6680ab}.meeting h3{font-size:15px;margin:0 0 5px}.meeting p,.meeting small{color:var(--muted);font-size:12px;margin:0}.empty{padding:32px;text-align:center;color:var(--faint);border:1px dashed var(--line);border-radius:12px}.toast{position:fixed;bottom:25px;left:50%;transform:translateX(-50%) translateY(15px);background:#f5f8ff;color:#0c1220;padding:12px 18px;border-radius:10px;font-weight:700;opacity:0;pointer-events:none;transition:.25s;z-index:50;box-shadow:var(--shadow)}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}.spin{display:inline-block;width:14px;height:14px;border:2px solid #07131955;border-top-color:#071319;border-radius:50%;animation:spin .7s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}@keyframes pulse{50%{box-shadow:0 0 0 14px #ff7f9800,0 15px 45px #ff7f9844}}@media(max-width:900px){.hero,.workspace,.result{grid-template-columns:1fr}.history-list{grid-template-columns:repeat(2,1fr)}}@media(max-width:560px){main{padding:35px 14px 70px}.top{padding:0 14px}.top nav a:nth-child(2){display:none}.panel{padding:18px}.hero h1{font-size:43px}.history-list{grid-template-columns:1fr}.row .btn{flex:1}.result{display:block}.result>.card{margin-bottom:18px}}
-</style></head>
-<body>
-<header class="top"><a class="brand" href="/"><span class="brand-mark">MF</span><span>MeetingFlow</span></a><nav><a href="#workspace">工作台</a><a href="#history">歷史紀錄</a><a href="/extension">Chrome 外掛</a></nav></header>
-<main>
-<section class="hero"><div><div class="kicker">Post-meeting clarity · 繁中最佳化</div><h1>會議結束，<em>行動開始。</em></h1><p>把錄音、逐字稿與「誰要做什麼、何時完成」放在同一個清晰工作流。無需註冊即可開始；沒有雲端 AI 金鑰時，也能使用本機整理與匯出。</p></div><div class="hero-card"><div class="number">30<span style="font-size:25px"> 秒</span></div><strong>從一段逐字稿到可執行的下一步</strong><p>參考 Fireflies 的會後動作項、Otter 的文字工作流與 Linear 的操作密度，重新為繁中會議設計。</p></div></section>
-<section id="workspace" class="workspace"><div class="card panel"><div class="panel-head"><div><h2>建立一場會議</h2><p class="sub">先錄音或匯入檔案，再貼上逐字稿即可完成。</p></div><span class="badge">公開版 · 不需登入</span></div>
-<label class="label" for="title">會議名稱</label><input class="input" id="title" maxlength="200" placeholder="例如：Q3 客戶提案回顧"><label class="label" for="participants">與會者（用逗號分隔）</label><input class="input" id="participants" placeholder="Sean, 小美, 客戶 PM"><label class="label" for="mode">整理模式</label><select class="select" id="mode"><option value="sales">業務 / 客戶會議</option><option value="legal">律師 / 保密案件</option></select>
-<label class="consent"><input id="consent" type="checkbox"><span><strong>我已告知與會者並取得錄音同意</strong><br>錄音前請確認所有參與者知情；包含上傳音檔、雲端轉寫與下載。保密案件不會自動推送到外部服務。</span></label>
-<div class="record-zone"><button id="record" class="record-button" aria-label="開始錄音">●</button><div id="timer" class="timer">00:00</div><div id="recordStatus" class="record-status">勾選同意後，點擊開始錄音</div></div>
-<label class="drop" id="drop"><input id="audioFile" type="file" accept="audio/*,.webm,.wav,.mp3,.m4a,.ogg"><span>拖放音檔到這裡，或 <u>選擇檔案</u></span><div id="fileName" class="file-name"></div></label><div id="audioNotice" class="notice">支援 WebM、WAV、MP3、M4A、OGG，單檔上限 100 MB。音檔預設只留在本機。</div><div class="row" style="margin-top:16px"><button id="transcribe" class="btn secondary" disabled>送雲端轉寫</button><button id="clear" class="btn quiet">清除草稿</button></div></div>
-<div class="card panel"><div class="panel-head"><div><h2>逐字稿</h2><p class="sub">可直接貼上內容；本機分析不會離開瀏覽器。</p></div><span id="modeBadge" class="badge">繁體中文</span></div><textarea id="transcript" class="textarea" placeholder="把會議逐字稿貼在這裡…&#10;&#10;例如：我們決定採用新版提案。請小美下週三前完成報價。風險是法務審核可能延誤。"></textarea><div class="row" style="margin-top:12px"><button id="analyze" class="btn primary">生成會後整理</button><button id="copyTranscript" class="btn quiet">複製逐字稿</button></div><div id="processing" class="notice" aria-live="polite"></div></div>
-<div class="result"><div class="card panel"><div class="panel-head"><div><h2>會議摘要</h2><p class="sub">從討論中擷取可以帶走的結論。</p></div><button id="copySummary" class="btn quiet">複製</button></div><div id="summary" class="summary">完成分析後，摘要會出現在這裡。</div><div class="section-title">重點</div><div id="highlights" class="list"><div class="empty">尚未分析</div></div><div class="section-title">決策</div><div id="decisions" class="list"><div class="empty">尚未分析</div></div><div class="section-title">風險與待確認</div><div id="risks" class="list"><div class="empty">尚未分析</div></div></div><div class="card panel"><div class="panel-head"><div><h2>行動項目</h2><p class="sub">負責人、截止日與狀態一目了然。</p></div><span id="actionCount" class="badge">0 項</span></div><div id="actions" class="list"><div class="empty">尚未分析</div></div><div class="section-title">匯出與交付</div><div class="row"><button id="download" class="btn secondary">下載 Markdown</button><button id="save" class="btn primary">保存到歷史</button></div><div class="section-title">插件 / 整合</div><div class="row"><button id="notion" class="btn quiet">Notion</button><button id="slack" class="btn quiet">Slack</button><button id="email" class="btn quiet">Email</button></div><div class="notice">尚未設定 OAuth 時，按鈕會提供可複製的 Markdown / Email 內容，不會假裝已送出。</div></div></div>
-<div id="history" class="card panel history"><div class="panel-head"><div><h2>最近會議</h2><p class="sub">資料保存在此瀏覽器的 localStorage；清除瀏覽器資料會一併移除。</p></div><input id="search" class="input" style="max-width:310px" placeholder="搜尋名稱、逐字稿、行動項"><button id="clearHistory" class="btn quiet" style="margin-left:8px">清除本機歷史</button></div><div id="historyList" class="history-list"><div class="empty">尚無紀錄，完成一次分析後保存。</div></div></div>
-</section></main><div id="toast" class="toast" role="status"></div>
+/* ============ Design tokens (Otter-aligned, TC-optimised) ============ */
+:root{
+  --bg:#0b0d14; --surface:#10141e; --surface-2:#161c2a; --surface-3:#1d2536;
+  --line:#27324a; --line-soft:#1c2438;
+  --text:#f4f7fb; --muted:#a3afc6; --faint:#6e7993;
+  --mint:#7cf0d0; --mint-soft:#7cf0d022;
+  --blue:#9cb8ff; --red:#ff7f98; --amber:#ffc979; --violet:#c7a7ff;
+  --radius-sm:8px; --radius:14px; --radius-lg:20px;
+  --shadow:0 24px 60px #0008, 0 2px 0 #ffffff0a inset;
+  --t:180ms cubic-bezier(.2,.7,.2,1);
+}
+[data-mode="legal"]{--mint:#ffb4c8;--mint-soft:#ff7f9818;--blue:#ff9eb4;--amber:#ffce80}
+[data-mode="legal"] body{box-shadow:inset 0 0 0 1px #ff7f9844}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;color:var(--text);background:var(--bg);font:15px/1.7 'Noto Sans TC','DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+body{background:radial-gradient(1100px 600px at 5% -10%,#35407838,transparent 65%),radial-gradient(900px 500px at 100% 0%,#0e665033,transparent 65%),var(--bg);min-height:100vh}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer;background:none;border:0}
+::selection{background:var(--mint-soft);color:var(--mint)}
+::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#2a3650;border-radius:10px}::-webkit-scrollbar-thumb:hover{background:#3a4870}
+
+/* ============ Header ============ */
+.top{height:64px;border-bottom:1px solid var(--line-soft);display:flex;align-items:center;justify-content:space-between;padding:0 max(20px,calc((100vw - 1320px)/2));position:sticky;top:0;z-index:50;background:#0b0d14e0;backdrop-filter:blur(18px) saturate(140%)}
+.brand{display:flex;align-items:center;gap:11px;font-weight:800;letter-spacing:-.025em;font-size:17px;text-decoration:none;color:var(--text)}
+.brand-mark{width:32px;height:32px;display:grid;place-items:center;border-radius:9px;background:conic-gradient(from 200deg,var(--mint),var(--blue),var(--violet),var(--mint));color:#08111a;font-weight:900;font-size:14px;font-family:'JetBrains Mono',monospace;position:relative}
+.brand-mark::after{content:"";position:absolute;inset:2px;border-radius:7px;background:var(--bg);display:grid;place-items:center}
+.brand-mark span{position:relative;z-index:1;background:conic-gradient(from 200deg,var(--mint),var(--blue),var(--violet),var(--mint));-webkit-background-clip:text;background-clip:text;color:transparent}
+.top nav{display:flex;gap:2px;align-items:center}
+.top nav a{color:var(--muted);padding:7px 12px;border-radius:8px;text-decoration:none;font-size:14px;font-weight:500;transition:all var(--t)}
+.top nav a:hover{background:#ffffff0a;color:var(--text)}
+.top nav .kbd{margin-left:4px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--faint)}
+.top-right{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--faint)}
+.status-pill{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border:1px solid var(--line);border-radius:99px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.04em;text-transform:uppercase}
+.status-pill .dot{width:6px;height:6px;border-radius:99px;background:var(--mint);box-shadow:0 0 8px var(--mint)}
+
+/* ============ Layout ============ */
+.app{max-width:1320px;margin:auto;padding:24px 20px 80px}
+.hero{display:grid;grid-template-columns:1fr auto;gap:24px;align-items:end;margin-bottom:24px;padding-bottom:24px;border-bottom:1px solid var(--line-soft)}
+.hero h1{font-size:clamp(28px,4vw,46px);line-height:1.15;letter-spacing:-.04em;margin:8px 0 12px;font-weight:800}
+.hero h1 em{font-style:normal;background:linear-gradient(120deg,var(--mint),var(--blue) 60%,var(--violet));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{color:var(--muted);max-width:560px;font-size:15px;margin:0}
+.kicker{display:inline-flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--mint)}
+.kicker::before{content:"";width:14px;height:1px;background:var(--mint)}
+.hero-stats{display:flex;gap:24px;font-size:12px;color:var(--faint);font-family:'JetBrains Mono',monospace}
+.hero-stats strong{display:block;color:var(--text);font-size:20px;font-weight:600;font-family:'Noto Sans TC',sans-serif;margin-bottom:2px}
+
+/* ============ Metadata bar ============ */
+.meta-bar{display:grid;grid-template-columns:1fr 1fr 200px 120px;gap:12px;padding:14px;background:var(--surface);border:1px solid var(--line-soft);border-radius:var(--radius);margin-bottom:16px}
+.meta-bar input,.meta-bar select{background:transparent;border:0;outline:none;padding:6px 8px;border-radius:6px;transition:background var(--t)}
+.meta-bar input:hover,.meta-bar select:hover{background:#ffffff06}
+.meta-bar input:focus,.meta-bar select:focus{background:#ffffff0c;box-shadow:inset 0 0 0 1px var(--mint)}
+.meta-bar .label{display:block;font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);font-family:'JetBrains Mono',monospace;padding:0 8px 2px}
+.meta-bar select{appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path fill='%236e7993' d='M0 0l5 6 5-6z'/></svg>");background-repeat:no-repeat;background-position:right 8px center}
+
+/* ============ Main grid: Otter-style 雙欄 ============ */
+.workspace{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:980px){.workspace{grid-template-columns:1fr}}
+
+.panel{background:var(--surface);border:1px solid var(--line-soft);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);transition:border-color var(--t)}
+.panel:focus-within{border-color:#3a4870}
+.panel-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--line-soft)}
+.panel-head h2{font-size:15px;font-weight:700;margin:0;letter-spacing:-.01em;display:flex;align-items:center;gap:8px}
+.panel-head h2 .icon{width:24px;height:24px;border-radius:6px;background:#ffffff0a;display:grid;place-items:center;font-size:13px}
+.panel-head .sub{font-size:12px;color:var(--faint);margin:2px 0 0}
+.panel-head-right{display:flex;align-items:center;gap:8px}
+.badge{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border:1px solid var(--line);border-radius:99px;font-size:11px;font-weight:500;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.badge.live{color:var(--red);border-color:#ff7f9844;background:#ff7f9814}
+.badge .dot{width:6px;height:6px;border-radius:99px;background:currentColor}
+.badge.live .dot{animation:pulse 1.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ============ Input column ============ */
+.consent{display:flex;align-items:flex-start;gap:10px;padding:12px;border:1px dashed #ff7f9855;border-radius:10px;background:#ff7f9808;margin-bottom:14px;cursor:pointer;font-size:13px;line-height:1.5}
+.consent:hover{background:#ff7f9814}
+.consent input{margin-top:3px;accent-color:var(--red)}
+.consent strong{color:var(--red);display:block;margin-bottom:2px}
+
+.recording-row{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;padding:16px;background:var(--surface-2);border-radius:12px;margin-bottom:14px}
+.record-btn{width:48px;height:48px;border-radius:99px;border:2px solid #ff7f9844;display:grid;place-items:center;color:var(--red);font-size:18px;transition:all var(--t);position:relative}
+.record-btn:not(:disabled):hover{background:#ff7f9814;border-color:var(--red);transform:scale(1.05)}
+.record-btn:disabled{opacity:.4;cursor:not-allowed}
+.record-btn.live{background:var(--red);color:#fff;border-color:var(--red);animation:pulse 1.4s ease-in-out infinite}
+.record-btn.live::before{content:"";position:absolute;inset:-6px;border:2px solid var(--red);border-radius:99px;opacity:.3;animation:ripple 1.6s ease-out infinite}
+@keyframes ripple{0%{transform:scale(1);opacity:.5}100%{transform:scale(1.6);opacity:0}}
+.timer{font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:500;color:var(--text);letter-spacing:-.02em}
+.timer-row{display:flex;flex-direction:column;gap:2px}
+.timer-status{font-size:11px;color:var(--faint);font-family:'JetBrains Mono',monospace;letter-spacing:.05em;text-transform:uppercase}
+.rec-meta{display:flex;flex-direction:column;align-items:flex-end;gap:4px;font-size:11px;color:var(--faint);font-family:'JetBrains Mono',monospace}
+.rec-meta .size{color:var(--text);font-size:13px}
+
+.drop{border:1.5px dashed var(--line);border-radius:12px;padding:18px;text-align:center;cursor:pointer;display:block;transition:all var(--t);background:#ffffff04}
+.drop:hover,.drop.over{border-color:var(--mint);background:var(--mint-soft)}
+.drop input{display:none}
+.drop .icn{font-size:24px;margin-bottom:6px;display:block}
+.drop u{color:var(--mint);text-decoration:none;border-bottom:1px solid var(--mint)}
+
+.transcript-area{margin-top:14px}
+.transcript-area textarea{width:100%;min-height:280px;background:var(--surface-2);border:1px solid var(--line-soft);border-radius:10px;padding:14px;color:var(--text);font-family:'Noto Sans TC',sans-serif;font-size:14px;line-height:1.75;resize:vertical;outline:none;transition:border-color var(--t)}
+.transcript-area textarea:focus{border-color:var(--mint)}
+.transcript-area textarea::placeholder{color:var(--faint)}
+.transcript-meta{display:flex;justify-content:space-between;margin-top:6px;font-size:11px;color:var(--faint);font-family:'JetBrains Mono',monospace}
+
+.processing{margin-top:12px;padding:10px 12px;background:var(--surface-2);border-radius:8px;font-size:13px;color:var(--muted);display:flex;align-items:center;gap:8px;min-height:38px}
+.processing .spin{width:14px;height:14px;border:2px solid var(--mint)33;border-top-color:var(--mint);border-radius:99px;animation:spin .8s linear infinite;flex:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+.processing.error{background:#ff7f9814;color:var(--red)}
+.processing.success{background:var(--mint-soft);color:var(--mint)}
+
+/* ============ Buttons ============ */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:9px 14px;border-radius:9px;font-weight:600;font-size:13px;border:1px solid transparent;transition:all var(--t);text-decoration:none;line-height:1}
+.btn:hover{transform:translateY(-1px)}
+.btn:active{transform:translateY(0)}
+.btn.primary{background:var(--mint);color:#071319;box-shadow:0 6px 20px var(--mint-soft)}
+.btn.primary:hover{box-shadow:0 10px 28px var(--mint-soft)}
+.btn.secondary{background:var(--surface-2);border-color:var(--line);color:var(--text)}
+.btn.secondary:hover{border-color:var(--mint);background:var(--mint-soft)}
+.btn.ghost{background:transparent;color:var(--muted)}
+.btn.ghost:hover{background:#ffffff08;color:var(--text)}
+.btn .kbd{font-family:'JetBrains Mono',monospace;font-size:10px;opacity:.7;margin-left:4px;padding:1px 5px;border:1px solid currentColor;border-radius:4px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+
+/* ============ Result column ============ */
+.section-title{font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin:18px 0 8px;font-family:'JetBrains Mono',monospace;display:flex;align-items:center;gap:8px}
+.section-title::after{content:"";flex:1;height:1px;background:var(--line-soft)}
+.summary{font-size:14px;line-height:1.75;color:var(--text);padding:12px 14px;background:var(--surface-2);border-radius:10px;border-left:3px solid var(--mint);min-height:60px}
+.summary:empty::before,.empty::before{content:attr(data-empty);color:var(--faint);font-style:italic}
+.summary.empty::before{content:"完成分析後，摘要會出現在這裡"}
+
+.list{display:flex;flex-direction:column;gap:6px}
+.list .item{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border-radius:8px;background:var(--surface-2);font-size:13px;line-height:1.6}
+.list .item .marker{flex:none;width:18px;height:18px;border-radius:5px;background:#ffffff0a;display:grid;place-items:center;font-size:10px;color:var(--mint);margin-top:2px}
+.list .item.highlight .marker{background:var(--mint-soft);color:var(--mint)}
+.list .item.decision .marker{background:#9cb8ff22;color:var(--blue)}
+.list .item.risk .marker{background:#ffc97922;color:var(--amber)}
+
+/* Action items: cards with checkbox + chips + 3-way buttons */
+.action-card{display:flex;gap:10px;align-items:flex-start;padding:12px;border:1px solid var(--line-soft);border-radius:10px;background:var(--surface-2);transition:all var(--t)}
+.action-card.done{opacity:.55;background:transparent}
+.action-card.done .action-task{text-decoration:line-through;text-decoration-color:var(--faint)}
+.action-card:not(.done):hover{border-color:#3a4870;background:var(--surface-3)}
+.action-check{flex:none;width:18px;height:18px;margin-top:3px;accent-color:var(--mint);cursor:pointer}
+.action-body{flex:1;min-width:0}
+.action-task{font-size:13px;font-weight:600;line-height:1.5;color:var(--text);margin-bottom:6px}
+.action-meta{display:flex;gap:6px;flex-wrap:wrap;font-size:11px}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:99px;background:#ffffff08;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.02em}
+.chip.person{color:var(--blue);background:#9cb8ff18}
+.chip.date{color:var(--amber);background:#ffc97918}
+.chip.date.tba{color:var(--faint)}
+.chip.case{color:var(--violet);background:#c7a7ff18}
+.action-actions{display:flex;gap:4px;flex-wrap:wrap;margin-top:8px}
+.action-actions .btn{padding:4px 8px;font-size:11px;border-radius:6px}
+
+/* Empty state */
+.empty-state{padding:32px 20px;text-align:center;color:var(--faint);font-size:13px;line-height:1.6}
+.empty-state .emoji{font-size:32px;display:block;margin-bottom:10px;opacity:.7}
+.empty-state strong{display:block;color:var(--muted);margin-bottom:4px;font-size:14px}
+
+/* ============ History ============ */
+.history{margin-top:16px}
+.history-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;margin-top:14px}
+.history-card{padding:12px 14px;border:1px solid var(--line-soft);border-radius:10px;background:var(--surface-2);cursor:pointer;transition:all var(--t);text-align:left;width:100%;display:block}
+.history-card:hover{border-color:var(--mint);background:var(--surface-3);transform:translateY(-1px)}
+.history-card .h-title{font-size:13px;font-weight:600;line-height:1.4;color:var(--text);margin-bottom:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.history-card .h-meta{font-size:11px;color:var(--faint);font-family:'JetBrains Mono',monospace;display:flex;gap:8px;align-items:center}
+.history-card .h-meta .act-count{color:var(--mint)}
+
+/* ============ Modal ============ */
+.modal-backdrop{position:fixed;inset:0;background:#0b0d14cc;backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;z-index:100;padding:20px}
+.modal-backdrop.show{display:flex}
+.modal{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-lg);padding:24px;max-width:520px;width:100%;max-height:80vh;overflow:auto;box-shadow:0 30px 80px #000c}
+.modal h3{margin:0 0 14px;font-size:18px;font-weight:700}
+.modal p{margin:0 0 12px;color:var(--muted);font-size:13px;line-height:1.6}
+.modal pre{background:var(--surface-2);padding:12px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.6;white-space:pre-wrap;max-height:300px;overflow:auto;border:1px solid var(--line-soft)}
+.modal .row{margin-top:14px;justify-content:flex-end}
+
+/* ============ Toast ============ */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--surface-3);border:1px solid var(--line);color:var(--text);padding:10px 18px;border-radius:99px;font-size:13px;font-weight:500;opacity:0;transition:all var(--t);z-index:200;pointer-events:none;box-shadow:0 10px 30px #0008}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.success{border-color:var(--mint);color:var(--mint)}
+.toast.error{border-color:var(--red);color:var(--red)}
+
+/* ============ Mode toggle pill ============ */
+.mode-pill{display:inline-flex;border:1px solid var(--line);border-radius:99px;padding:2px;background:var(--surface-2);font-size:12px}
+.mode-pill button{padding:4px 12px;border-radius:99px;color:var(--muted);font-weight:500;transition:all var(--t)}
+.mode-pill button.active{background:var(--mint);color:#071319;font-weight:700}
+[data-mode="legal"] .mode-pill button.active{background:var(--red);color:#fff}
+
+/* ============ Skeleton loader ============ */
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.skeleton{background:linear-gradient(90deg,#1d2536 25%,#2a3650 50%,#1d2536 75%);background-size:200% 100%;animation:shimmer 1.6s linear infinite;border-radius:6px;height:14px;margin-bottom:8px}
+</style>
+</head>
+<body data-mode="sales">
+<header class="top">
+  <a class="brand" href="/">
+    <span class="brand-mark"><span>MF</span></span>
+    <span>MeetingFlow</span>
+  </a>
+  <nav>
+    <a href="#workspace">工作台</a>
+    <a href="#history">歷史 <span class="kbd">⌘H</span></a>
+    <a href="/extension">Chrome 擴充</a>
+    <a href="/privacy">隱私</a>
+  </nav>
+  <div class="top-right">
+    <span class="status-pill"><span class="dot"></span>公開版 · 無登入</span>
+  </div>
+</header>
+
+<main class="app">
+  <section class="hero">
+    <div>
+      <span class="kicker">v1.0 · Public Release</span>
+      <h1>會議結束，<em>行動開始。</em></h1>
+      <p>錄音、上傳音檔或直接貼上逐字稿，30 秒內拿到摘要、決策、風險與「誰要做什麼、何時做完」的行動項清單。免登入、不收費、純本機整理。</p>
+    </div>
+    <div class="hero-stats">
+      <div><strong>30s</strong>逐字稿 → 行動項</div>
+      <div><strong>0$</strong>永遠免費</div>
+      <div><strong>0</strong>登入 / 帳號</div>
+    </div>
+  </section>
+
+  <div class="meta-bar">
+    <div>
+      <span class="label">會議名稱</span>
+      <input id="title" placeholder="例如：Q3 客戶提案回顧" maxlength="200">
+    </div>
+    <div>
+      <span class="label">與會者（逗號分隔）</span>
+      <input id="participants" placeholder="Sean、小美、客戶 PM">
+    </div>
+    <div>
+      <span class="label">模式</span>
+      <div class="mode-pill" role="tablist">
+        <button id="mode-sales" class="active" data-mode="sales">業務</button>
+        <button id="mode-legal" data-mode="legal">保密</button>
+      </div>
+    </div>
+    <div>
+      <span class="label">狀態</span>
+      <span id="mode-badge" class="badge">繁體中文 · 本機</span>
+    </div>
+  </div>
+
+  <section id="workspace" class="workspace">
+    <!-- LEFT: Input column -->
+    <div class="panel">
+      <div class="panel-head">
+        <div>
+          <h2><span class="icon">🎙</span>輸入</h2>
+          <p class="sub">錄音、上傳或直接貼逐字稿</p>
+        </div>
+        <div class="panel-head-right">
+          <span id="legal-tag" class="badge" style="display:none">🔒 不外推</span>
+        </div>
+      </div>
+
+      <label class="consent">
+        <input id="consent" type="checkbox">
+        <span><strong>我已告知與會者並取得錄音同意</strong>未勾選時無法開始錄音。保密模式下，所有音檔僅留本機。</span>
+      </label>
+
+      <div class="recording-row">
+        <button id="record" class="record-btn" aria-label="開始錄音" disabled>●</button>
+        <div class="timer-row">
+          <div id="timer" class="timer">00:00</div>
+          <div id="record-status" class="timer-status">READY · 等待同意</div>
+        </div>
+        <div class="rec-meta">
+          <span id="file-name">—</span>
+          <span id="file-size" class="size"></span>
+        </div>
+      </div>
+
+      <label class="drop" id="drop">
+        <input id="audio-file" type="file" accept="audio/*,.webm,.wav,.mp3,.m4a,.ogg,.mp4,.mpeg">
+        <span class="icn">📂</span>
+        <span>拖放音檔到這裡，或 <u>選擇檔案</u></span>
+        <div id="drop-hint" style="font-size:11px;color:var(--faint);margin-top:6px">WebM / WAV / MP3 / M4A / OGG，單檔 ≤ 100 MB</div>
+      </label>
+
+      <div class="transcript-area">
+        <span class="label" style="font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);font-family:'JetBrains Mono',monospace">逐字稿 · 可直接貼上</span>
+        <textarea id="transcript" placeholder="把會議逐字稿貼在這裡，或先錄音 / 上傳音檔後由擴充處理…
+
+例：我們決定採用新版提案。請小美下週三前完成報價。風險是法務審核可能延誤。"></textarea>
+        <div class="transcript-meta">
+          <span id="char-count">0 字</span>
+          <span>本機分析 · 不上傳</span>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:14px">
+        <button id="analyze" class="btn primary">生成會後整理 <span class="kbd">⌘↵</span></button>
+        <button id="copy-transcript" class="btn ghost">複製逐字稿</button>
+        <button id="clear-draft" class="btn ghost">清除草稿</button>
+      </div>
+      <div id="processing" class="processing" data-empty="分析狀態會出現在這裡"></div>
+    </div>
+
+    <!-- RIGHT: Result column -->
+    <div class="panel">
+      <div class="panel-head">
+        <div>
+          <h2><span class="icon">✨</span>整理結果</h2>
+          <p class="sub">從討論中�取可以帶走的結論</p>
+        </div>
+        <div class="panel-head-right">
+          <span id="action-count" class="badge">0 項行動</span>
+        </div>
+      </div>
+
+      <div class="section-title">摘要</div>
+      <div id="summary" class="summary empty" data-empty="完成分析後，摘要會出現在這裡"></div>
+
+      <div class="section-title">重點</div>
+      <div id="highlights" class="list"><div class="empty-state"><span class="emoji">📝</span><strong>尚未分析</strong>生成後會列出關鍵觀察</div></div>
+
+      <div class="section-title">決策</div>
+      <div id="decisions" class="list"><div class="empty-state"><span class="emoji">✅</span><strong>尚未分析</strong>團隊達成共識的事項</div></div>
+
+      <div class="section-title">風險與待確認</div>
+      <div id="risks" class="list"><div class="empty-state"><span class="emoji">⚠️</span><strong>尚未分析</strong>需要再追蹤的不確定性</div></div>
+
+      <div class="section-title">行動項目</div>
+      <div id="actions" class="list"><div class="empty-state"><span class="emoji">🎯</span><strong>尚未分析</strong>每項含負責人與截止日</div></div>
+
+      <div class="section-title">匯出與交付</div>
+      <div class="row">
+        <button id="download" class="btn secondary">下載 Markdown <span class="kbd">⌘D</span></button>
+        <button id="save" class="btn primary">保存到歷史 <span class="kbd">⌘S</span></button>
+        <button id="copy-summary" class="btn ghost">複製摘要</button>
+      </div>
+
+      <div class="section-title">插件 / 整合</div>
+      <div class="row">
+        <button id="notion" class="btn secondary">Notion</button>
+        <button id="slack" class="btn secondary">Slack</button>
+        <button id="email" class="btn secondary">Email</button>
+      </div>
+      <div style="font-size:11px;color:var(--faint);margin-top:8px;line-height:1.6">
+        公開版未啟用 OAuth；按鈕會提供可複製的 Markdown / 訊息，或開啟 Email 草稿。<br>
+        會員制 v1.1 將解鎖一鍵推送到 Notion / Slack。詳見 <a href="/privacy" style="color:var(--mint)">隱私說明</a>。
+      </div>
+    </div>
+  </section>
+
+  <!-- History -->
+  <section id="history" class="panel history">
+    <div class="panel-head">
+      <div>
+        <h2><span class="icon">📚</span>最近會議</h2>
+        <p class="sub">資料保存在此瀏覽器的 localStorage；上限 30 筆，清除瀏覽器資料會一併移除</p>
+      </div>
+      <div class="panel-head-right">
+        <input id="search" class="btn ghost" style="background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:6px 10px;min-width:220px;font-size:13px" placeholder="搜尋名稱、與會者、逐字稿…">
+        <button id="clear-history" class="btn ghost">清除本機歷史</button>
+      </div>
+    </div>
+    <div id="history-list" class="history-list">
+      <div class="empty-state" style="grid-column:1/-1">
+        <span class="emoji">🎬</span>
+        <strong>開始你的第一場會議</strong>
+        錄一段 30 秒的語音，或直接貼一段逐字稿，就能看到這裡的魔法。
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- Modal for Notion/Slack fallback -->
+<div id="modal" class="modal-backdrop">
+  <div class="modal">
+    <h3 id="modal-title">整合預覽</h3>
+    <p id="modal-desc">公開版未啟用 OAuth；以下是會送到 Notion / Slack 的內容，可直接複製。</p>
+    <pre id="modal-content"></pre>
+    <div class="row">
+      <button id="modal-copy" class="btn primary">複製</button>
+      <button id="modal-close" class="btn ghost">關閉</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast" role="status"></div>
+
 <script>
-const $=s=>document.querySelector(s), state={blob:null, file:null, timer:null, started:0, analysis:null, history:JSON.parse(localStorage.getItem('meetingflow-history')||'[]')};
-const supported=()=>window.MediaRecorder&&navigator.mediaDevices?.getUserMedia;
-function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove('show'),2600)}
-function consent(){if(!$('#consent').checked){toast('請先確認已告知與會者並取得同意');return false}return true}
-function formatTime(sec){return `${String(Math.floor(sec/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')}`}
-async function start(){if(!consent())return;if(!supported()){toast('此瀏覽器不支援麥克風錄音，請改用音檔上傳');return}try{const stream=await navigator.mediaDevices.getUserMedia({audio:true});const type=['audio/webm;codecs=opus','audio/webm','audio/mp4'].find(x=>MediaRecorder.isTypeSupported(x))||'';const rec=new MediaRecorder(stream,type?{mimeType:type}:undefined);const chunks=[];rec.ondataavailable=e=>e.data.size&&chunks.push(e.data);rec.onstop=()=>{state.blob=new Blob(chunks,{type:rec.mimeType||'audio/webm'});stream.getTracks().forEach(t=>t.stop());$('#fileName').textContent=`錄音完成 · ${(state.blob.size/1024/1024).toFixed(2)} MB`;$('#transcribe').disabled=false;$('#recordStatus').textContent='錄音已完成，可送出轉寫或直接貼上逐字稿';toast('錄音已保留在此頁面')};rec.start(1000);state.rec=rec;state.started=Date.now();$('#record').classList.add('live');$('#record').textContent='■';$('#recordStatus').textContent='錄音中…';state.timer=setInterval(()=>$('#timer').textContent=formatTime(Math.floor((Date.now()-state.started)/1000)),500)}catch(e){toast('無法使用麥克風，請檢查瀏覽器權限')}}
-function stop(){if(!state.rec)return;state.rec.stop();state.rec=null;clearInterval(state.timer);$('#record').classList.remove('live');$('#record').textContent='●'}
-function setFile(file){if(!file)return;if(file.size>100*1024*1024){toast('音檔不可超過 100 MB');return}if(!file.type.startsWith('audio/')&&!/\.(webm|wav|mp3|m4a|ogg|mp4|mpeg)$/i.test(file.name)){toast('不支援此音檔格式');return}state.file=file;state.blob=file;$('#fileName').textContent=`${file.name} · ${(file.size/1024/1024).toFixed(2)} MB`;$('#transcribe').disabled=false;toast('音檔已加入，可送出轉寫')}
-function renderList(id,items,empty='尚未分析'){const box=$(id);box.innerHTML=items?.length?items.map(x=>`<div class="action"><span class="badge">•</span><div>${escapeHtml(x)}</div></div>`).join(''):`<div class="empty">${empty}</div>`}
-function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function renderAnalysis(a){state.analysis=a;$('#summary').textContent=a.summary;renderList('#highlights',a.highlights);renderList('#decisions',a.decisions);renderList('#risks',a.risks,'目前沒有明確風險');$('#actionCount').textContent=`${a.action_items.length} 項`;$('#actions').innerHTML=a.action_items.length?a.action_items.map((x,i)=>`<label class="action" data-index="${i}"><input type="checkbox"><div><strong>${escapeHtml(x.task)}</strong><small>負責人：${escapeHtml(x.assignee)} · ${x.due_date||'截止日待確認'}</small></div><span class="badge ${x.due_date?'':'amber'}">${x.due_date?'有期限':'待確認'}</span></label>`).join(''):`<div class="empty">沒有擷取到行動項，可從逐字稿補充「請…」「負責…」句子。</div>`;$('#actions').querySelectorAll('input').forEach((input,i)=>{const done=Array.isArray(state.actionDone)?Boolean(state.actionDone[i]):false;input.checked=done;input.closest('.action').classList.toggle('done',done);input.addEventListener('change',e=>{e.target.closest('.action').classList.toggle('done',e.target.checked);if(!Array.isArray(state.actionDone))state.actionDone=[];state.actionDone[i]=e.target.checked})});$('#modeBadge').textContent=a.confidential?'保密模式 · 不外推':'繁體中文 · 本機分析';state.actionDone=Array.isArray(a.action_items)?new Array(a.action_items.length).fill(false):[];}
-async function analyze(){const text=$('#transcript').value.trim();if(!text){toast('請先錄音、上傳音檔或貼上逐字稿');return}$('#processing').innerHTML='<span class="spin"></span> 正在整理逐字稿…';$('#analyze').disabled=true;try{const r=await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({transcript:text,title:$('#title').value||'未命名會議',participants:($('#participants').value||'').split(/[,，、]/).map(x=>x.trim()).filter(Boolean),mode:$('#mode').value})});if(!r.ok)throw new Error((await r.json()).detail||'分析失敗');renderAnalysis(await r.json());$('#processing').textContent='已完成 · 本機規則分析，不會上傳逐字稿';toast('會後整理完成')}catch(e){$('#processing').textContent=e.message;toast('分析失敗，請重試')}finally{$('#analyze').disabled=false}}
-async function transcribe(){if(!consent())return;if(!state.blob){toast('請先選擇或錄製音檔');return}$('#transcribe').disabled=true;$('#processing').textContent='正在送出音檔，若尚未設定雲端金鑰會誠實提示…';const form=new FormData();form.append('file',state.file||new File([state.blob],'meeting.webm',{type:state.blob.type||'audio/webm'}));form.append('meeting_title',$('#title').value||'未命名會議');form.append('participants',$('#participants').value);form.append('mode',$('#mode').value);try{const r=await fetch('/api/transcribe',{method:'POST',body:form});const data=await r.json();if(!r.ok)throw new Error(data.detail||'轉寫失敗');$('#transcript').value=data.transcript;renderAnalysis(data.analysis);$('#processing').textContent='雲端轉寫完成';toast('逐字稿與會後整理完成')}catch(e){$('#processing').textContent=e.message;toast(e.message)}finally{$('#transcribe').disabled=false}}
-function markdown(){const a=state.analysis||{};const actions=(a.action_items||[]).map((x,i)=>`- [ ] ${x.task} — 負責人：${x.assignee} — 截止：${x.due_date||'待確認'}`).join('\n');return `# ${$('#title').value||'未命名會議'}\n\n- 模式：${$('#mode').value==='legal'?'保密案件':'業務會議'}\n- 與會者：${$('#participants').value||'未填寫'}\n- 建立時間：${new Date().toLocaleString('zh-TW')}\n\n## 摘要\n${a.summary||'尚未分析'}\n\n## 決策\n${(a.decisions||[]).map(x=>`- ${x}`).join('\n')||'- 無'}\n\n## 行動項目\n${actions||'- 無'}\n\n## 風險\n${(a.risks||[]).map(x=>`- ${x}`).join('\n')||'- 無'}\n\n## 逐字稿\n${$('#transcript').value||'尚未提供'}\n`}
-function download(){const blob=new Blob([markdown()],{type:'text/markdown;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);const titleSlug=($('#title').value||'').replace(/[^\w\u4e00-\u9fff-]+/g,'-').replace(/^-+|-+$/g,'').slice(0,60)||`meeting-${new Date().toISOString().slice(0,10)}`;a.download=`${titleSlug}.md`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
-function save(){const item={id:Date.now(),title:$('#title').value||'未命名會議',participants:$('#participants').value,transcript:$('#transcript').value,analysis:state.analysis,actionDone:state.actionDone||[],createdAt:new Date().toISOString()};state.history=[item,...state.history].slice(0,30);localStorage.setItem('meetingflow-history',JSON.stringify(state.history));renderHistory();toast('已保存到本機歷史')}
-function clearHistory(){if(!state.history.length)return toast('目前沒有可清除的歷史');if(!confirm('清除此裝置上所有會議歷史？'))return;state.history=[];localStorage.removeItem('meetingflow-history');renderHistory();toast('已清除本機歷史')}
-function renderHistory(){const q=($('#search').value||'').toLowerCase();const list=q?state.history.filter(x=>{const fields=[x.title,x.participants,x.transcript,x.analysis?.summary,...(x.analysis?.highlights||[]),...(x.analysis?.decisions||[]),...(x.analysis?.risks||[]),...(x.analysis?.action_items||[]).flatMap(a=>[a.task,a.assignee])].map(String).join(' ').toLowerCase();return fields.includes(q)}):state.history;$('#historyList').innerHTML=list.length?list.map(x=>`<article class="meeting" data-id="${x.id}"><h3>${escapeHtml(x.title)}</h3><p>${escapeHtml(x.participants||'未填寫')}</p><small>${new Date(x.createdAt).toLocaleString('zh-TW')} · ${x.analysis?.action_items?.length||0} 個行動項</small></article>`).join(''):'<div class="empty">尚無符合紀錄</div>';$('#historyList').querySelectorAll('.meeting').forEach(x=>x.onclick=()=>{const m=state.history.find(y=>y.id==x.dataset.id);$('#title').value=m.title;$('#participants').value=m.participants;$('#transcript').value=m.transcript;state.actionDone=Array.isArray(m.actionDone)?m.actionDone:[];renderAnalysis(m.analysis||{});window.scrollTo({top:document.querySelector('#workspace').offsetTop-90,behavior:'smooth'})})}
-$('#consent').onchange=()=>$('#record').disabled=!$('#consent').checked;$('#record').onclick=()=>state.rec?stop():start();$('#audioFile').onchange=e=>setFile(e.target.files[0]);$('#drop').ondragover=e=>{e.preventDefault();$('#drop').classList.add('over')};$('#drop').ondragleave=()=>$('#drop').classList.remove('over');$('#drop').ondrop=e=>{e.preventDefault();$('#drop').classList.remove('over');setFile(e.dataTransfer.files[0])};$('#analyze').onclick=analyze;$('#transcribe').onclick=transcribe;$('#download').onclick=download;$('#save').onclick=save;$('#search').oninput=renderHistory;$('#copyTranscript').onclick=()=>navigator.clipboard.writeText($('#transcript').value).then(()=>toast('已複製逐字稿'));$('#copySummary').onclick=()=>navigator.clipboard.writeText($('#summary').textContent).then(()=>toast('已複製摘要'));$('#clear').onclick=()=>{if(confirm('清除目前草稿？')){$('#transcript').value='';$('#summary').textContent='完成分析後，摘要會出現在這裡。';state.analysis=null;state.actionDone=[];toast('已清除')}};$('#clearHistory').onclick=clearHistory;$('#notion').onclick=()=>navigator.clipboard.writeText(markdown()).then(()=>toast('Notion 尚未授權，已複製 Markdown，可貼入 Notion'));$('#slack').onclick=()=>navigator.clipboard.writeText((state.analysis?.action_items||[]).map(x=>`• ${x.assignee}：${x.task}（${x.due_date||'待確認'}）`).join('\n')).then(()=>toast('Slack 尚未授權，已複製行動項訊息'));$('#email').onclick=()=>{location.href=`mailto:?subject=${encodeURIComponent($('#title').value||'會議摘要')}&body=${encodeURIComponent(markdown())}`};$('#record').disabled=true;renderHistory();
-</script></body></html>
+'use strict';
+
+// ============ State ============
+const $ = s => document.querySelector(s);
+const state = {
+  blob: null, file: null,
+  rec: null, timer: null, started: 0,
+  analysis: null, actionDone: [],
+  history: JSON.parse(localStorage.getItem('meetingflow-history') || '[]'),
+  mode: 'sales'
+};
+
+const supported = () => window.MediaRecorder && navigator.mediaDevices?.getUserMedia;
+
+// ============ Toast ============
+function toast(msg, kind = '') {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + kind;
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => t.className = 'toast', 2400);
+}
+
+// ============ Consent + recording ============
+function setConsent() {
+  const ok = $('#consent').checked;
+  $('#record').disabled = !ok;
+  $('#record-status').textContent = ok ? 'READY · 按 ● 開始錄音' : '需先勾選同意';
+}
+function formatTime(sec) {
+  return `${String(Math.floor(sec / 60)).padStart(2, '0')}:${String(sec % 60).padStart(2, '0')}`;
+}
+async function startRec() {
+  if (!supported()) { toast('此瀏覽器不支援麥克風錄音，請改用音檔上傳或貼逐字稿', 'error'); return; }
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const type = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4'].find(x => MediaRecorder.isTypeSupported(x)) || '';
+    const rec = new MediaRecorder(stream, type ? { mimeType: type } : undefined);
+    const chunks = [];
+    rec.ondataavailable = e => e.data.size && chunks.push(e.data);
+    rec.onerror = () => stopRec(true);
+    stream.getAudioTracks().forEach(t => { t.onended = () => { if (state.rec) stopRec(true); }; });
+    rec.onstop = () => {
+      state.blob = new Blob(chunks, { type: rec.mimeType || 'audio/webm' });
+      stream.getTracks().forEach(t => t.stop());
+      $('#file-name').textContent = '錄音完成';
+      $('#file-size').textContent = `${(state.blob.size / 1024 / 1024).toFixed(2)} MB`;
+      $('#record').classList.remove('live');
+      $('#record').textContent = '●';
+      $('#record-status').textContent = 'IDLE · 可重新錄製';
+      toast('錄音已保留', 'success');
+    };
+    rec.start(1000);
+    state.rec = rec;
+    state.started = Date.now();
+    $('#record').classList.add('live');
+    $('#record').textContent = '■';
+    $('#record-status').textContent = 'REC · 錄音中';
+    state.timer = setInterval(() => $('#timer').textContent = formatTime(Math.floor((Date.now() - state.started) / 1000)), 250);
+  } catch (e) {
+    toast('無法使用麥克風，請檢查瀏覽器權限', 'error');
+  }
+}
+function stopRec(silent = false) {
+  if (!state.rec) return;
+  try { state.rec.stop(); } catch {}
+  state.rec = null;
+  clearInterval(state.timer);
+  if (!silent) toast('已停止');
+}
+
+function setFile(file) {
+  if (!file) return;
+  if (file.size > 100 * 1024 * 1024) { toast('音檔不可超過 100 MB', 'error'); return; }
+  const ok = file.type.startsWith('audio/') || /\.(webm|wav|mp3|m4a|ogg|mp4|mpeg)$/i.test(file.name);
+  if (!ok) { toast('不支援此音檔格式', 'error'); return; }
+  state.file = file;
+  state.blob = file;
+  $('#file-name').textContent = file.name;
+  $('#file-size').textContent = `${(file.size / 1024 / 1024).toFixed(2)} MB`;
+  toast('音檔已加入', 'success');
+}
+
+// ============ Render ============
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+function renderList(id, items, marker = 'highlight') {
+  const box = $(id);
+  if (!items || !items.length) {
+    box.innerHTML = `<div class="empty-state"><span class="emoji">📝</span><strong>目前沒有</strong></div>`;
+    return;
+  }
+  box.innerHTML = items.map(x => `<div class="item ${marker}"><span class="marker">●</span><div>${escapeHtml(x)}</div></div>`).join('');
+}
+function renderAnalysis(a) {
+  state.analysis = a;
+  $('#summary').classList.remove('empty');
+  $('#summary').textContent = a.summary || '（無摘要）';
+  renderList('#highlights', a.highlights, 'highlight');
+  renderList('#decisions', a.decisions, 'decision');
+  renderList('#risks', a.risks, 'risk');
+  const actions = a.action_items || [];
+  $('#action-count').textContent = `${actions.length} 項行動`;
+  if (!actions.length) {
+    $('#actions').innerHTML = `<div class="empty-state"><span class="emoji">�</span><strong>沒擷取到行動項</strong>從逐字稿補充「請…」「負責…」等句子再試一次</div>`;
+    state.actionDone = [];
+    return;
+  }
+  $('#actions').innerHTML = actions.map((x, i) => {
+    const due = x.due_date || '';
+    const tba = !due || /待|未定|null/i.test(due);
+    return `<div class="action-card${state.actionDone[i] ? ' done' : ''}" data-i="${i}">
+      <input type="checkbox" class="action-check" ${state.actionDone[i] ? 'checked' : ''}>
+      <div class="action-body">
+        <div class="action-task">${escapeHtml(x.task)}</div>
+        <div class="action-meta">
+          <span class="chip person">👤 ${escapeHtml(x.assignee || '待指派')}</span>
+          <span class="chip date ${tba ? 'tba' : ''}">📅 ${tba ? '截止待確認' : escapeHtml(due)}</span>
+          ${x.case_tag ? `<span class="chip case">⚖️ ${escapeHtml(x.case_tag)}</span>` : ''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  $('#actions').querySelectorAll('.action-card').forEach((card, i) => {
+    const cb = card.querySelector('.action-check');
+    cb.addEventListener('change', () => {
+      card.classList.toggle('done', cb.checked);
+      state.actionDone[i] = cb.checked;
+    });
+  });
+  state.actionDone = actions.map((_, i) => !!state.actionDone[i]);
+  // Update mode badge
+  const isLegal = a.confidential || state.mode === 'legal';
+  $('#mode-badge').textContent = isLegal ? '🔒 保密模式 · 不外推' : '繁體中文 · 本機分析';
+  $('#legal-tag').style.display = isLegal ? 'inline-flex' : 'none';
+}
+
+// ============ Analyze ============
+async function analyze() {
+  const text = $('#transcript').value.trim();
+  if (!text) { toast('請先錄音、上傳音檔或貼上逐字稿', 'error'); return; }
+  const proc = $('#processing');
+  proc.className = 'processing';
+  proc.innerHTML = '<span class="spin"></span> 正在整理逐字稿…';
+  $('#analyze').disabled = true;
+  try {
+    const r = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        transcript: text,
+        title: $('#title').value || '未命名會議',
+        participants: ($('#participants').value || '').split(/[,，、]/).map(x => x.trim()).filter(Boolean),
+        mode: state.mode
+      })
+    });
+    if (!r.ok) {
+      const err = await r.json().catch(() => ({}));
+      throw new Error(err.detail || `分析失敗 (HTTP ${r.status})`);
+    }
+    const data = await r.json();
+    renderAnalysis(data);
+    proc.className = 'processing success';
+    proc.innerHTML = `✓ 已完成 · ${data.confidential ? '保密模式（不外推）' : '本機規則分析，不會上傳逐字稿'}`;
+    toast('會後整理完成', 'success');
+  } catch (e) {
+    proc.className = 'processing error';
+    proc.textContent = '✗ ' + e.message;
+    toast('分析失敗', 'error');
+  } finally {
+    $('#analyze').disabled = false;
+  }
+}
+
+// ============ Markdown + Export ============
+function buildMarkdown() {
+  const a = state.analysis || {};
+  const actions = (a.action_items || []).map((x, i) =>
+    `- [ ] ${x.task} — 負責人：${x.assignee || '待指派'} — 截止：${x.due_date || '待確認'}${x.case_tag ? ` — 案件：${x.case_tag}` : ''}`
+  ).join('\n');
+  return `# ${$('#title').value || '未命名會議'}
+
+- 模式：${state.mode === 'legal' ? '🔒 保密案件（不外推）' : '業務會議'}
+- 與會者：${$('#participants').value || '未填寫'}
+- 建立時間：${new Date().toLocaleString('zh-TW')}
+
+## 摘要
+
+${a.summary || '尚未分析'}
+
+## 重點
+
+${(a.highlights || []).map(x => `- ${x}`).join('\n') || '- 無'}
+
+## 決策
+
+${(a.decisions || []).map(x => `- ${x}`).join('\n') || '- 無'}
+
+## 行動項目
+
+${actions || '- 無'}
+
+## 風險
+
+${(a.risks || []).map(x => `- ${x}`).join('\n') || '- 無'}
+
+## 逐字稿
+
+${$('#transcript').value || '尚未提供'}
+`;
+}
+function downloadMd() {
+  const blob = new Blob([buildMarkdown()], { type: 'text/markdown;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  const slug = ($('#title').value || '').replace(/[^\w一-龥-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60) || `meeting-${new Date().toISOString().slice(0, 10)}`;
+  a.download = `${slug}.md`;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  toast('Markdown 已下載', 'success');
+}
+
+// ============ History ============
+function saveHistory() {
+  if (!state.analysis) { toast('請先完成一次分析', 'error'); return; }
+  const item = {
+    id: Date.now(),
+    title: $('#title').value || '未命名會議',
+    participants: $('#participants').value,
+    transcript: $('#transcript').value,
+    analysis: state.analysis,
+    actionDone: state.actionDone || [],
+    mode: state.mode,
+    createdAt: new Date().toISOString()
+  };
+  state.history = [item, ...state.history].slice(0, 30);
+  localStorage.setItem('meetingflow-history', JSON.stringify(state.history));
+  renderHistory();
+  toast('已保存到本機歷史', 'success');
+}
+function clearHistory() {
+  if (!state.history.length) { toast('目前沒有可清除的歷史'); return; }
+  if (!confirm('清除此裝置上所有會議歷史？此動作無法復原。')) return;
+  state.history = [];
+  localStorage.removeItem('meetingflow-history');
+  renderHistory();
+  toast('已清除本機歷史', 'success');
+}
+function renderHistory() {
+  const q = ($('#search').value || '').toLowerCase().trim();
+  const list = q ? state.history.filter(x => {
+    const fields = [
+      x.title, x.participants, x.transcript, x.analysis?.summary,
+      ...(x.analysis?.highlights || []),
+      ...(x.analysis?.decisions || []),
+      ...(x.analysis?.risks || []),
+      ...(x.analysis?.action_items || []).flatMap(a => [a.task, a.assignee])
+    ].map(String).join(' ').toLowerCase();
+    return fields.includes(q);
+  }) : state.history;
+  const box = $('#history-list');
+  if (!list.length) {
+    box.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
+      <span class="emoji">${state.history.length ? '🔍' : '🎬'}</span>
+      <strong>${state.history.length ? '沒有符合的紀錄' : '開始你的第一場會議'}</strong>
+      ${state.history.length ? '換個關鍵字試試' : '錄一段 30 秒的語音，或直接貼一段逐字稿，就能看到這裡的魔法。'}
+    </div>`;
+    return;
+  }
+  box.innerHTML = list.map(x => `<button class="history-card" data-id="${x.id}">
+    <div class="h-title">${escapeHtml(x.title)}</div>
+    <div class="h-meta">
+      <span>${new Date(x.createdAt).toLocaleString('zh-TW', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+      <span>·</span>
+      <span class="act-count">${(x.analysis?.action_items?.length || 0)} 行動</span>
+      ${x.mode === 'legal' ? '<span>·</span><span style="color:var(--red)">🔒 保密</span>' : ''}
+    </div>
+  </button>`).join('');
+  box.querySelectorAll('.history-card').forEach(el => {
+    el.addEventListener('click', () => {
+      const m = state.history.find(y => y.id == el.dataset.id);
+      if (!m) return;
+      $('#title').value = m.title;
+      $('#participants').value = m.participants;
+      $('#transcript').value = m.transcript;
+      state.mode = m.mode || 'sales';
+      state.actionDone = Array.isArray(m.actionDone) ? m.actionDone : [];
+      applyMode();
+      renderAnalysis(m.analysis || {});
+      window.scrollTo({ top: document.querySelector('#workspace').offsetTop - 80, behavior: 'smooth' });
+    });
+  });
+}
+
+// ============ Mode ============
+function applyMode() {
+  document.body.dataset.mode = state.mode;
+  $('#mode-sales').classList.toggle('active', state.mode === 'sales');
+  $('#mode-legal').classList.toggle('active', state.mode === 'legal');
+  $('#legal-tag').style.display = state.mode === 'legal' ? 'inline-flex' : 'none';
+  $('#mode-badge').textContent = state.mode === 'legal' ? '🔒 保密模式 · 不外推' : '繁體中文 · 本機分析';
+}
+
+// ============ Modal (Notion / Slack fallback) ============
+function showModal(title, desc, content) {
+  $('#modal-title').textContent = title;
+  $('#modal-desc').textContent = desc;
+  $('#modal-content').textContent = content;
+  $('#modal').classList.add('show');
+}
+function closeModal() { $('#modal').classList.remove('show'); }
+$('#modal-close').addEventListener('click', closeModal);
+$('#modal').addEventListener('click', e => { if (e.target.id === 'modal') closeModal(); });
+$('#modal-copy').addEventListener('click', () => {
+  navigator.clipboard.writeText($('#modal-content').textContent).then(() => { toast('已複製', 'success'); closeModal(); });
+});
+
+// ============ Wire up ============
+function wire() {
+  $('#consent').addEventListener('change', setConsent);
+  $('#record').addEventListener('click', () => state.rec ? stopRec() : startRec());
+  $('#audio-file').addEventListener('change', e => setFile(e.target.files[0]));
+  const drop = $('#drop');
+  drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('over'); });
+  drop.addEventListener('dragleave', () => drop.classList.remove('over'));
+  drop.addEventListener('drop', e => { e.preventDefault(); drop.classList.remove('over'); setFile(e.dataTransfer.files[0]); });
+  $('#analyze').addEventListener('click', analyze);
+  $('#download').addEventListener('click', downloadMd);
+  $('#save').addEventListener('click', saveHistory);
+  $('#search').addEventListener('input', renderHistory);
+  $('#clear-history').addEventListener('click', clearHistory);
+  $('#clear-draft').addEventListener('click', () => {
+    if (!confirm('清除目前草稿（標題、與會者、逐字稿、整理結果）？')) return;
+    $('#title').value = ''; $('#participants').value = ''; $('#transcript').value = '';
+    state.analysis = null; state.actionDone = []; state.blob = null; state.file = null;
+    $('#file-name').textContent = '—'; $('#file-size').textContent = '';
+    $('#summary').classList.add('empty'); $('#summary').textContent = '';
+    renderAnalysis({ summary: '', highlights: [], decisions: [], risks: [], action_items: [] });
+    toast('已清除');
+  });
+  $('#copy-transcript').addEventListener('click', () => {
+    const t = $('#transcript').value;
+    if (!t) return toast('沒有逐字稿可複製', 'error');
+    navigator.clipboard.writeText(t).then(() => toast('已複製逐字稿', 'success'));
+  });
+  $('#copy-summary').addEventListener('click', () => {
+    const s = $('#summary').textContent;
+    if (!s || $('#summary').classList.contains('empty')) return toast('沒有摘要可複製', 'error');
+    navigator.clipboard.writeText(s).then(() => toast('已複製摘要', 'success'));
+  });
+  $('#notion').addEventListener('click', () => {
+    showModal('Notion 整合（公開版）',
+      '會員制 v1.1 將解鎖一鍵 OAuth 推送。目前先把 Markdown 複製到剪貼簿，貼進 Notion 任一頁面。',
+      buildMarkdown());
+  });
+  $('#slack').addEventListener('click', () => {
+    const a = state.analysis?.action_items || [];
+    const lines = a.length
+      ? a.map(x => `• <@${(x.assignee || 'unassigned').replace(/\s+/g, '.')}>：${x.task}（截止：${x.due_date || '待確認'}）`).join('\n')
+      : '（無行動項）';
+    showModal('Slack 訊息（公開版）',
+      '複製以下訊息到 Slack channel。會員制 v1.1 將解鎖 OAuth 自動 @負責人。',
+      `📋 *${$('#title').value || '會議摘要'}*\n${$('#participants').value ? '與會者：' + $('#participants').value + '\n' : ''}\n${lines}\n\n_${state.analysis?.summary || ''}_`);
+  });
+  $('#email').addEventListener('click', () => {
+    location.href = `mailto:?subject=${encodeURIComponent('會議摘要｜' + ($('#title').value || '未命名'))}&body=${encodeURIComponent(buildMarkdown())}`;
+  });
+
+  $('#mode-sales').addEventListener('click', () => { state.mode = 'sales'; applyMode(); });
+  $('#mode-legal').addEventListener('click', () => { state.mode = 'legal'; applyMode(); });
+
+  // Char counter
+  $('#transcript').addEventListener('input', () => {
+    $('#char-count').textContent = `${$('#transcript').value.length} 字`;
+  });
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', e => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { e.preventDefault(); analyze(); }
+    else if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's') { e.preventDefault(); saveHistory(); }
+    else if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'd') { e.preventDefault(); downloadMd(); }
+    else if (e.key === 'Escape') closeModal();
+  });
+
+  applyMode();
+  renderHistory();
+  setConsent();
+}
+
+// Bootstrap
+document.addEventListener('DOMContentLoaded', wire);
+
+// Tiny inline test: capabilities ping (don't fail if backend is asleep)
+fetch('/api/capabilities').then(r => r.ok ? r.json() : null).then(cap => {
+  if (cap) {
+    const el = $('#mode-badge');
+    if (!cap.transcribe_enabled) el.title = '雲端轉寫已關閉（公開版預設）';
+  }
+}).catch(() => {});
+</script>
+</body>
+</html>

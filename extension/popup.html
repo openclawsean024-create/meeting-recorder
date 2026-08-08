@@ -1,1 +1,112 @@
-<!doctype html><html lang="zh-TW"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>MeetingFlow</title><style>*{box-sizing:border-box}body{width:340px;margin:0;padding:20px;font:14px system-ui;color:#eef2ff;background:#080b12}h1{font-size:19px;margin:0 0 4px}.muted{color:#96a0b5;line-height:1.55}.consent{display:flex;gap:9px;padding:12px;margin:15px 0;background:#111827;border:1px solid #273348;border-radius:12px}.status{padding:12px;border-radius:12px;background:#111827;margin:12px 0;color:#9ca3af}.status.live{color:#ff7a90;border:1px solid #7f1d35}button{width:100%;border:0;border-radius:12px;padding:12px;margin-top:8px;font-weight:800;cursor:pointer;background:#5eead4;color:#052e2b}button.secondary{background:#1f2937;color:#e5e7eb}button.danger{background:#fb7185;color:#3f0712}button:disabled{opacity:.45;cursor:not-allowed}.error{color:#fda4af;min-height:18px;margin-top:10px}</style></head><body><h1>MeetingFlow 錄製器</h1><div class="muted">支援 Meet、Zoom Web 與其他 Chrome 分頁。錄製期間請保持該分頁開啟。</div><label class="consent"><input id="consent" type="checkbox"><span>我已告知所有與會者，並取得錄音同意。</span></label><div id="status" class="status">尚未開始錄製</div><button id="start" disabled>開始錄製目前分頁</button><button id="stop" class="danger" hidden>停止並下載</button><button id="open" class="secondary">開啟 MeetingFlow 工作台</button><button id="clear" class="secondary">清除外掛內的錄音</button><div id="error" class="error"></div><script src="popup.js"></script></body></html>
+<!doctype html>
+<html lang="zh-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+<title>MeetingFlow 錄製器</title>
+<style>
+*{box-sizing:border-box}
+:root{
+  --bg:#080b12; --surface:#10141e; --surface-2:#161c2a; --line:#27324a;
+  --text:#eef2ff; --muted:#a3afc6; --faint:#6e7993;
+  --mint:#7cf0d0; --red:#ff7f98; --amber:#ffc979;
+  --radius:12px;
+}
+body{
+  width:340px; margin:0; padding:18px;
+  font:14px/1.55 'Noto Sans TC',-apple-system,sans-serif;
+  color:var(--text); background:var(--bg);
+  -webkit-font-smoothing:antialiased;
+}
+header{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+header .mark{width:30px;height:30px;border-radius:8px;background:conic-gradient(from 200deg,var(--mint),#9cb8ff,#c7a7ff,var(--mint));position:relative;display:grid;place-items:center;font-weight:900;font-size:12px;font-family:'JetBrains Mono',monospace;color:#08111a}
+header h1{font-size:17px;margin:0;font-weight:700;letter-spacing:-.02em}
+.sub{color:var(--faint);font-size:12px;line-height:1.5;margin:0 0 14px}
+
+.detected{display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);margin-bottom:12px;font-size:13px}
+.detected .icon{font-size:20px}
+.detected .label{font-weight:600;color:var(--text)}
+.detected .url{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--faint);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px}
+.detected.none{border-style:dashed;background:transparent;color:var(--faint)}
+.detected.none .icon{opacity:.5}
+
+.consent{display:flex;gap:9px;padding:11px;margin:0 0 12px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);font-size:12px;line-height:1.5;cursor:pointer}
+.consent:hover{background:var(--surface-2)}
+.consent strong{color:var(--red);display:block;margin-bottom:2px;font-size:12px}
+
+.toggle{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:12px;font-size:13px;cursor:pointer}
+.toggle .label{font-weight:500}
+.toggle .hint{color:var(--faint);font-size:11px;margin-top:2px}
+.toggle input{accent-color:var(--mint);width:16px;height:16px}
+
+.status{padding:12px;border-radius:var(--radius);background:var(--surface);margin:0 0 12px;font-size:13px;line-height:1.5;border:1px solid var(--line)}
+.status .top{display:flex;align-items:center;gap:8px;font-weight:600}
+.status .meta{color:var(--faint);font-size:11px;margin-top:4px;font-family:'JetBrains Mono',monospace}
+.status.live{border-color:#7f1d35;background:#ff7f9814}
+.status.live .dot{width:8px;height:8px;border-radius:99px;background:var(--red);animation:pulse 1.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.status .dot{width:8px;height:8px;border-radius:99px;background:var(--mint)}
+
+button{width:100%;border:0;border-radius:var(--radius);padding:11px;margin-top:6px;font-weight:700;font-size:13px;cursor:pointer;transition:all 120ms ease}
+button:disabled{opacity:.4;cursor:not-allowed}
+button.primary{background:var(--mint);color:#052e2b}
+button.primary:hover:not(:disabled){transform:translateY(-1px)}
+button.secondary{background:var(--surface);border:1px solid var(--line);color:var(--text)}
+button.secondary:hover:not(:disabled){background:var(--surface-2)}
+button.danger{background:#ff7f9822;border:1px solid #7f1d35;color:var(--red)}
+button.danger:hover:not(:disabled){background:#ff7f9833}
+
+.error{color:var(--red);min-height:18px;margin-top:10px;font-size:12px;line-height:1.5}
+.hint{color:var(--faint);font-size:11px;margin-top:12px;line-height:1.5;padding-top:12px;border-top:1px solid var(--line)}
+.hint code{background:var(--surface-2);padding:1px 5px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:10px}
+</style>
+</head>
+<body>
+<header>
+  <span class="mark">MF</span>
+  <h1>MeetingFlow 錄製器</h1>
+</header>
+<p class="sub">把目前分頁的會議音訊錄下來，會後匯入 MeetingFlow 工作台。</p>
+
+<div id="detected" class="detected none">
+  <span class="icon">🔍</span>
+  <div style="flex:1;min-width:0">
+    <div class="label">偵測中…</div>
+    <div class="url"></div>
+  </div>
+</div>
+
+<label class="consent">
+  <input id="consent" type="checkbox">
+  <span><strong>已告知所有與會者並取得同意</strong>未勾選時無法開始錄音。</span>
+</label>
+
+<label class="toggle">
+  <div>
+    <div class="label">🎤 同時錄我的麥克風</div>
+    <div class="hint">需要授權麥克風權限；授權失敗會自動改為只錄分頁。</div>
+  </div>
+  <input id="includeMic" type="checkbox">
+</label>
+
+<div id="status" class="status">
+  <div class="top"><span class="dot"></span><span>尚未開始錄製</span></div>
+  <div class="meta">點下方按鈕開始</div>
+</div>
+
+<button id="start" class="primary" disabled>● 開始錄製目前分頁</button>
+<button id="stop" class="danger" hidden>■ 停止並下載</button>
+<button id="open" class="secondary">↗ 開啟 MeetingFlow 工作台</button>
+<button id="clear" class="secondary">🗑 清除外掛內的錄音</button>
+
+<div id="error" class="error"></div>
+
+<p class="hint">
+  <strong>不支援：</strong>桌面版 Zoom / Teams / Meet app（Chrome 權限限制）、DRM 內容、企業政策封鎖。<br>
+  錄音預設 <code>WebM / Opus</code>，下載到磁碟後再拖進工作台。<br>
+  公開版不啟用雲端轉寫；請直接貼逐字稿到工作台。
+</p>
+
+<script src="popup.js"></script>
+</body>
+</html>
