@@ -67,14 +67,31 @@ def _sentences(text: str) -> list[str]:
 
 
 def _unique(items: list[str], limit: int) -> list[str]:
+    """Dedupe *items* (preserving order), truncate each to 300 chars, return at
+    most *limit* entries.
+
+    The dedup check runs against the *truncated* form so two long near-duplicates
+    match each other instead of both sneaking through.
+    """
     result: list[str] = []
     for item in items:
         clean = re.sub(r"\s+", " ", item).strip()
-        if clean and clean not in result:
-            result.append(clean[:300])
+        truncated = clean[:300]
+        if truncated and truncated not in result:
+            result.append(truncated)
         if len(result) >= limit:
             break
     return result
+
+
+# Common Chinese verbs / particles that almost never belong to a person's name
+# but immediately follow a 請/由/麻煩 cue. Treat them as a hard stop so we don't
+# pull "請小美下週三前完成報價" → "小美下週三前完成報價".
+_ASSIGNEE_STOP_CHARS = (
+    "，。、；：「」（）() \t\n"
+    "準備完成負責提供聯絡提交整理確認跟進寄出補件協助"
+    "幫忙處理聯繫查詢回覆確認安排討論規劃執行報告"
+)
 
 
 def _infer_assignee(sentence: str, participants: list[str]) -> str:
@@ -82,7 +99,9 @@ def _infer_assignee(sentence: str, participants: list[str]) -> str:
         if name and name in sentence:
             return name
     match = re.search(
-        r"(?:請|由|麻煩)\s*([\u4e00-\u9fffA-Za-z][\u4e00-\u9fffA-Za-z0-9-]{0,15}?)(?=[，。、；\s]|$)",
+        r"(?:請|由|麻煩)\s*"
+        r"([\u4e00-\u9fffA-Za-z][\u4e00-\u9fffA-Za-z0-9-]{0,7}?)"
+        rf"(?=[{re.escape(_ASSIGNEE_STOP_CHARS)}]|$)",
         sentence,
     )
     return match.group(1) if match else "待指派"
@@ -93,14 +112,26 @@ def _infer_due(sentence: str, today: dt.date | None = None) -> str | None:
     iso = re.search(r"\b(20\d{2})[-/](\d{1,2})[-/](\d{1,2})\b", sentence)
     if iso:
         try:
-            return dt.date(int(iso.group(1)), int(iso.group(2)), int(iso.group(3))).isoformat()
+            parsed = dt.date(int(iso.group(1)), int(iso.group(2)), int(iso.group(3)))
+            # Past ISO dates are not useful as future due dates; roll forward
+            # by one year so an overdue target still shows up on the calendar.
+            if parsed < today:
+                try:
+                    parsed = parsed.replace(year=parsed.year + 1)
+                except ValueError:
+                    # Feb 29 → non-leap year; fall through to None
+                    return None
+            return parsed.isoformat()
         except ValueError:
             pass
     md = re.search(r"(?<!\d)(\d{1,2})[月/]\s*(\d{1,2})日?", sentence)
     if md:
         try:
             candidate = dt.date(today.year, int(md.group(1)), int(md.group(2)))
-            if candidate < today - dt.timedelta(days=30):
+            if candidate < today:
+                # Same-year date is already past — roll to next year so the
+                # action item still has a meaningful "截止" rather than
+                # silently showing yesterday as the due date.
                 candidate = candidate.replace(year=today.year + 1)
             return candidate.isoformat()
         except ValueError:

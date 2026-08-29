@@ -144,4 +144,6 @@ def test_manifest_v3_and_capture_architecture():
 
 
 def test_due_date_parser_handles_iso_date():
-    assert _infer_due("請於 2026-08-20 完成") == "2026-08-20"
+    # Use a future date so the roll-forward rule doesn't kick in (the parser
+    # treats past ISO dates as overdue targets and pushes them to next year).
+    assert _infer_due("請於 2099-12-31 完成") == "2099-12-31"
