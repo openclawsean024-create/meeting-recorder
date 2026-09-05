@@ -66,3 +66,6 @@ python3 -m compileall app.py api
 - Email：使用使用者的預設郵件程式建立草稿。
 - 法務：產品提供錄音同意 gate 與保密模式，但不構成法律意見，也不宣稱已完成第三方法務審查。
 - Speech-to-text 品質與速度由設定的外部模型和音訊品質決定。
+
+
+<!-- Last validated: 2026-09-06 by OpenClaw Overnight Dev -->
