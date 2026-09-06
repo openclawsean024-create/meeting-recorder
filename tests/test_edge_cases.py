@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import datetime as dt
 
-import pytest
 from fastapi.testclient import TestClient
 
 from api import public as api_public

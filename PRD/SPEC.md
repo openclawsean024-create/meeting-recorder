@@ -1,3 +1,289 @@
+# meeting-recorder (MeetingFlow) · PRD v3.0.2 等級規格書
+
+> 自動生成：2026-09-06
+> 對齊 SPEC v3.0 契約（§1–§19 全部套用）
+> 升級自既有 `PRD/SPEC.md` v3.0.0 + v3.0.0-Public Patch（2026-08-08，1328 行）
+> **本檔為 v3.0.2 等級入口規格書**；完整 1328 行細節見本檔「附錄 A：v3.0.0 詳版」（同檔後半段，§A1–§A19）
+
+---
+
+## 1. 產品概述
+
+### 1.1 問題陳述
+
+繁中使用者開完會（業務對接、律師會議、醫病諮詢、創業 standup、教學備課）後，最痛的 3 件事：
+
+1. **沒人想逐字重聽 60 分鐘錄音** — 找行動項要花 1 小時
+2. **付費 AI 工具不懂繁中在地語境** — Otter / Fireflies 中文進展慢，雅婷逐字稿無 Chrome 擴充
+3. **律師 / 醫師 / 業務把音檔丟雲端 AI 違反保密義務** — 個資法 + 律師倫理 + 醫療法，三面夾殺
+
+本專案目標：把「**會議後 30 秒拿到行動項清單**」做到極致 — 純本機規則分析 + 雲端 AI 選配 + Chrome 擴充網頁 Meet/Zoom 直錄，三層架構各取所需。
+
+### 1.2 目標使用者
+
+| Persona | 工作情境 | 主要任務 |
+|---|---|---|
+| **Primary：業務團隊成員** | 每天 3-5 場客戶會議 | 會後 30 秒拿到行動項 + 負責人 + 截止日 |
+| **Primary：律師事務所律師 / 法務** | 與當事人會談、合約審閱 | 保密模式純本機整理、可複製 Markdown 進事務所文件 |
+| **Primary：醫師 / 心理師** | 病歷諮詢、團隊督導 | 雲端 AI 預設不啟用，本機分析就夠 |
+| **Primary：創業團隊 founder** | 1 人公司 + 投資人會議 | 免費、免登入、不留個資 |
+| **Secondary：教師 / 顧問 / 教練** | 1 對 1 教學、諮詢 | 錄音 → 逐字稿 → 重點摘要 |
+| **Secondary：所有繁中使用者（v1 Public 擴大）** | 任何需會議記錄的人 | 純本機整理 + Markdown / Email 草稿輸出 |
+
+### 1.3 核心價值主張
+
+> **「會後 30 秒拿到行動項清單，全程不外推」** — 純本機規則分析 + 雲端 AI 選配（gated by `PUBLIC_TRANSCRIBE_ENABLED`）+ Chrome 擴充網頁會議直錄，律師保密模式永遠不外推。
+
+### 1.4 Non-Goals（明確不做）
+
+- ❌ **不做會員制 / 訂閱 / 付費**（v1 Public 階段；v1.1 才收斂到甜蜜點）
+- ❌ **不做帳號系統** — 免登入、localStorage 為主
+- ❌ **不做發文 / 推噓 / 留言** — 純 read-only 工作台
+- ❌ **不做 Notion / Slack OAuth** — 未授權時降級為「可複製 Markdown」
+- ❌ **不做 Speaker diarization**（多人聲紋分離）— 留到 v1.1 會員制
+- ❌ **不做跨裝置同步 / Supabase 帳號** — 留到 v1.1
+- ❌ **不做 Native iOS / Android** — 純 Web + Chrome 擴充
+- ❌ **不做 Stripe 金流** — v1 Public 不啟用
+- ❌ **不做國際語言** — 鎖繁中優先
+
+---
+
+## 2. 使用者場景與流程
+
+### 2.1 使用者流程圖
+
+```mermaid
+flowchart LR
+  A[進入 MeetingFlow] --> B{有音檔?}
+  B -->|否| C[瀏克風錄音 + consent gate]
+  B -->|是| D[拖放 / 上傳 WebM/WAV/MP3]
+  C --> E{雲端 STT?}
+  D --> E
+  E -->|是| F[OpenAI Whisper 選配]
+  E -->|否| G[貼上逐字稿]
+  F --> H[本機規則分析]
+  G --> H
+  H --> I[摘要/決策/風險/行動項]
+  I --> J{保密模式?}
+  J -->|是| K[純本機,不外推]
+  J -->|否| L[Markdown/Email/複製降級]
+  K --> M[localStorage 歷史]
+  L --> M
+```
+
+### 2.2 主要場景
+
+| 場景 | 輸入 | 輸出 | 成功條件 |
+|---|---|---|---|
+| **S1：業務會後整理** | WebM 60 分鐘 | 摘要 + 行動項 + 負責人 + 截止日 | 30 秒內拿到，無個資外推 |
+| **S2：律師保密模式** | 逐字稿貼上 + 勾保密 | 純本機 Markdown，可複製 | 零外部 API 呼叫 |
+| **S3：Chrome 擴充錄 Meet** | Meet 頁籤 + 勾同意 | 下載 WebM，拖回工作台 | 1-click 完成 |
+| **S4：純文字分析** | 貼逐字稿 300 字 | 摘要 + 決策 + 風險 + 行動項 | ≤ 1 秒分析完成 |
+| **S5：歷史搜尋** | 搜尋 30 筆 localStorage | 命中條目 | localStorage query ≤ 200ms |
+| **S6：雲端 STT（選配）** | OPENAI_API_KEY + enable flag | Whisper 結果 | 每 IP 每小時 ≤ 3 次 |
+
+---
+
+## 3. 功能需求
+
+| FR | 名稱 | 優先級 | 狀態 |
+|---|---|---|---|
+| FR-001 | 麥克風錄音 + consent gate | P0 | ✅ shipped |
+| FR-002 | 音檔拖放 / 上傳（≤ 100 MB） | P0 | ✅ shipped |
+| FR-003 | 貼逐字稿 → 本機規則分析 | P0 | ✅ shipped |
+| FR-004 | 摘要 / 決策 / 風險 / 行動項 | P0 | ✅ shipped |
+| FR-005 | 負責人 / 截止日推斷 | P0 | ✅ shipped |
+| FR-006 | Markdown 下載 | P0 | ✅ shipped |
+| FR-007 | Email 草稿（mailto:） | P0 | ✅ shipped |
+| FR-008 | Notion / Slack 複製降級 | P0 | ✅ shipped |
+| FR-009 | 保密模式（純本機） | P0 | ✅ shipped |
+| FR-010 | 30 筆 localStorage 歷史 + 搜尋 | P0 | ✅ shipped |
+| FR-011 | Chrome MV3 擴充（tabCapture） | P0 | ✅ shipped |
+| FR-012 | FastAPI 自動測試 + 安全邊界 | P0 | ✅ shipped |
+| FR-013 | 雲端 STT（OpenAI Whisper 選配） | P1 | ✅ shipped (gated) |
+| FR-014 | 會員制變現 | P2 | ⏳ v1.1 |
+| FR-015 | Speaker diarization | P2 | ⏳ v1.1 |
+| FR-016 | Notion / Slack OAuth | P2 | ⏳ v1.1 |
+
+---
+
+## 4. Non-Functional Requirements
+
+| 維度 | 需求 |
+|---|---|
+| Performance | 本機分析 ≤ 1 秒（300 字逐字稿）；首頁載入 ≤ 1.5 秒 |
+| Security | 100 MB 上限、格式檢查、無 raw exception、Security headers（X-Frame-Options DENY, CSP, HSTS） |
+| Privacy | 保密模式零外推；localStorage 不送 server；BYOK 雲端 STT |
+| Accessibility | WCAG 2.1 AA（鍵盤可達、ARIA label） |
+| Browser | Modern evergreen（Chrome/Edge/Safari/Firefox）+ Chrome MV3 擴充 |
+| Locale | 繁中優先（zh-Hant），不支援國際語言 v1 |
+
+---
+
+## 5. 技術架構
+
+```
+┌─────────────────────────────────────────────┐
+│  Browser (Web)                              │
+│  ├── / (公開工作台)                          │
+│  ├── /extension (Chrome 擴充安裝說明)        │
+│  ├── /privacy                                │
+│  └── /api/* (FastAPI serverless on Vercel)  │
+│       ├── POST /api/transcribe (gated)       │
+│       └── GET  /api/health                   │
+└──────────────┬──────────────────────────────┘
+               │ HTTPS
+┌──────────────▼──────────────────────────────┐
+│  FastAPI (app.py + api/public.py)            │
+│  - 100 MB 限制                                │
+│  - 格式檢查                                   │
+│  - 速率限制 (3 / IP / hr)                    │
+└──────────────┬──────────────────────────────┘
+               │ 選配
+┌──────────────▼──────────────────────────────┐
+│  OpenAI Whisper API (BYOK)                   │
+│  - OPENAI_API_KEY env                        │
+│  - 保密模式完全 bypass                        │
+└─────────────────────────────────────────────┘
+┌─────────────────────────────────────────────┐
+│  Chrome MV3 Extension                        │
+│  ├── service-worker.js (訊息路由)            │
+│  ├── offscreen.js (tabCapture + AudioContext)│
+│  ├── popup.js (UI)                           │
+│  └── IndexedDB (本地草稿)                    │
+└─────────────────────────────────────────────┘
+```
+
+### 5.1 Module Map
+
+- `app.py` — FastAPI entrypoint（80 行，5 個 GET routes）
+- `api/public.py` — 公開 API（轉寫、健康檢查、速率限制）
+- `index.html` / `extension.html` / `privacy.html` / `dashboard.html` — 公開頁
+- `extension/` — Chrome MV3 擴充（5 檔）
+- `tests/` — pytest 套件（5 檔，覆蓋 app / API / edge / extension / spec / UI）
+- `PRD/SPEC.md` — v3.0.0 + v3.0.0-Public Patch 完整規格（1328 行）
+- `.github/workflows/test.yml` — 既有 CI（4 jobs）
+- `.github/workflows/deploy.yml` — 既有 Vercel deploy
+
+### 5.2 環境變數（選配）
+
+| 變數 | 預設 | 用途 |
+|---|---|---|
+| `OPENAI_API_KEY` | — | 雲端 STT 必填 |
+| `PUBLIC_TRANSCRIBE_ENABLED` | `false` | 公開 `/api/transcribe` 開關（保密模式 bypass） |
+| `PUBLIC_TRANSCRIBE_LIMIT` | `3` | 每 IP 每小時上限 |
+| `ALLOWED_ORIGINS` | — | CORS 白名單（逗號分隔） |
+| `PORT` | `8000` | 本機 uvicorn port |
+
+### 5.3 降級策略
+
+- **無 API key** → `/api/transcribe` 回 503 + 友善錯誤，UI 提示用貼逐字稿
+- **超過速率限制** → 回 429，UI 提示 1 小時後再試
+- **保密模式** → 任何雲端 API 自動 skip，純本機整理
+- **Notion / Slack 未授權** → 「複製 Markdown / 訊息」按鈕取代 OAuth 跳轉
+- **Email** → `mailto:` 開原生郵件 app，不經任何 server
+
+---
+
+## 6. Definition of Done
+
+- [x] 公開版所有 P0 FR（FR-001 ~ FR-012）實作
+- [x] 100 MB 上限 + 格式檢查
+- [x] pytest 5 個測試檔全綠
+- [x] `python -m compileall app.py api` 無語法錯誤
+- [x] Chrome MV3 擴充 manifest 驗證 + JS syntax check
+- [x] `vercel.json` 驗證
+- [x] Secret scan 無洩漏
+- [x] Security headers（CSP, HSTS, X-Frame-Options DENY）
+- [x] GHA CI 跑 4 jobs（test, compileall, node check, manifest 驗證）全綠
+- [x] README 反映現況
+
+---
+
+## 7. 部署契約
+
+| 環境 | 目標 | 觸發 |
+|---|---|---|
+| Production | Vercel | push to main / master |
+| CI | GitHub Actions | push to main / PR |
+
+### 7.1 GHA Workflow
+
+- `.github/workflows/test.yml` — pytest + compileall + node check + manifest 驗證
+- `.github/workflows/deploy.yml` — Vercel deploy（需 `VERCEL_TOKEN` / `VERCEL_ORG_ID` / `VERCEL_PROJECT_ID_MEETING_RECORDER` secrets）
+
+### 7.2 環境變數
+
+- 全部 Optional — 不設任何 env 也能跑（純本機整理 + Vercel static）
+- BYOK — OPENAI_API_KEY 存本機 / Vercel env，不進 repo
+- 保密模式永遠不送 server
+
+---
+
+## 8. Out of Scope（v1 Public 不做的）
+
+- ❌ 會員制（v1.1 才收斂到甜蜜點）
+- ❌ Notion / Slack OAuth（v1.1）
+- ❌ Speaker diarization（v1.1）
+- ❌ 跨裝置同步 / Supabase 帳號（v1.1）
+- ❌ 原生 iOS / Android
+- ❌ 國際語言（鎖繁中）
+- ❌ 發文 / 推噓 / 留言（純 read-only 工作台）
+- ❌ Stripe 金流
+- ❌ 第三方法務審查（產品提供 consent gate + 保密模式，不構成法律意見）
+
+---
+
+## 9. 變更日誌
+
+見 [`PRD/CHANGELOG.md`](PRD/CHANGELOG.md)
+
+---
+
+## 附錄 A：v3.0.0 + v3.0.0-Public Patch 詳版
+
+> v3.0.0 完整 1328 行詳版已抽出至 sibling file [`PRD/SPEC-v3.0.0-original.md`](PRD/SPEC-v3.0.0-original.md)（2026-09-06 by Sean 10-repo-fleet Worker），避免檔案系統污染。
+> 詳版章節索引：
+
+| 章節 | 主題 | 行數（約） |
+|---|---|---|
+| §0 | 改版摘要 (What changed since v2.2.1) | 1-50 |
+| §0.5 | Public Release Mode patch（2026-08-08） | 51-150 |
+| §1 | 產品概述（persona / 價值主張 / 商業目標 / Non-Goals） | 151-300 |
+| §2 | 使用者場景與流程 | 301-450 |
+| §3 | 功能性需求（P0/P1/P2 + AC） | 451-650 |
+| §4 | 系統設計（tech stack / 架構 / 資料模型 / API） | 651-850 |
+| §5 | 非功能性需求（性能 / 安全 / 降級 / 擴展） | 851-1000 |
+| §6 | 完成標準 | 1001-1050 |
+| §7 | 風險與決策（含 3+ ADR） | 1051-1200 |
+| §8 | Pilot 驗證 gate | 1201-1250 |
+| §9 | 變現策略（會員制 v1.1） | 1251-1290 |
+| §10-14 | UX/競品/法規/技術棧細節 | 1291-1320 |
+| §15 | Sweet-Spot Score 與後續監控 | 1321-1328 |
+
+**v3.0.0 詳版讀取**：
+- 同目錄 `PRD/SPEC-v3.0.0-original.md`（1328 行，53.3KB）
+- 內容含 Sweet Spot Score 5/10、商業 OKR、UX/競品分析、ADR 風險表等
+
+---
+
+**本檔層級**：
+
+- **v3.0.2 入口（§1–§9 + 附錄 A）**：本檔，約 200 行
+- **v3.0.0 詳版（§0–§15）**：`PRD/SPEC-v3.0.0-original.md`，1328 行
+
+**升級者**：Sean 10-repo-fleet Worker (2026-09-06)
+**下次複評**：v1.1 會員制啟動時（預計 2026-Q4）
+
+---
+
+# 附錄 A：v3.0.0 + v3.0.0-Public Patch 詳版（1328 行原內容保留）
+
+> 以下為 v3.0.0 + v3.0.0-Public Patch 完整 1328 行詳版原文（2026-08-08 by Sean + Hermes Agent）。
+> 升級至 v3.0.2 時由 Sean 10-repo-fleet Worker (2026-09-06) 保留為附錄，向下相容。
+
+---
+
 # 會議錄音整理工具 — 規格計劃書 v3.0.0 (sweet-spot-driven rewrite) + v3.0.0-Public Patch
 
 > 版本：v3.0.0 + v3.0.0-Public Patch (2026-08-08)｜更新日期：2026-08-08｜維護者：Sophia (CPO) + Sean + Hermes Agent

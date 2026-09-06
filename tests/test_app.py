@@ -1,7 +1,6 @@
 import json
 from pathlib import Path
 
-import pytest
 from fastapi.testclient import TestClient
 
 from api.public import _infer_due, analyze_transcript
@@ -46,8 +45,9 @@ def test_infer_assignee_stops_at_sentence_boundary():
 
 
 def test_infer_due_handles_next_week_consistently():
-    from api.public import _infer_due
     import datetime as dt
+
+    from api.public import _infer_due
     today = dt.date(2026, 8, 6)
     assert _infer_due("下週三前完成", today=today) == "2026-08-19"
     assert _infer_due("下週一前完成", today=today) == "2026-08-17"

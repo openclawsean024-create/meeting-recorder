@@ -7,8 +7,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import pytest
-
 ROOT = Path(__file__).resolve().parents[1]
 SPEC = (ROOT / "PRD" / "SPEC.md").read_text(encoding="utf-8")
 

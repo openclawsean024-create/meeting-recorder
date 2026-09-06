@@ -1,0 +1,22 @@
+# Ruff configuration for meeting-recorder
+# https://docs.astral.sh/ruff/
+
+target-version = "py311"
+line-length = 110
+
+[lint]
+# 預設啟用 E/F/W/B/UP 規則
+select = ["E", "F", "W", "B", "UP", "I", "C4", "SIM"]
+ignore = [
+    "E501",  # line too long (handled by formatter)
+    "B008",  # function call in default argument (FastAPI 慣用)
+    "E402",  # module level import not at top of file (測試 fixtures 慣用)
+]
+
+[lint.per-file-ignores]
+"tests/*" = ["B011"]  # 允許 assert False 在測試
+"app.py" = ["E402"]   # FastAPI app 結構允許
+
+[format]
+quote-style = "double"
+indent-style = "space"

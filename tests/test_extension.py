@@ -6,10 +6,7 @@ declare the resources we depend on. They do not exercise Chrome APIs.
 from __future__ import annotations
 
 import json
-import re
 from pathlib import Path
-
-import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 EXT = ROOT / "extension"
