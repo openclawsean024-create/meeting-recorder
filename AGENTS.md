@@ -1,84 +1,58 @@
-# MeetingFlow（meeting-recorder）
+# AGENTS.md — 繁中會議錄音與行動項工作台（meeting-recorder／MeetingFlow）
 
-## 目標
+> ⚠️ 產品狀態：**建議暫緩**（`PRD/SPEC.md` §0）。在 Sean 明確同意前，不依 `GOAL.md` 開始功能開發；文件修正與品質閘門修復以外的變更先問 Sean。
 
-提供**繁中會議錄音、逐字稿與「會後行動項」工作台**，無需登入即可使用。
-最終交付：
+## 1. 權威文件與範圍
 
-- 公開響應式網站：麥克風錄音 / 音檔拖放 / 錄音同意 / 繁中逐字稿編輯。
-- 本機規則分析：300 字內摘要、決輯、風險、行動項、負責人與日期推斷。
-- 律師保密模式與案件標籤；保密模式不自動外推。
-- 匯出 Markdown、剪貼簿、Email 草稿；Notion / Slack 未授權時降級為可複製格式。
-- 本機會議歷史、搜尋與重新載入。
-- 選配雲端轉寫（`OPENAI_API_KEY` + `PUBLIC_TRANSCRIBE_ENABLED=true`，每來源每小時上限 3 次）。
-- Chrome Manifest V3 外掛：`tabCapture` + service worker + offscreen document + IndexedDB。
-- FastAPI 後端，pytest 測試，安全邊界（100 MB 上限、格式檢查、無 raw exception）。
-- Vercel 零 token 部署流程（Git 整合）。
+- 規格：[`PRD/SPEC.md`](./PRD/SPEC.md) v4.0（§0 評估、§5 FR 狀態、§14 README 與程式不符清單、§15 待決事項）。
+- 目前目標：[`GOAL.md`](./GOAL.md)（只含 M1）。
+- 驗證指令：[`SOP.md`](./SOP.md)；目前狀態：[`STATUS.md`](./STATUS.md)。
+- `PRD/SPEC.md` 附錄 B 是 2026-08-08 的歷史原文，被 `tests/test_spec_patch.py` 逐字檢查；改寫 SPEC 時必須保留該段，且附錄 B 之後不可再有 `## 1.` 開頭的標題。
+- `BUILD_REPORT.md`、`CHANGELOG.md`、`PRD/CHANGELOG.md`、`rpb-1-verify.log` 是舊紀錄，與程式不一致處見 SPEC §14，不作為現況依據。
 
-## 避免
-
-- **不要把任何 API key / token commit 到 repo 或貼到對話**。`.env.example` 只列變數名稱，沒有值。
-- **不要在無授權的情況下假裝完成 OAuth**：Notion / Slack 必須誠實降級為可複製格式，不可偽造成功回應。
-- **不要把保密模式（律師 / 案件）的音檔或逐字稿送到雲端轉寫**：保密模式下應主動拒絕外部 STT。
-- **不要對外暴露 `OPENAI_API_KEY`**：永遠只在 server 端讀取，不可放進前端 bundle 或 `index.html` / `extension/*`。
-- **不要關閉 CORS 限制**：未設定 `ALLOWED_ORIGINS` 時預設同源；不要為了方便改成 `*`。
-- **不要繞過錄音同意 gate** 或在 UI 隱藏 consent 流程，這是產品對使用者的法律承諾。
-- **不要原生 Zoom 桌面程式 / DRM 內容 / 受管理政策封鎖的分頁上嘗試 `tabCapture`**：超出 Chrome 支援範圍，不應嘗試 hack。
-- **不要混用分支命名**：Conventional Commits 寫 commit message；不要在同一個 commit 混雜文件 + 程式碼 + 重構。
-- **不要跳過測試**：`pytest -q` 必須全綠、`python3 -m compileall app.py api` 必須通過才能交付。
-- **不要擅自新增資料庫 / 登入系統**：本版刻意保持無登入、無 DB；會員制 / 付款留待後續版本。
-
-## 技術棧與指令
-
-### 技術棧
-
-- **後端**：Python 3.x、FastAPI、Uvicorn、pydantic v2、python-multipart、httpx（OpenAI 轉寫）。
-- **前端**：`index.html`（單頁工作台，內含 vanilla JS）、`extension.html`（外掛安裝說明頁）、`privacy.html`。
-- **Chrome 外掛**：Manifest V3，`tabCapture` + service worker + offscreen document + IndexedDB，位於 `extension/`。
-- **測試**：pytest（含 `test_app.py`、`test_edge_cases.py`、`test_extension.py`、`test_spec_patch.py`、`test_ui.py`）。
-- **部署**：Vercel（`vercel.json` 已存在，無 token 走 Git 整合）。
-
-### 主要目錄
+## 2. 專案結構（`master`）
 
 ```
-app.py                 # FastAPI 入口（CORS、路由、/health）
-api/                   # 後端模組（目前 public router）
-extension/             # Chrome MV3 外掛原始碼
-tests/                 # pytest 測試
-PRD/SPEC.md            # 產品規格（sweet-spot 改寫後的 v1）
-index.html             # 公開工作台
-extension.html         # 外掛安裝說明頁
-privacy.html           # 隱私權聲明
-vercel.json            # Vercel 部署設定
-.env.example           # 環境變數樣板（無敏感值）
+app.py                 # FastAPI 入口：CORS、頁面路由、/health
+api/public.py          # /api/capabilities、/api/analyze（規則式分析）、/api/transcribe（OpenAI，預設關閉）
+index.html             # 目前只是一行 meta refresh → dashboard.html（M1 AC-002 恢復工作台）
+dashboard.html         # 2026-09-05 套入的通用後台樣板，寫死 KPI、假登入狀態（M1 刪除）
+extension.html         # 擴充安裝說明
+privacy.html           # 隱私說明（用語待 M1 AC-005 修正）
+extension/             # Chrome MV3：manifest、service-worker、offscreen（tabCapture＋mic 混音、IndexedDB）、popup
+tests/                 # pytest 5 檔、65 個測試（test_app、test_edge_cases、test_extension、test_spec_patch、test_ui）
+.github/workflows/     # test.yml、ci.yml、deploy.yml（deploy 只在 main 分支觸發）
+vercel.json            # @vercel/python + @vercel/static，含 CSP／HSTS 等標頭
+PRD/                   # SPEC.md（v4.0）、CHANGELOG.md
 ```
 
-### 本機開發指令
+同 repo 另有 `main`（Next.js，無共同歷史）、`claude/review-meeting-notes-site-Y5hsb`（Python＋Supabase）、`gh-pages` 分支；**只讀，不要合併進 master**，去留由 Sean 決定。
 
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-uvicorn app:app --reload   # http://127.0.0.1:8000
-```
+## 3. 技術棧
 
-### 測試與驗證
+| 項目 | 說明 |
+|---|---|
+| 語言 | Python 3.11（CI 版本）；`.ruff.toml` target `py311` |
+| 後端 | FastAPI、Uvicorn、pydantic v2、python-multipart、httpx（`requirements.txt`，版本為範圍） |
+| 前端 | 單檔 HTML＋vanilla JS（工作台待恢復）；無打包工具、無 `package.json` |
+| 擴充 | Chrome Manifest V3，`tabCapture`、`offscreen`、`storage`、`downloads` |
+| 測試 | pytest 8；FastAPI `TestClient` |
+| Lint／Format | ruff（只在 CI 以 `pip install ruff` 安裝，未鎖版本） |
+| 部署 | Vercel（`vercel.json`）；線上站目前不是 master 版本 |
 
-```bash
-pytest -q
-python3 -m compileall app.py api
-```
+## 4. 開發規則
 
-### 部署到 Vercel
+1. **個資與保密**：錄音、逐字稿、與會者姓名、案件當事人都是個人資料。保密模式下音檔與逐字稿不得送出瀏覽器（M1 目標）；任何情況下都不得送第三方。伺服器不得 log 逐字稿或音檔內容。
+2. **只用假資料**：測試、fixture、文件範例只用明顯假資料（姓名加「示範」／「測試」前綴、電話 `0900-000-xxx`、Email `@example.com`）。不得放入真實會議錄音、真實當事人或客戶資料。發現疑似真實個資時不要複製，回報檔案路徑。
+3. **不得提交憑證**：不得提交 `OPENAI_API_KEY`、Vercel token、Supabase key 或 `.env*`；測試只用 `sk-fake-for-test` 類假值與 mock。不得請使用者把 token 貼到對話。
+4. **不呼叫付費 API**：M1 不正式呼叫 OpenAI 或任何 STT／LLM；用 `httpx.MockTransport` 或 monkeypatch。
+5. **錄音同意不可繞過**：不得移除或預設勾選「我已告知與會者」；不做自動開始錄音。
+6. **誠實降級**：未完成的整合（Notion／Slack／雲端轉寫）不得顯示假成功；畫面不得出現假 KPI、假登入狀態。
+7. **測試不可為了通過而刪改斷言**：不得刪除、`skip`、放寬既有斷言；行為刻意改變時在 PR 逐條說明並對應 FR／AC。
+8. **CORS 與 CSP**：不得把 CORS 改成 `*`；不得在頁面載入外部腳本 CDN。
+9. **Git**：從 `master` 開分支、以 PR 合併；不直接 push `master`、不 force push、不改 repo 設定；不得在未經 Sean 同意下部署 production、刪除分支或封存 repo。
+10. **Commit 格式**：Conventional Commits，附 FR／AC 編號，例如 `fix(ci): AC-001 remove continue-on-error`；一個 commit 只做一件事。
 
-1. `https://vercel.com/new` → Import `openclawsean024-create/meeting-recorder`。
-2. Framework Preset 保留「Other」（讀 `vercel.json`）。
-3. 選配環境變數：`OPENAI_API_KEY`、`PUBLIC_TRANSCRIBE_ENABLED=false`、`PUBLIC_TRANSCRIBE_LIMIT=3`。
-4. Deploy，之後 `git push origin master` 自動部署。
+## 5. 驗證
 
-### Git 紀律
-
-- Conventional Commits：`feat:` / `fix:` / `refactor:` / `test:` / `docs:` / `chore:`。
-- 一個邏輯改動 = 一個 commit；不要混雜。
-- 改動必帶測試；交付前測試與 `compileall` 必須全綠。
-- 重大改動前可開 branch；合併後保留追蹤線索。
+指令與目前可用狀態見 [`SOP.md`](./SOP.md)。尚未配置或目前失敗的檢查不得宣稱已通過。
